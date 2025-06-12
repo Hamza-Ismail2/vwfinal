@@ -1,0 +1,13 @@
+node_modules/
+client/node_modules/
+client/build/
+client/node_modules/
+client/node_modules/
+
+server/node_modules/
+server/build/
+server/node_modules/
+server/node_modules/
+server/.env
+
+
