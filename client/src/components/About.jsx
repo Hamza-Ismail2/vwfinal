@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { TrophyIcon, PaperAirplaneIcon, ShieldCheckIcon, ClockIcon, StarIcon, RocketLaunchIcon, HandThumbUpIcon } from '@heroicons/react/24/solid';
 import helicopterFleet from '../images/Bell-407-Hughes-500-Flight-over-Old-Flow.jpg';
 import vipArrival from '../images/kahua-VIP-arrival-scaled.jpg';
 import helicopterAction from '../images/IMG_7065-scaled.jpg';
@@ -9,22 +10,22 @@ const About = () => {
     {
       number: "15+",
       label: "Years of Experience",
-      icon: "🏆"
+      icon: TrophyIcon
     },
     {
       number: "2,500+",
       label: "Successful Flights",
-      icon: "✈️"
+      icon: PaperAirplaneIcon
     },
     {
       number: "100%",
       label: "Safety Record",
-      icon: "🛡️"
+      icon: ShieldCheckIcon
     },
     {
       number: "24/7",
       label: "Availability",
-      icon: "⏰"
+      icon: ClockIcon
     }
   ];
 
@@ -34,7 +35,7 @@ const About = () => {
       role: "Chief Pilot & Operations Director",
       experience: "20+ years",
       certifications: ["ATP", "CFI", "CFII"],
-      image: "👨‍✈️",
+      image: "https://images.unsplash.com/photo-1552058544-f2b08422138a?auto=format&fit=crop&w=400&q=80",
       description: "Former military pilot with extensive experience in emergency services and VIP transport."
     },
     {
@@ -42,7 +43,7 @@ const About = () => {
       role: "Safety & Training Manager",
       experience: "15+ years",
       certifications: ["SMS", "Safety Inspector"],
-      image: "👩‍💼",
+      image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=400&q=80",
       description: "Aviation safety expert ensuring our fleet meets the highest industry standards."
     },
     {
@@ -50,7 +51,7 @@ const About = () => {
       role: "Senior Pilot",
       experience: "18+ years",
       certifications: ["ATP", "Night Vision", "IFR"],
-      image: "👨‍✈️",
+      image: "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&w=400&q=80",
       description: "Specialized in medical emergency transport and challenging weather operations."
     },
     {
@@ -58,7 +59,7 @@ const About = () => {
       role: "Customer Experience Director",
       experience: "12+ years",
       certifications: ["Customer Service", "Operations"],
-      image: "👩‍💼",
+      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
       description: "Dedicated to ensuring every flight experience exceeds customer expectations."
     }
   ];
@@ -67,25 +68,25 @@ const About = () => {
     {
       title: "Safety First",
       description: "Our unwavering commitment to safety drives every decision we make",
-      icon: "🛡️",
+      icon: ShieldCheckIcon,
       color: "from-red-500 to-red-700"
     },
     {
       title: "Excellence",
       description: "We strive for perfection in every aspect of our service",
-      icon: "⭐",
+      icon: StarIcon,
       color: "from-yellow-500 to-yellow-700"
     },
     {
       title: "Innovation",
       description: "Embracing cutting-edge technology and best practices",
-      icon: "🚀",
+      icon: RocketLaunchIcon,
       color: "from-blue-500 to-blue-700"
     },
     {
       title: "Integrity",
       description: "Honest, transparent, and ethical in all our operations",
-      icon: "🤝",
+      icon: HandThumbUpIcon,
       color: "from-green-500 to-green-700"
     }
   ];
@@ -209,7 +210,7 @@ const About = () => {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 className="bg-white rounded-2xl shadow-lg p-6 lg:p-8 text-center hover:shadow-xl transition-shadow duration-300"
               >
-                <div className="text-4xl lg:text-5xl mb-4">{stat.icon}</div>
+                <stat.icon className="w-10 h-10 mx-auto mb-4 text-orange-500" />
                 <div className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
                   {stat.number}
                 </div>
@@ -249,7 +250,7 @@ const About = () => {
                 className="group bg-white rounded-2xl shadow-lg p-6 lg:p-8 hover:shadow-xl transition-all duration-300"
               >
                 <div className={`w-16 h-16 bg-gradient-to-r ${value.color} rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                  <span className="text-2xl">{value.icon}</span>
+                  <value.icon className="w-8 h-8 text-white" />
                 </div>
                 <h4 className="text-xl font-bold text-gray-900 mb-3 text-center">
                   {value.title}
@@ -290,7 +291,9 @@ const About = () => {
                 className="bg-white rounded-2xl shadow-lg p-6 lg:p-8 hover:shadow-xl transition-shadow duration-300"
               >
                 <div className="text-center mb-4">
-                  <div className="text-6xl mb-4">{member.image}</div>
+                  <div className="w-24 h-24 mx-auto mb-4">
+                    <img src={member.image} alt={member.name} className="w-full h-full object-cover rounded-full shadow-lg" />
+                  </div>
                   <h4 className="text-xl font-bold text-gray-900 mb-2">
                     {member.name}
                   </h4>
