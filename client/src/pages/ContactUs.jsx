@@ -15,31 +15,77 @@ const ContactUs = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
 
+  // Utility for input sanitization
+  const sanitizeInput = (value, type = 'text') => {
+    if (typeof value !== 'string') return '';
+    let v = value.trim();
+    if (type === 'email') {
+      v = v.replace(/[^a-zA-Z0-9@._+-]/g, '');
+    } else if (type === 'phone') {
+      v = v.replace(/[^0-9]/g, ''); // Only allow numbers for phone
+    } else if (type === 'number') {
+      v = v.replace(/[^0-9]/g, '');
+    } else {
+      v = v.replace(/[<>]/g, '');
+    }
+    return v;
+  };
+
+  // Format phone as XXX-XXXXXXX
+  const formatPhone = (value) => {
+    const numbers = value.replace(/[^0-9]/g, '');
+    if (numbers.length <= 3) return numbers;
+    return numbers.slice(0, 3) + '-' + numbers.slice(3, 10);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    let sanitized = value;
+    if (name === 'email') sanitized = sanitizeInput(value, 'email');
+    else if (name === 'phone') {
+      sanitized = sanitizeInput(value, 'phone');
+      sanitized = formatPhone(sanitized);
+    }
+    else sanitized = sanitizeInput(value, 'text');
+    setFormData(prev => ({ ...prev, [name]: sanitized }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+    const allowedServices = ["Aircraft Maintenance", "Helicopter Services", "Training", "Other"];
+    const sanitizedData = {
+      name: sanitizeInput(formData.name, 'text'),
+      email: sanitizeInput(formData.email, 'email'),
+      phone: sanitizeInput(formData.phone, 'phone').slice(0, 3) + '-' + sanitizeInput(formData.phone, 'phone').slice(3, 10),
+      company: sanitizeInput(formData.company, 'text'),
+      service: allowedServices.includes(sanitizeInput(formData.serviceType, 'text'))
+        ? sanitizeInput(formData.serviceType, 'text')
+        : 'Other',
+      message: sanitizeInput(formData.message, 'text'),
+      urgency: sanitizeInput(formData.urgency, 'text'),
+    };
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setSubmitStatus('success');
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        company: '',
-        serviceType: '',
-        message: '',
-        urgency: 'normal'
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sanitizedData)
       });
+      const data = await response.json();
+      if (data.success) {
+        setSubmitStatus('success');
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          company: '',
+          serviceType: '',
+          message: '',
+          urgency: 'normal'
+        });
+      } else {
+        setSubmitStatus('error');
+      }
     } catch (error) {
       setSubmitStatus('error');
     } finally {
@@ -230,7 +276,7 @@ const ContactUs = () => {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                       placeholder="Your full name"
                     />
                   </div>
@@ -245,7 +291,7 @@ const ContactUs = () => {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                       placeholder="your.email@example.com"
                     />
                   </div>
@@ -261,8 +307,9 @@ const ContactUs = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
-                      placeholder="(808) XXX-XXXX"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                      placeholder="XXX-XXXXXXX"
+                      maxLength={11}
                     />
                   </div>
 
@@ -275,7 +322,7 @@ const ContactUs = () => {
                       name="company"
                       value={formData.company}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                       placeholder="Your company name"
                     />
                   </div>
@@ -290,7 +337,7 @@ const ContactUs = () => {
                       name="serviceType"
                       value={formData.serviceType}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                     >
                       <option value="">Select a service</option>
                       {serviceTypes.map((service, index) => (
@@ -309,7 +356,7 @@ const ContactUs = () => {
                       name="urgency"
                       value={formData.urgency}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                     >
                       <option value="normal">Normal</option>
                       <option value="urgent">Urgent</option>
@@ -327,7 +374,7 @@ const ContactUs = () => {
                     onChange={handleChange}
                     required
                     rows="6"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 resize-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white resize-none"
                     placeholder="Please provide details about your requirements, preferred dates, locations, or any specific needs..."
                   ></textarea>
                 </div>

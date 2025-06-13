@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import LoadingSpinner from './components/LoadingSpinner';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Lazy load pages for better performance
 const Home = lazy(() => import('./pages/Home'));
@@ -102,6 +103,7 @@ const getCurrentSEO = (pathname) => {
 const AppContent = () => {
   const location = useLocation();
   const currentSEO = getCurrentSEO(location.pathname);
+  const isAdminPage = location.pathname === '/admin-panel' || location.pathname === '/admin-login';
 
   return (
     <>
@@ -206,8 +208,7 @@ const AppContent = () => {
       </Helmet>
 
       <div>
-        <Navbar />
-        
+        {!isAdminPage && <Navbar />}
         <PageTransition>
           <main className="overflow-hidden">
             <Suspense fallback={<LoadingPage />}>
@@ -225,70 +226,72 @@ const AppContent = () => {
                 <Route path="/faqs" element={<FAQs />} />
                 <Route path="/careers" element={<Careers />} />
                 <Route path="/admin-login" element={<AdminLogin />} />
-                <Route path="/admin-panel" element={<AdminPanel />} />
-                
+                <Route path="/admin-panel" element={
+                  <ProtectedRoute>
+                    <AdminPanel />
+                  </ProtectedRoute>
+                } />
                 {/* Redirect old routes */}
                 <Route path="/about-us" element={<AboutUs />} />
                 <Route path="/contact-us" element={<ContactUs />} />
                 <Route path="/maintenance" element={<AircraftMaintenance />} />
                 <Route path="/quote" element={<RequestQuote />} />
-                
                 {/* 404 - Redirect to home for now */}
                 <Route path="*" element={<Home />} />
               </Routes>
             </Suspense>
           </main>
         </PageTransition>
-
-        <Footer />
-
+        {!isAdminPage && <Footer />}
         {/* Quick Action Buttons */}
-        <div className="fixed bottom-6 right-6 z-50 space-y-3">
-          {/* Emergency Contact */}
-          <motion.a
-            href="tel:(808)930-9826"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 1, type: "spring", stiffness: 260, damping: 20 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="flex items-center justify-center w-14 h-14 bg-red-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
-            title="Call Vertical Worx"
-          >
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-            </svg>
-          </motion.a>
-
-          {/* Quote Request */}
-          <motion.a
-            href="/request-quote"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 1.2, type: "spring", stiffness: 260, damping: 20 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="flex items-center justify-center w-14 h-14 bg-orange-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
-            title="Request Quote"
-          >
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-            </svg>
-          </motion.a>
-        </div>
-
-        {/* Mobile-only call button */}
-        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-orange-500 to-red-600 p-4 z-40 md:hidden">
-          <a
-            href="tel:(808)930-9826"
-            className="flex items-center justify-center w-full bg-white text-orange-600 py-3 rounded-lg font-semibold text-lg shadow-lg"
-          >
-            <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-            </svg>
-            Call Now - (808) 930-9826
-          </a>
-        </div>
+        {!isAdminPage && (
+          <>
+            <div className="fixed bottom-6 right-6 z-50 space-y-3">
+              {/* Emergency Contact */}
+              <motion.a
+                href="tel:(808)930-9826"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 1, type: "spring", stiffness: 260, damping: 20 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="flex items-center justify-center w-14 h-14 bg-red-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
+                title="Call Vertical Worx"
+              >
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                </svg>
+              </motion.a>
+              {/* Quote Request */}
+              <motion.a
+                href="/request-quote"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 1.2, type: "spring", stiffness: 260, damping: 20 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="flex items-center justify-center w-14 h-14 bg-orange-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
+                title="Request Quote"
+              >
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                </svg>
+              </motion.a>
+            </div>
+            {/* Mobile-only call button */}
+            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-orange-500 to-red-600 p-4 z-40 md:hidden">
+              <a
+                href="tel:(808)930-9826"
+                className="flex items-center justify-center w-full bg-white text-orange-600 py-3 rounded-lg font-semibold text-lg shadow-lg"
+              >
+                <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                </svg>
+                Call Now - (808) 930-9826
+              </a>
+            </div>
+          </>
+        )}
       </div>
     </>
   );
