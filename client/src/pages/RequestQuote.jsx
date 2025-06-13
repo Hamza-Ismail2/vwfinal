@@ -160,17 +160,28 @@ const RequestQuote = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Map frontend fields to backend fields
+    // Prepare payload for /api/quote
     const payload = {
-      name: `${formData.firstName} ${formData.lastName}`.trim(),
+      serviceType: formData.serviceType,
+      aircraft: formData.aircraft,
+      passengers: formData.passengers,
+      flightDate: formData.flightDate,
+      flightTime: formData.flightTime,
+      duration: formData.duration,
+      origin: formData.origin,
+      destination: formData.destination,
+      specialRequests: formData.specialRequests,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
       email: sanitizeInput(formData.email, 'email'),
       phone: sanitizeInput(formData.phone, 'phone').slice(0, 3) + '-' + sanitizeInput(formData.phone, 'phone').slice(3, 10),
-      company: sanitizeInput(formData.company, 'text'),
-      service: 'Helicopter Services', // or map from serviceType if needed
-      message: `Service Type: ${formData.serviceType}\nAircraft: ${formData.aircraft}\nPassengers: ${formData.passengers}\nFlight Date: ${formData.flightDate}\nFlight Time: ${formData.flightTime}\nDuration: ${formData.duration}\nOrigin: ${formData.origin}\nDestination: ${formData.destination}\nSpecial Requests: ${formData.specialRequests}\nBudget: ${formData.budget}\nFlexibility: ${formData.flexibility}\nAdditional Info: ${formData.additionalInfo}`
+      company: formData.company,
+      budget: formData.budget,
+      flexibility: formData.flexibility,
+      additionalInfo: formData.additionalInfo
     };
     try {
-      const response = await fetch('/api/contact', {
+      const response = await fetch('/api/quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -197,6 +208,7 @@ const RequestQuote = () => {
           flexibility: '',
           additionalInfo: ''
         });
+        setCurrentStep(1);
       } else {
         alert('There was an error submitting your request. Please try again.');
       }
@@ -670,8 +682,9 @@ const RequestQuote = () => {
                   <button
                     type="submit"
                     className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+                    disabled={isSubmitting}
                   >
-                    Submit Quote Request
+                    {isSubmitting ? 'Submitting...' : 'Submit Quote Request'}
                   </button>
                 )}
               </div>
