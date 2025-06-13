@@ -59,6 +59,7 @@ const Navbar = () => {
       id: 'resources', 
       label: 'Resources',
       dropdown: [
+        { id: 'gallery', label: 'Gallery', path: '/gallery' },
         { id: 'blog', label: 'Blog & News', path: '/blog-news' },
         { id: 'faqs', label: 'FAQs', path: '/faqs' },
         { id: 'careers', label: 'Careers', path: '/careers' }

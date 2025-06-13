@@ -14,6 +14,7 @@ const Services = lazy(() => import('./pages/Services'));
 const AircraftMaintenance = lazy(() => import('./pages/AircraftMaintenance'));
 const ContactUs = lazy(() => import('./pages/ContactUs'));
 const RequestQuote = lazy(() => import('./pages/RequestQuote'));
+const Gallery = lazy(() => import('./pages/Gallery'));
 
 // Create placeholder components for remaining pages
 const ProjectsCaseStudies = lazy(() => import('./pages/ProjectsCaseStudies'));
@@ -90,6 +91,12 @@ const seoData = {
     title: 'Request Quote - Custom Helicopter Services | Vertical Worx Hawaii',
     description: 'Get a personalized quote for helicopter services. Fast response within 2 hours. Custom aviation solutions for your specific needs.',
     keywords: 'helicopter quote Hawaii, custom aviation services, helicopter pricing, aviation consultation',
+    ogType: 'website'
+  },
+  '/gallery': {
+    title: 'Gallery - Professional Helicopter Operations | Vertical Worx Hawaii',
+    description: 'Explore our gallery of professional helicopter operations, scenic flights, and aerial services across the Hawaiian Islands. See our work in action.',
+    keywords: 'helicopter gallery Hawaii, aerial photography, helicopter operations photos, aviation portfolio',
     ogType: 'website'
   }
 };
@@ -217,6 +224,7 @@ const AppContent = () => {
                 <Route path="/about" element={<AboutUs />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/aircraft-maintenance" element={<AircraftMaintenance />} />
+                <Route path="/gallery" element={<Gallery />} />
                 <Route path="/projects-case-studies" element={<ProjectsCaseStudies />} />
                 <Route path="/certifications-compliance" element={<CertificationsCompliance />} />
                 <Route path="/request-quote" element={<RequestQuote />} />
