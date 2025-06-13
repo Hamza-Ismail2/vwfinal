@@ -41,11 +41,8 @@ app.use(helmet({
   },
 }));
 
-// CORS configuration
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  credentials: true,
-}));
+// Allow all CORS requests globally
+app.use(cors({ origin: '*', credentials: true }));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -100,7 +97,20 @@ const fileFilter = (req, file, cb) => {
 };
 const upload = multer({ storage, fileFilter });
 
-app.use('/uploads', express.static(uploadDir));
+// Serve uploads with CORS for safety
+app.use('/uploads', cors({ origin: '*' }), express.static(uploadDir, {
+  maxAge: '30d',
+  etag: true
+}));
+
+// Serve React frontend in production
+if (process.env.NODE_ENV === 'production') {
+  const clientBuildPath = path.join(__dirname, '../client/build');
+  app.use(express.static(clientBuildPath));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+}
 
 // API routes
 app.use('/api/contact', contactRoutes);

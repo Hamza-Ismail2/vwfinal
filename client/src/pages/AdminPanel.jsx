@@ -8,6 +8,7 @@ const TABS = [
   { label: 'Salesforce Analytics', value: 'salesforce' },
   { label: 'Contact Submissions', value: 'contacts' },
   { label: 'Quote Requests', value: 'quotes' },
+  { label: 'Gallery Management', value: 'gallery' },
 ];
 
 const tabVariants = {
@@ -147,6 +148,28 @@ const AdminPanel = () => {
                 className="absolute w-full left-0 top-0"
               >
                 <ContactSubmissions />
+              </motion.div>
+            ) : activeTab === 'quotes' ? (
+              <motion.div
+                key="quotes"
+                variants={tabVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="absolute w-full left-0 top-0"
+              >
+                <QuoteRequests />
+              </motion.div>
+            ) : activeTab === 'gallery' ? (
+              <motion.div
+                key="gallery"
+                variants={tabVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="absolute w-full left-0 top-0"
+              >
+                <GalleryManager />
               </motion.div>
             ) : (
               <motion.div
@@ -1002,13 +1025,16 @@ const QuoteRequests = () => {
                 <span className="text-xs text-orange-200 mt-1 font-semibold">{date.split('/').slice(0,2).join('/')}</span>
               </div>
             ))}
+            {/* X-axis label (centered below bars) */}
             <span className="absolute left-1/2 -translate-x-1/2 bottom-0 text-xs text-orange-300 font-semibold whitespace-nowrap">Date</span>
           </div>
+          {/* Y-axis label for mobile (top left) */}
           <span className="block sm:hidden absolute top-2 left-4 text-xs text-orange-300 font-semibold">Submissions</span>
         </div>
         {/* Top Services */}
         <div className="bg-black/70 rounded-xl p-6 border border-orange-700 shadow-lg relative flex flex-col items-stretch min-h-[220px]">
           <h4 className="text-orange-400 font-bold mb-2 tracking-wide">Top Services</h4>
+          {/* Y-axis label */}
           <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-orange-300 font-semibold rotate-[-90deg] origin-bottom whitespace-nowrap hidden sm:block">Count</span>
           <div className="flex items-end gap-2 h-32 relative w-full pt-2 pb-6 md:pb-8">
             {Object.entries(serviceCounts).map(([service, count], i) => (
@@ -1018,8 +1044,10 @@ const QuoteRequests = () => {
                 <span className="text-xs text-orange-200 mt-1 font-semibold">{service.slice(0, 8)}</span>
               </div>
             ))}
+            {/* X-axis label (centered below bars) */}
             <span className="absolute left-1/2 -translate-x-1/2 bottom-0 text-xs text-orange-300 font-semibold whitespace-nowrap">Service</span>
           </div>
+          {/* Y-axis label for mobile (top left) */}
           <span className="block sm:hidden absolute top-2 left-4 text-xs text-orange-300 font-semibold">Count</span>
         </div>
       </div>
@@ -1158,6 +1186,167 @@ const QuoteRequests = () => {
         )}
       </AnimatePresence>
     </motion.div>
+  );
+};
+
+const GalleryManager = () => {
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [form, setForm] = useState({ title: '', description: '', image: null });
+  const [editing, setEditing] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const user = JSON.parse(localStorage.getItem('vw_admin'));
+
+  const fetchImages = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/images');
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Failed to fetch images');
+      const processed = data.data.map(img => {
+        let safeUrl = '';
+        try {
+          const { pathname } = new URL(img.url, window.location.origin);
+          safeUrl = pathname.startsWith('/uploads') ? pathname : `/uploads${pathname}`;
+        } catch { /* ignore */ }
+        return { ...img, safeUrl };
+      });
+      setImages(processed);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchImages(); }, []);
+
+  const handleChange = e => {
+    const { name, value, files } = e.target;
+    if (name === 'image') {
+      setForm({ ...form, image: files[0] });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    try {
+      const method = editing ? 'PUT' : 'POST';
+      const url = editing ? `/api/images/${editing._id}` : '/api/images';
+      const formData = new FormData();
+      formData.append('title', form.title);
+      formData.append('description', form.description);
+      if (form.image && typeof form.image !== 'string') {
+        formData.append('image', form.image);
+      }
+      const res = await fetch(url, {
+        method,
+        headers: { 'x-user-role': user?.role || 'admin' },
+        body: formData
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Failed to save image');
+      setForm({ title: '', description: '', image: null });
+      setEditing(null);
+      setModalOpen(false);
+      fetchImages();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleEdit = image => {
+    setEditing(image);
+    setForm({
+      title: image.title,
+      description: image.description,
+      image: null
+    });
+    setModalOpen(true);
+  };
+
+  const handleDelete = async id => {
+    if (!window.confirm('Delete this gallery image?')) return;
+    try {
+      const res = await fetch(`/api/images/${id}`, {
+        method: 'DELETE',
+        headers: { 'x-user-role': user?.role || 'admin' }
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Failed to delete image');
+      fetchImages();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-orange-500">Gallery</h2>
+        <button className="bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-orange-700 hover:shadow-lg transition z-20" onClick={() => { setEditing(null); setForm({ title: '', description: '', image: null }); setModalOpen(true); }}>+ New Image</button>
+      </div>
+      {loading ? <div>Loading...</div> : error ? <div className="text-red-600">{error}</div> : (
+        <div className="overflow-x-auto rounded-xl shadow-lg bg-black/70">
+          <table className="min-w-full bg-black/70 rounded-lg shadow z-10 text-white">
+            <thead>
+              <tr className="bg-gradient-to-r from-orange-600 to-orange-400 text-white">
+                <th className="py-3 px-4 font-semibold">Image</th>
+                <th className="py-3 px-4 font-semibold">Title</th>
+                <th className="py-3 px-4 font-semibold">Description</th>
+                <th className="py-3 px-4 font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {images.map(image => (
+                <tr key={image._id} className="border-b border-orange-900/40 hover:bg-orange-900/20 transition">
+                  <td className="py-2 px-4">
+                    <img src={image.safeUrl} alt={image.title} className="rounded shadow max-h-24 max-w-[120px] object-cover" />
+                  </td>
+                  <td className="py-2 px-4 font-semibold">{image.title}</td>
+                  <td className="py-2 px-4">{image.description}</td>
+                  <td className="py-2 px-4">
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <button className="px-3 py-1 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition z-20 w-full sm:w-auto" onClick={() => handleEdit(image)}>Edit</button>
+                      <button className="px-3 py-1 bg-red-600 text-white rounded shadow hover:bg-red-700 transition z-20 w-full sm:w-auto" onClick={() => handleDelete(image._id)}>Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50" onClick={() => setModalOpen(false)}>
+          <div className="bg-black/90 rounded-2xl p-8 w-full max-w-lg relative z-50 shadow-2xl custom-scrollbar border border-orange-600" style={{maxHeight:'90vh', overflowY:'auto'}} onClick={e => e.stopPropagation()}>
+            <button className="absolute top-4 right-4 text-orange-400 hover:text-orange-600 text-2xl z-50" onClick={() => setModalOpen(false)}>&times;</button>
+            <h3 className="text-xl font-bold mb-4 text-orange-500">{editing ? 'Edit Image' : 'New Image'}</h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-orange-200 font-semibold mb-1">Title</label>
+                <input name="title" value={form.title} onChange={handleChange} placeholder="Title" className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700 placeholder-orange-300" required />
+              </div>
+              <div>
+                <label className="block text-orange-200 font-semibold mb-1">Description</label>
+                <textarea name="description" value={form.description} onChange={handleChange} placeholder="Description" className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700 placeholder-orange-300" rows={3} required />
+              </div>
+              <div>
+                <label className="block text-orange-200 font-semibold mb-1">Image (JPG, PNG, WEBP)</label>
+                <input type="file" name="image" accept="image/jpeg,image/png,image/webp" onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700" required={!editing} />
+                {form.image && typeof form.image !== 'string' && (
+                  <img src={URL.createObjectURL(form.image)} alt="Preview" className="mt-2 rounded shadow max-h-32" />
+                )}
+              </div>
+              <button type="submit" className="w-full bg-orange-600 text-white py-2 rounded-lg font-semibold hover:bg-orange-700 z-20 shadow">{editing ? 'Update' : 'Create'}</button>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
