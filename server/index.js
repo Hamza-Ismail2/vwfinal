@@ -18,6 +18,7 @@ const servicesRoutes = require('./routes/services');
 const userRoutes = require('./routes/user');
 const blogRoutes = require('./routes/blog');
 const projectRoutes = require('./routes/project');
+const quoteRoutes = require('./routes/quote');
 
 
 const app = express();
@@ -107,6 +108,7 @@ app.use('/api/services', servicesRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/api/quote', quoteRoutes);
 
 
 // Error handling middleware

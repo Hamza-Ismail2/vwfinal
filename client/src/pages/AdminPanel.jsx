@@ -7,6 +7,7 @@ const TABS = [
     { label: 'Project Management', value: 'project' },
   { label: 'Salesforce Analytics', value: 'salesforce' },
   { label: 'Contact Submissions', value: 'contacts' },
+  { label: 'Quote Requests', value: 'quotes' },
 ];
 
 const tabVariants = {
@@ -136,7 +137,7 @@ const AdminPanel = () => {
               >
                 <SalesforceAnalytics />
               </motion.div>
-            ) : (
+            ) : activeTab === 'contacts' ? (
               <motion.div
                 key="contacts"
                 variants={tabVariants}
@@ -146,6 +147,17 @@ const AdminPanel = () => {
                 className="absolute w-full left-0 top-0"
               >
                 <ContactSubmissions />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="quotes"
+                variants={tabVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="absolute w-full left-0 top-0"
+              >
+                <QuoteRequests />
               </motion.div>
             )}
           </AnimatePresence>
@@ -862,6 +874,282 @@ const ContactSubmissions = () => {
               <div className="flex justify-end gap-4">
                 <button onClick={() => setDeleteContact(null)} className="px-6 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition">Cancel</button>
                 <button onClick={() => handleDelete(deleteContact._id)} disabled={deleting} className="px-6 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                  {deleting ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
+
+const QuoteRequests = () => {
+  const [quotes, setQuotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [viewQuote, setViewQuote] = useState(null);
+  const [deleteQuote, setDeleteQuote] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Analytics
+  const statusCounts = quotes.reduce((acc, q) => {
+    acc[q.status] = (acc[q.status] || 0) + 1;
+    return acc;
+  }, {});
+  const serviceCounts = quotes.reduce((acc, q) => {
+    acc[q.serviceType] = (acc[q.serviceType] || 0) + 1;
+    return acc;
+  }, {});
+  const trendData = quotes.reduce((acc, q) => {
+    const date = new Date(q.createdAt).toLocaleDateString();
+    acc[date] = (acc[date] || 0) + 1;
+    return acc;
+  }, {});
+
+  useEffect(() => {
+    fetchQuotes();
+  }, []);
+
+  const fetchQuotes = () => {
+    setLoading(true);
+    fetch('/api/quote')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setQuotes(data.data);
+        else setError('Failed to fetch quote requests');
+      })
+      .catch(() => setError('Failed to fetch quote requests'))
+      .finally(() => setLoading(false));
+  };
+
+  const handleMarkRead = (id, read) => {
+    fetch(`/api/quote/${id}/read`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ read: !read })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setQuotes(quotes => quotes.map(q => q._id === id ? { ...q, read: data.data.read } : q));
+      });
+  };
+
+  const handleStatusChange = (id, status) => {
+    fetch(`/api/quote/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setQuotes(quotes => quotes.map(q => q._id === id ? { ...q, status: data.data.status } : q));
+      });
+  };
+
+  const handleDelete = (id) => {
+    setDeleting(true);
+    fetch(`/api/quote/${id}`, { method: 'DELETE' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setQuotes(quotes => quotes.filter(q => q._id !== id));
+        setDeleteQuote(null);
+      })
+      .finally(() => setDeleting(false));
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, ease: 'easeOut' }}
+      className="w-full font-adminpanel"
+    >
+      {/* Analytics */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8 items-end px-2 md:px-0">
+        {statusOptions.map(status => (
+          <div key={status} className="bg-gradient-to-br from-orange-600 to-orange-400 rounded-xl p-4 flex flex-col items-center shadow border border-orange-700">
+            <span className="text-white text-lg font-semibold capitalize tracking-wide">{status.charAt(0).toUpperCase() + status.slice(1)}</span>
+            <AnimatedNumber value={statusCounts[status] || 0} className="text-4xl font-extrabold text-white drop-shadow-lg" />
+          </div>
+        ))}
+        <div className="flex justify-center items-center h-full">
+          <motion.button
+            onClick={() => exportToCSV(quotes)}
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.97 }}
+            className="px-6 py-4 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 text-white font-extrabold text-lg shadow-2xl backdrop-blur-lg border-2 border-white/30 hover:scale-105 hover:shadow-orange-400/40 transition-all duration-300 flex items-center gap-2"
+            style={{ boxShadow: '0 8px 32px 0 rgba(255,90,31,0.25)' }}
+            title="Export all quote requests to CSV"
+          >
+            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+            Export CSV
+          </motion.button>
+        </div>
+      </div>
+      {/* Trends and Top Services */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 px-2 md:px-0">
+        {/* Trends */}
+        <div className="bg-black/70 rounded-xl p-6 border border-orange-700 shadow-lg relative flex flex-col items-stretch min-h-[220px]">
+          <h4 className="text-orange-400 font-bold mb-2 tracking-wide">Submission Trends</h4>
+          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-orange-300 font-semibold rotate-[-90deg] origin-bottom whitespace-nowrap hidden sm:block">Submissions</span>
+          <div className="flex items-end gap-2 h-32 relative w-full pt-2 pb-6 md:pb-8">
+            {Object.entries(trendData).map(([date, count], i) => (
+              <div key={date} className="flex flex-col items-center w-8">
+                <motion.div initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: i * 0.05, duration: 0.5, type: 'spring', stiffness: 80 }}
+                  className="bg-gradient-to-t from-orange-600 to-orange-400 rounded-t-xl shadow-lg" style={{ height: `${count * 18}px`, minHeight: '10px', width: '100%' }} title={`${count} on ${date}`}></motion.div>
+                <span className="text-xs text-orange-200 mt-1 font-semibold">{date.split('/').slice(0,2).join('/')}</span>
+              </div>
+            ))}
+            <span className="absolute left-1/2 -translate-x-1/2 bottom-0 text-xs text-orange-300 font-semibold whitespace-nowrap">Date</span>
+          </div>
+          <span className="block sm:hidden absolute top-2 left-4 text-xs text-orange-300 font-semibold">Submissions</span>
+        </div>
+        {/* Top Services */}
+        <div className="bg-black/70 rounded-xl p-6 border border-orange-700 shadow-lg relative flex flex-col items-stretch min-h-[220px]">
+          <h4 className="text-orange-400 font-bold mb-2 tracking-wide">Top Services</h4>
+          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-orange-300 font-semibold rotate-[-90deg] origin-bottom whitespace-nowrap hidden sm:block">Count</span>
+          <div className="flex items-end gap-2 h-32 relative w-full pt-2 pb-6 md:pb-8">
+            {Object.entries(serviceCounts).map(([service, count], i) => (
+              <div key={service} className="flex flex-col items-center w-8">
+                <motion.div initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: i * 0.05, duration: 0.5, type: 'spring', stiffness: 80 }}
+                  className="bg-gradient-to-t from-orange-600 to-orange-400 rounded-t-xl shadow-lg" style={{ height: `${count * 18}px`, minHeight: '10px', width: '100%' }} title={`${count} for ${service}`}></motion.div>
+                <span className="text-xs text-orange-200 mt-1 font-semibold">{service.slice(0, 8)}</span>
+              </div>
+            ))}
+            <span className="absolute left-1/2 -translate-x-1/2 bottom-0 text-xs text-orange-300 font-semibold whitespace-nowrap">Service</span>
+          </div>
+          <span className="block sm:hidden absolute top-2 left-4 text-xs text-orange-300 font-semibold">Count</span>
+        </div>
+      </div>
+      {/* Table */}
+      <div className="overflow-x-auto rounded-xl shadow-lg bg-black/70 custom-scrollbar-orange border border-orange-700 px-2 md:px-0 pb-4 md:pb-0">
+        <table className="min-w-full bg-black/70 rounded-lg shadow z-10 text-white">
+          <thead>
+            <tr className="bg-gradient-to-r from-orange-600 to-orange-400 text-white">
+              <th className="py-3 px-4 font-semibold">Read</th>
+              <th className="py-3 px-4 font-semibold">First Name</th>
+              <th className="py-3 px-4 font-semibold">Last Name</th>
+              <th className="py-3 px-4 font-semibold">Email</th>
+              <th className="py-3 px-4 font-semibold">Phone</th>
+              <th className="py-3 px-4 font-semibold">Service Type</th>
+              <th className="py-3 px-4 font-semibold">Aircraft</th>
+              <th className="py-3 px-4 font-semibold">Passengers</th>
+              <th className="py-3 px-4 font-semibold">Flight Date</th>
+              <th className="py-3 px-4 font-semibold">Flight Time</th>
+              <th className="py-3 px-4 font-semibold">Duration</th>
+              <th className="py-3 px-4 font-semibold">Origin</th>
+              <th className="py-3 px-4 font-semibold">Destination</th>
+              <th className="py-3 px-4 font-semibold">Special Requests</th>
+              <th className="py-3 px-4 font-semibold">Budget</th>
+              <th className="py-3 px-4 font-semibold">Flexibility</th>
+              <th className="py-3 px-4 font-semibold">Additional Info</th>
+              <th className="py-3 px-4 font-semibold">Status</th>
+              <th className="py-3 px-4 font-semibold">Date</th>
+              <th className="py-3 px-4 font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan={20} className="text-center py-8 text-orange-300">Loading...</td></tr>
+            ) : error ? (
+              <tr><td colSpan={20} className="text-center py-8 text-red-400">{error}</td></tr>
+            ) : quotes.length === 0 ? (
+              <tr><td colSpan={20} className="text-center py-8 text-orange-300">No quote requests found.</td></tr>
+            ) : quotes.map(quote => (
+              <tr key={quote._id} className={`border-b border-orange-900/40 hover:bg-orange-900/20 transition ${!quote.read ? 'font-bold' : 'opacity-80'}`}> 
+                <td className="py-2 px-4 text-center">
+                  <button onClick={() => handleMarkRead(quote._id, quote.read)} title={quote.read ? 'Mark as unread' : 'Mark as read'} className="focus:outline-none">
+                    {quote.read ? (
+                      <span className="inline-block w-3 h-3 rounded-full bg-orange-400 opacity-60"></span>
+                    ) : (
+                      <span className="inline-block w-3 h-3 rounded-full bg-orange-500 ring-2 ring-orange-300 animate-pulse"></span>
+                    )}
+                  </button>
+                </td>
+                <td className="py-2 px-4 whitespace-nowrap">{quote.firstName}</td>
+                <td className="py-2 px-4 whitespace-nowrap">{quote.lastName}</td>
+                <td className="py-2 px-4 whitespace-nowrap">{quote.email}</td>
+                <td className="py-2 px-4 whitespace-nowrap">{quote.phone}</td>
+                <td className="py-2 px-4 whitespace-nowrap">{quote.serviceType}</td>
+                <td className="py-2 px-4 whitespace-nowrap">{quote.aircraft}</td>
+                <td className="py-2 px-4 whitespace-nowrap">{quote.passengers}</td>
+                <td className="py-2 px-4 whitespace-nowrap">{quote.flightDate}</td>
+                <td className="py-2 px-4 whitespace-nowrap">{quote.flightTime}</td>
+                <td className="py-2 px-4 whitespace-nowrap">{quote.duration}</td>
+                <td className="py-2 px-4 whitespace-nowrap">{quote.origin}</td>
+                <td className="py-2 px-4 whitespace-nowrap">{quote.destination}</td>
+                <td className="py-2 px-4 whitespace-nowrap">{quote.specialRequests}</td>
+                <td className="py-2 px-4 whitespace-nowrap">{quote.budget}</td>
+                <td className="py-2 px-4 whitespace-nowrap">{quote.flexibility}</td>
+                <td className="py-2 px-4 whitespace-nowrap">{quote.additionalInfo}</td>
+                <td className="py-2 px-4 whitespace-nowrap capitalize">
+                  <select value={quote.status} onChange={e => handleStatusChange(quote._id, e.target.value)} className="bg-black/70 border border-orange-700 rounded px-2 py-1 text-orange-300 focus:ring-2 focus:ring-orange-500 capitalize">
+                    {statusOptions.map(opt => <option key={opt} value={opt} className="capitalize">{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>)}
+                  </select>
+                </td>
+                <td className="py-2 px-4 whitespace-nowrap">{new Date(quote.createdAt).toLocaleString()}</td>
+                <td className="py-2 px-4 flex gap-2 items-center">
+                  <button onClick={() => setViewQuote(quote)} title="View details" className="bg-orange-500 hover:bg-orange-600 text-white rounded-full p-2 shadow focus:outline-none">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                  </button>
+                  <a href={`mailto:${quote.email}`} title="Reply" className="bg-orange-400 hover:bg-orange-500 text-white rounded-full p-2 shadow focus:outline-none">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16 12H8m0 0l4-4m-4 4l4 4" /></svg>
+                  </a>
+                  <button onClick={() => setDeleteQuote(quote)} title="Delete" className="bg-red-600 hover:bg-red-700 text-white rounded-full p-2 shadow focus:outline-none">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {/* View Modal */}
+      <AnimatePresence>
+        {viewQuote && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 200, damping: 20 }} className="bg-white/90 rounded-2xl shadow-2xl p-8 max-w-2xl w-full border-2 border-orange-400">
+              <h4 className="text-2xl font-bold text-orange-600 mb-4">Quote Request Details</h4>
+              <div className="space-y-2 text-gray-800 grid grid-cols-1 md:grid-cols-2 gap-x-8">
+                <div><span className="font-semibold">First Name:</span> {viewQuote.firstName}</div>
+                <div><span className="font-semibold">Last Name:</span> {viewQuote.lastName}</div>
+                <div><span className="font-semibold">Email:</span> {viewQuote.email}</div>
+                <div><span className="font-semibold">Phone:</span> {viewQuote.phone}</div>
+                <div><span className="font-semibold">Service Type:</span> {viewQuote.serviceType}</div>
+                <div><span className="font-semibold">Aircraft:</span> {viewQuote.aircraft}</div>
+                <div><span className="font-semibold">Passengers:</span> {viewQuote.passengers}</div>
+                <div><span className="font-semibold">Flight Date:</span> {viewQuote.flightDate}</div>
+                <div><span className="font-semibold">Flight Time:</span> {viewQuote.flightTime}</div>
+                <div><span className="font-semibold">Duration:</span> {viewQuote.duration}</div>
+                <div><span className="font-semibold">Origin:</span> {viewQuote.origin}</div>
+                <div><span className="font-semibold">Destination:</span> {viewQuote.destination}</div>
+                <div><span className="font-semibold">Special Requests:</span> {viewQuote.specialRequests}</div>
+                <div><span className="font-semibold">Budget:</span> {viewQuote.budget}</div>
+                <div><span className="font-semibold">Flexibility:</span> {viewQuote.flexibility}</div>
+                <div><span className="font-semibold">Additional Info:</span> {viewQuote.additionalInfo}</div>
+                <div><span className="font-semibold">Status:</span> {viewQuote.status}</div>
+                <div><span className="font-semibold">Read:</span> {viewQuote.read ? 'Yes' : 'No'}</div>
+                <div><span className="font-semibold">Date:</span> {new Date(viewQuote.createdAt).toLocaleString()}</div>
+              </div>
+              <div className="flex justify-end gap-4 mt-8">
+                <button onClick={() => setViewQuote(null)} className="px-6 py-2 rounded-lg bg-orange-500 text-white font-semibold hover:bg-orange-600 transition">Close</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {deleteQuote && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 200, damping: 20 }} className="bg-white/90 rounded-2xl shadow-2xl p-8 max-w-md w-full border-2 border-red-500">
+              <h4 className="text-2xl font-bold text-red-600 mb-4">Delete Quote Request?</h4>
+              <p className="text-gray-800 mb-6">Are you sure you want to delete this quote request? This action cannot be undone.</p>
+              <div className="flex justify-end gap-4">
+                <button onClick={() => setDeleteQuote(null)} className="px-6 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition">Cancel</button>
+                <button onClick={() => handleDelete(deleteQuote._id)} disabled={deleting} className="px-6 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-60 disabled:cursor-not-allowed">
                   {deleting ? 'Deleting...' : 'Delete'}
                 </button>
               </div>
