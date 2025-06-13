@@ -9,53 +9,22 @@ const getImages = async (req, res) => {
     try {
         const images = await Image.find({ isActive: true })
             .sort({ order: 1, createdAt: -1 })
-            .select('title description image createdAt');
-
-        // Convert image data to base64 for frontend
-        const imagesWithBase64 = images.map(image => {
-            // Handle different image data formats for backwards compatibility
-            if (image.image.data && Buffer.isBuffer(image.image.data)) {
-                // New format: Binary data stored in database
-                return {
-                    _id: image._id,
-                    title: image.title,
-                    description: image.description,
-                    createdAt: image.createdAt,
-                    image: {
-                        data: image.image.data.toString('base64'),
-                        contentType: image.image.contentType,
-                        filename: image.image.filename,
-                        originalName: image.image.originalName,
-                        size: image.image.size
-                    }
-                };
-            } else {
-                // Old format: Return error or placeholder
-                console.warn(`Image ${image.title} has old format, needs migration`);
-                return {
-                    _id: image._id,
-                    title: image.title,
-                    description: image.description,
-                    createdAt: image.createdAt,
-                    image: {
-                        data: null,
-                        contentType: 'image/jpeg',
-                        filename: 'placeholder.jpg',
-                        originalName: 'placeholder.jpg',
-                        size: 0,
-                        needsMigration: true
-                    }
-                };
-            }
-        }).filter(img => img.image.data !== null); // Filter out images that need migration
-
+            .select('title description url filename originalName contentType size createdAt');
+        const host = req.get('host');
+        const protocol = req.protocol;
+        const imagesWithFullUrl = images
+            .filter(img => typeof img.url === 'string' && img.url.length > 0)
+            .map(img => ({
+                ...img.toObject(),
+                url: img.url.startsWith('http') ? img.url : `${protocol}://${host}${img.url}`
+            }));
         res.status(200).json({
             success: true,
-            count: imagesWithBase64.length,
-            data: imagesWithBase64
+            count: imagesWithFullUrl.length,
+            data: imagesWithFullUrl
         });
     } catch (error) {
-        console.error('Error fetching images:', error);
+        console.error('Error in getImages:', error);
         res.status(500).json({
             success: false,
             message: 'Error fetching images',
@@ -98,52 +67,30 @@ const getImage = async (req, res) => {
 const createImage = async (req, res) => {
     try {
         const { title, description, order } = req.body;
-
-        // Check if file was uploaded
         if (!req.file) {
             return res.status(400).json({
                 success: false,
                 message: 'Please upload an image file'
             });
         }
-
-        // Read the uploaded file as binary data
-        const imageBuffer = fs.readFileSync(req.file.path);
-
+        const url = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
         const imageData = {
             title,
             description,
-            image: {
-                data: imageBuffer,
-                contentType: req.file.mimetype,
-                filename: req.file.filename,
-                originalName: req.file.originalname,
-                size: req.file.size
-            },
+            url,
+            filename: req.file.filename,
+            originalName: req.file.originalname,
+            contentType: req.file.mimetype,
+            size: req.file.size,
             order: order || 0
         };
-
-        // Delete the temporary uploaded file since we're storing in DB
-        fs.unlinkSync(req.file.path);
-
         const image = await Image.create(imageData);
-
         res.status(201).json({
             success: true,
             message: 'Image created successfully',
             data: image
         });
     } catch (error) {
-        console.error('Error creating image:', error);
-        
-        // Clean up uploaded file if database save failed
-        if (req.file) {
-            const filePath = path.join(__dirname, '../uploads', req.file.filename);
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-            }
-        }
-
         res.status(400).json({
             success: false,
             message: 'Error creating image',
@@ -158,57 +105,35 @@ const createImage = async (req, res) => {
 const updateImage = async (req, res) => {
     try {
         const { title, description, order, isActive } = req.body;
-        
         const image = await Image.findById(req.params.id);
-
         if (!image) {
             return res.status(404).json({
                 success: false,
                 message: 'Image not found'
             });
         }
-
-        // Update fields
         if (title) image.title = title;
         if (description) image.description = description;
         if (order !== undefined) image.order = order;
         if (isActive !== undefined) image.isActive = isActive;
-
-        // Handle new image file upload
         if (req.file) {
-            // Read the new uploaded file as binary data
-            const imageBuffer = fs.readFileSync(req.file.path);
-            
-            image.image = {
-                data: imageBuffer,
-                contentType: req.file.mimetype,
-                filename: req.file.filename,
-                originalName: req.file.originalname,
-                size: req.file.size
-            };
-
-            // Delete the temporary uploaded file
-            fs.unlinkSync(req.file.path);
+            // Remove old file
+            const oldPath = path.join(__dirname, '../uploads', image.filename);
+            if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+            // Update with new file
+            image.url = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            image.filename = req.file.filename;
+            image.originalName = req.file.originalname;
+            image.contentType = req.file.mimetype;
+            image.size = req.file.size;
         }
-
         await image.save();
-
         res.status(200).json({
             success: true,
             message: 'Image updated successfully',
             data: image
         });
     } catch (error) {
-        console.error('Error updating image:', error);
-        
-        // Clean up uploaded file if update failed
-        if (req.file) {
-            const filePath = path.join(__dirname, '../uploads', req.file.filename);
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-            }
-        }
-
         res.status(400).json({
             success: false,
             message: 'Error updating image',
@@ -223,23 +148,21 @@ const updateImage = async (req, res) => {
 const deleteImage = async (req, res) => {
     try {
         const image = await Image.findById(req.params.id);
-
         if (!image) {
             return res.status(404).json({
                 success: false,
                 message: 'Image not found'
             });
         }
-
-        // No need to delete files from filesystem since images are stored in DB
+        // Remove file from disk
+        const filePath = path.join(__dirname, '../uploads', image.filename);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
         await Image.findByIdAndDelete(req.params.id);
-
         res.status(200).json({
             success: true,
             message: 'Image deleted successfully'
         });
     } catch (error) {
-        console.error('Error deleting image:', error);
         res.status(500).json({
             success: false,
             message: 'Error deleting image',

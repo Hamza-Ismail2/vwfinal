@@ -16,61 +16,43 @@ const Gallery = () => {
       try {
         setLoading(true);
         setError(null);
-        
         const response = await fetch('/api/images');
-        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
         const data = await response.json();
-        console.log('API Response:', data); // Debug log
-        
         if (data.success && data.data) {
-          // Map the data to match the expected format
-          const mappedImages = data.data.map(image => {
-            console.log('Processing image:', image.title, 'Size:', image.image.size); // Debug log
-            
-            // Handle base64 encoded images from database
-            let imageSrc;
-            if (image.image && image.image.data && image.image.contentType) {
-              // Create data URL from base64 data
-              imageSrc = `data:${image.image.contentType};base64,${image.image.data}`;
-              console.log('Created base64 image for:', image.title);
-            } else {
-              console.error('Invalid image format for:', image.title, image.image);
-              return null;
-            }
-            
+          setGalleryImages(data.data.map(image => {
+            const safePath = (() => {
+              try {
+                const { pathname } = new URL(image.url, window.location.origin);
+                return pathname.startsWith('/uploads') ? pathname : `/uploads${pathname}`;
+              } catch {
+                return '';
+              }
+            })();
             return {
               id: image._id,
-              src: imageSrc,
+              src: safePath,
               title: image.title,
               description: image.description,
-              filename: image.image.filename,
-              originalName: image.image.originalName,
-              contentType: image.image.contentType,
-              size: image.image.size
+              filename: image.filename,
+              originalName: image.originalName,
+              contentType: image.contentType,
+              size: image.size
             };
-          }).filter(Boolean); // Remove any null entries
-          
-          console.log('Mapped images:', mappedImages); // Debug log
-          setGalleryImages(mappedImages);
+          }));
         } else {
           setError('No images found or invalid response format');
         }
       } catch (error) {
-        console.error('Error fetching images:', error);
         setError(`Failed to load gallery images: ${error.message}`);
       } finally {
         setLoading(false);
       }
     };
-
     fetchImages();
   }, []);
-
-
 
   const openModal = (image) => {
     setSelectedImage(image);
@@ -78,6 +60,20 @@ const Gallery = () => {
 
   const closeModal = () => {
     setSelectedImage(null);
+  };
+
+  const getImageSrc = (url) => {
+    if (!url) return '';
+    try {
+      const { pathname } = new URL(url, window.location.origin);
+
+      // Already /uploads/… ?  use it  —  otherwise prepend
+      return pathname.startsWith('/uploads')
+        ? pathname
+        : `/uploads${pathname}`;
+    } catch {
+      return ''; // bad URL → empty
+    }
   };
 
   return (
@@ -109,8 +105,6 @@ const Gallery = () => {
           </motion.div>
         </div>
       </section>
-
-
 
       {/* Gallery Grid */}
       <section className="py-16 bg-gray-50">
@@ -171,20 +165,8 @@ const Gallery = () => {
                   <img
                     src={image.src}
                     alt={image.title}
+                    loading="lazy"
                     className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-                    onError={(e) => {
-                      console.error('Image failed to load:', image.src);
-                      e.target.style.display = 'none';
-                      e.target.parentElement.innerHTML = `
-                        <div class="w-full h-64 bg-gray-200 flex items-center justify-center">
-                          <div class="text-center">
-                            <div class="text-gray-400 text-4xl mb-2">📸</div>
-                            <p class="text-gray-500">Image not found</p>
-                          </div>
-                        </div>
-                      `;
-                    }}
-                    onLoad={() => console.log('Image loaded successfully:', image.src)}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="absolute bottom-4 left-4 right-4 text-white">

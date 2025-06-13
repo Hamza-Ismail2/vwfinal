@@ -13,27 +13,25 @@ const ImageSchema = new mongoose.Schema({
         trim: true,
         maxlength: [250, 'Description cannot be more than 250 characters']
     },
-    image: {
-        data: {
-            type: Buffer,
-            required: [true, 'Please provide image data']
-        },
-        contentType: {
-            type: String,
-            required: [true, 'Please provide image content type']
-        },
-        filename: {
-            type: String,
-            required: [true, 'Please provide image filename']
-        },
-        originalName: {
-            type: String,
-            required: [true, 'Please provide original filename']
-        },
-        size: {
-            type: Number,
-            required: [true, 'Please provide file size']
-        }
+    url: {
+        type: String,
+        required: [true, 'Please provide image URL']
+    },
+    filename: {
+        type: String,
+        required: [true, 'Please provide image filename']
+    },
+    originalName: {
+        type: String,
+        required: [true, 'Please provide original filename']
+    },
+    contentType: {
+        type: String,
+        required: [true, 'Please provide image content type']
+    },
+    size: {
+        type: Number,
+        required: [true, 'Please provide file size']
     },
     isActive: {
         type: Boolean,

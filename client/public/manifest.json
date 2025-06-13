@@ -1,0 +1,25 @@
+{
+  "short_name": "VertWorx",
+  "name": "Vertical Worx Helicopter Services",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "blackbglogo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "whitebglogo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#0ea5e9",
+  "background_color": "#ffffff"
+} 
