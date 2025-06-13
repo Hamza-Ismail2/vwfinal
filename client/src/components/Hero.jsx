@@ -170,9 +170,10 @@ const Hero = () => {
           <motion.button
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/services')}
             className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all duration-300 min-w-[180px]"
           >
-            Watch Video
+            Our Services
           </motion.button>
           
           <motion.button
