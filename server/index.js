@@ -14,6 +14,7 @@ require('dotenv').config();
 // Import routes
 const contactRoutes = require('./routes/contact');
 const servicesRoutes = require('./routes/services');
+const imageRoutes = require('./routes/images');
 
 const userRoutes = require('./routes/user');
 const blogRoutes = require('./routes/blog');
@@ -103,6 +104,7 @@ app.use('/uploads', express.static(uploadDir));
 // API routes
 app.use('/api/contact', contactRoutes);
 app.use('/api/services', servicesRoutes);
+app.use('/api/images', imageRoutes);
 
 app.use('/api/users', userRoutes);
 app.use('/api/blogs', blogRoutes);
