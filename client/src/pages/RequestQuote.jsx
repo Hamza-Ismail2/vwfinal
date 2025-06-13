@@ -140,14 +140,93 @@ const RequestQuote = () => {
       sanitized = sanitizeInput(value, 'phone');
       sanitized = formatPhone(sanitized);
     }
-    else if (field === 'passengers' || field === 'duration' || field === 'budget') sanitized = sanitizeInput(value, 'number');
+    else if (field === 'passengers' || field === 'budget') sanitized = sanitizeInput(value, 'number');
     else sanitized = sanitizeInput(value, 'text');
     setFormData(prev => ({ ...prev, [field]: sanitized }));
   };
 
+  // Validation functions for each step
+  const validateStep1 = () => {
+    if (!formData.serviceType) {
+      alert('Please select a service type before proceeding.');
+      return false;
+    }
+    return true;
+  };
+
+  const validateStep2 = () => {
+    const requiredFields = [
+      { field: 'aircraft', label: 'Aircraft Type Preference' },
+      { field: 'passengers', label: 'Number of Passengers' },
+      { field: 'flightDate', label: 'Preferred Date' },
+      { field: 'flightTime', label: 'Preferred Time' },
+      { field: 'duration', label: 'Duration' },
+      { field: 'flexibility', label: 'Flight Flexibility' },
+      { field: 'origin', label: 'Origin/Departure Point' }
+    ];
+
+    for (const { field, label } of requiredFields) {
+      if (!formData[field] || formData[field].trim() === '') {
+        alert(`Please fill in the ${label} field before proceeding.`);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const validateStep3 = () => {
+    const requiredFields = [
+      { field: 'firstName', label: 'First Name' },
+      { field: 'lastName', label: 'Last Name' },
+      { field: 'email', label: 'Email Address' },
+      { field: 'phone', label: 'Phone Number' }
+    ];
+
+    for (const { field, label } of requiredFields) {
+      if (!formData[field] || formData[field].trim() === '') {
+        alert(`Please fill in the ${label} field before proceeding.`);
+        return false;
+      }
+    }
+
+    // Additional email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      alert('Please enter a valid email address.');
+      return false;
+    }
+
+    // Additional phone validation (should have at least 10 digits)
+    const phoneDigits = formData.phone.replace(/\D/g, '');
+    if (phoneDigits.length < 10) {
+      alert('Please enter a valid phone number with at least 10 digits.');
+      return false;
+    }
+
+    return true;
+  };
+
   const nextStep = () => {
     if (currentStep < 4) {
-      setCurrentStep(currentStep + 1);
+      let canProceed = false;
+
+      switch (currentStep) {
+        case 1:
+          canProceed = validateStep1();
+          break;
+        case 2:
+          canProceed = validateStep2();
+          break;
+        case 3:
+          canProceed = validateStep3();
+          break;
+        default:
+          canProceed = true;
+      }
+
+      if (canProceed) {
+        setCurrentStep(currentStep + 1);
+      }
     }
   };
 
@@ -159,6 +238,12 @@ const RequestQuote = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Final validation before submission
+    if (!validateStep1() || !validateStep2() || !validateStep3()) {
+      return;
+    }
+    
     setIsSubmitting(true);
     // Prepare payload for /api/quote
     const payload = {
@@ -282,11 +367,12 @@ const RequestQuote = () => {
             <h3 className="text-2xl font-bold text-gray-800 mb-6">Service Details</h3>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Aircraft Type Preference</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Aircraft Type Preference *</label>
                 <select
                   value={formData.aircraft}
                   onChange={(e) => handleInputChange('aircraft', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                  required
                 >
                   <option value="">Select Aircraft</option>
                   <option value="robinson-r44">Robinson R44</option>
@@ -299,11 +385,12 @@ const RequestQuote = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Number of Passengers</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Number of Passengers *</label>
                 <select
                   value={formData.passengers}
                   onChange={(e) => handleInputChange('passengers', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                  required
                 >
                   <option value="">Select Passengers</option>
                   <option value="1">1 Passenger</option>
@@ -316,31 +403,34 @@ const RequestQuote = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Date</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Date *</label>
                 <input
                   type="date"
                   value={formData.flightDate}
                   onChange={(e) => handleInputChange('flightDate', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                  required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Time</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Time *</label>
                 <input
                   type="time"
                   value={formData.flightTime}
                   onChange={(e) => handleInputChange('flightTime', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                  required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Duration</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Duration *</label>
                 <select
                   value={formData.duration}
                   onChange={(e) => handleInputChange('duration', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                  required
                 >
                   <option value="">Select Duration</option>
                   <option value="30min">30 minutes</option>
@@ -353,11 +443,12 @@ const RequestQuote = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Flight Flexibility</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Flight Flexibility *</label>
                 <select
                   value={formData.flexibility}
                   onChange={(e) => handleInputChange('flexibility', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                  required
                 >
                   <option value="">Select Flexibility</option>
                   <option value="fixed">Fixed date and time</option>
@@ -367,13 +458,14 @@ const RequestQuote = () => {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Origin/Departure Point</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Origin/Departure Point *</label>
                 <input
                   type="text"
                   value={formData.origin}
                   onChange={(e) => handleInputChange('origin', e.target.value)}
                   placeholder="Enter departure location"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                  required
                 />
               </div>
 
@@ -647,7 +739,7 @@ const RequestQuote = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8">
+            <div className="bg-white rounded-2xl shadow-xl p-8">
               {renderStepContent()}
 
               {/* Navigation Buttons */}
@@ -674,13 +766,16 @@ const RequestQuote = () => {
                     type="button"
                     onClick={nextStep}
                     className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
-                    disabled={currentStep === 1 && !formData.serviceType}
                   >
                     Next
                   </button>
                 ) : (
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleSubmit(e);
+                    }}
                     className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
                     disabled={isSubmitting}
                   >
@@ -688,7 +783,7 @@ const RequestQuote = () => {
                   </button>
                 )}
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </section>
