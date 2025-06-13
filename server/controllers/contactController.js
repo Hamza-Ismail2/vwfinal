@@ -165,4 +165,38 @@ exports.deleteContact = async (req, res) => {
             error: error.message
         });
     }
+};
+
+// Mark as read/unread
+exports.markRead = async (req, res) => {
+    try {
+        const contact = await Contact.findByIdAndUpdate(
+            req.params.id,
+            { read: req.body.read },
+            { new: true }
+        );
+        if (!contact) {
+            return res.status(404).json({ success: false, error: 'Contact not found' });
+        }
+        res.status(200).json({ success: true, data: contact });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
+    }
+};
+
+// Update status
+exports.updateStatus = async (req, res) => {
+    try {
+        const contact = await Contact.findByIdAndUpdate(
+            req.params.id,
+            { status: req.body.status },
+            { new: true, runValidators: true }
+        );
+        if (!contact) {
+            return res.status(404).json({ success: false, error: 'Contact not found' });
+        }
+        res.status(200).json({ success: true, data: contact });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
+    }
 }; 

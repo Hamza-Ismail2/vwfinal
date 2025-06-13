@@ -16,17 +16,54 @@ const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
 
+  // Utility for input sanitization
+  const sanitizeInput = (value, type = 'text') => {
+    if (typeof value !== 'string') return '';
+    let v = value.trim();
+    if (type === 'email') {
+      v = v.replace(/[^a-zA-Z0-9@._+-]/g, '');
+    } else if (type === 'phone') {
+      v = v.replace(/[^0-9]/g, ''); // Only allow numbers for phone
+    } else if (type === 'number') {
+      v = v.replace(/[^0-9]/g, '');
+    } else {
+      v = v.replace(/[<>]/g, ''); // Remove angle brackets to prevent HTML injection
+    }
+    return v;
+  };
+
+  // Format phone as XXX-XXXXXXX
+  const formatPhone = (value) => {
+    const numbers = value.replace(/[^0-9]/g, '');
+    if (numbers.length <= 3) return numbers;
+    return numbers.slice(0, 3) + '-' + numbers.slice(3, 10);
+  };
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    const { name, value, type } = e.target;
+    let sanitized = value;
+    if (name === 'email') sanitized = sanitizeInput(value, 'email');
+    else if (name === 'phone') {
+      sanitized = sanitizeInput(value, 'phone');
+      sanitized = formatPhone(sanitized);
+    }
+    else if (name === 'passengers') sanitized = sanitizeInput(value, 'number');
+    else sanitized = sanitizeInput(value, 'text');
+    setFormData(prev => ({ ...prev, [name]: sanitized }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    const sanitizedData = {
+      name: sanitizeInput(formData.name, 'text'),
+      email: sanitizeInput(formData.email, 'email'),
+      phone: sanitizeInput(formData.phone, 'phone').slice(0, 3) + '-' + sanitizeInput(formData.phone, 'phone').slice(3, 10),
+      service: sanitizeInput(formData.service, 'text'),
+      message: sanitizeInput(formData.message, 'text'),
+      date: sanitizeInput(formData.date, 'text'),
+      passengers: sanitizeInput(formData.passengers, 'number'),
+    };
     
     try {
       const response = await fetch('/api/contact', {
@@ -34,7 +71,7 @@ const Contact = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(sanitizedData),
       });
       
       const data = await response.json();
@@ -193,7 +230,7 @@ const Contact = () => {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                       placeholder="Your full name"
                     />
                   </div>
@@ -208,7 +245,7 @@ const Contact = () => {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                       placeholder="your.email@example.com"
                     />
                   </div>
@@ -225,8 +262,9 @@ const Contact = () => {
                       value={formData.phone}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
-                      placeholder="+1 (555) 123-4567"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                      placeholder="XXX-XXXXXXX"
+                      maxLength={11}
                     />
                   </div>
 
@@ -239,7 +277,7 @@ const Contact = () => {
                       value={formData.service}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                     >
                       <option value="">Select a service</option>
                       {services.map((service, index) => (
@@ -262,7 +300,7 @@ const Contact = () => {
                       value={formData.date}
                       onChange={handleChange}
                       min={new Date().toISOString().split('T')[0]}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                     />
                   </div>
 
@@ -274,7 +312,7 @@ const Contact = () => {
                       name="passengers"
                       value={formData.passengers}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                     >
                       {[1,2,3,4,5,6,7,8].map(num => (
                         <option key={num} value={num}>
@@ -294,7 +332,7 @@ const Contact = () => {
                     value={formData.message}
                     onChange={handleChange}
                     rows="4"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 resize-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white resize-none"
                     placeholder="Tell us about your specific requirements, pickup/drop-off locations, or any special requests..."
                   ></textarea>
                 </div>

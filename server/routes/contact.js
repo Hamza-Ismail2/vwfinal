@@ -9,7 +9,9 @@ const {
     getContacts,
     getContact,
     updateContact,
-    deleteContact
+    deleteContact,
+    markRead,
+    updateStatus
 } = require('../controllers/contactController');
 
 router.route('/')
@@ -20,6 +22,11 @@ router.route('/:id')
     .get(getContact)
     .put(updateContact)
     .delete(deleteContact);
+
+// Mark as read/unread
+router.patch('/:id/read', markRead);
+// Update status
+router.patch('/:id/status', updateStatus);
 
 module.exports = router;
 

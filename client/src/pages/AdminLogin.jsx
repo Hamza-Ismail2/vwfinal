@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+
+const bgGradient = {
+  background: 'linear-gradient(135deg, #0f172a 0%, #ff5a1f 100%)',
+  minHeight: '100vh',
+  width: '100vw',
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  zIndex: 0,
+  overflow: 'hidden',
+};
 
 const AdminLogin = () => {
   const [username, setUsername] = useState('');
@@ -9,15 +21,41 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Utility for input sanitization
+  const sanitizeInput = (value, type = 'text') => {
+    if (typeof value !== 'string') return '';
+    let v = value.trim();
+    if (type === 'email') {
+      v = v.replace(/[^a-zA-Z0-9@._+-]/g, '');
+    } else if (type === 'password') {
+      v = v.replace(/[<>]/g, '');
+    } else {
+      v = v.replace(/[<>]/g, '');
+    }
+    return v;
+  };
+
+  // In onChange handlers, sanitize input
+  // For username
+  const handleUsernameChange = (e) => {
+    setUsername(sanitizeInput(e.target.value, 'text'));
+  };
+  // For password
+  const handlePasswordChange = (e) => {
+    setPassword(sanitizeInput(e.target.value, 'password'));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    const sanitizedUsername = sanitizeInput(username, 'text');
+    const sanitizedPassword = sanitizeInput(password, 'password');
     try {
       const res = await fetch('/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username: sanitizedUsername, password: sanitizedPassword })
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Login failed');
@@ -32,34 +70,59 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white relative">
-      {/* Hero Section */}
-      <div className="w-full bg-white py-8 shadow-sm z-50 fixed top-0 left-0 flex items-center justify-between px-8" style={{zIndex: 50}}>
-        <img src="/whitebglogo.jpg" alt="Vertical Worx Logo" className="h-12 w-auto" />
-        <div className="flex-1 flex justify-center">
-          <h1 className="text-3xl font-extrabold text-orange-600 tracking-tight text-center" style={{fontFamily: 'Montserrat, Inter, Arial, sans-serif'}}>Admin Login</h1>
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Animated Gradient Background */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        style={bgGradient}
+        aria-hidden="true"
+      />
+      {/* Glassmorphism Card */}
+      <motion.div
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 80, damping: 18 }}
+        className="relative z-10 w-full max-w-md p-8 rounded-2xl shadow-2xl bg-white/20 backdrop-blur-lg border border-white/30"
+      >
+        <div className="flex flex-col items-center mb-6">
+          <img src="/whitebglogo.jpg" alt="Vertical Worx Logo" className="h-14 w-auto mb-2 drop-shadow-lg" />
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-3xl font-extrabold text-orange-600 tracking-tight text-center font-display drop-shadow"
+          >
+            Admin Login
+          </motion.h1>
         </div>
-        <div className="w-12" /> {/* Spacer to balance the logo's width on the right */}
-      </div>
-      {/* Spacer for hero */}
-      <div className="h-32" />
-      {/* Login Card */}
-      <div className="w-full max-w-md p-8 rounded-lg border border-gray-200 bg-white z-10">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">Username</label>
-            <input type="text" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-gray-900" value={username} onChange={e => setUsername(e.target.value)} required autoComplete="username" />
+            <label className="block text-white font-semibold mb-2">Username</label>
+            <motion.input
+              whileFocus={{ scale: 1.03, boxShadow: '0 0 0 2px #ff5a1f55' }}
+              type="text"
+              className="w-full px-4 py-3 rounded-lg bg-white/40 backdrop-blur border border-white/30 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              value={username}
+              onChange={handleUsernameChange}
+              required
+              autoComplete="username"
+              placeholder="Enter your username"
+            />
           </div>
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">Password</label>
+            <label className="block text-white font-semibold mb-2">Password</label>
             <div className="relative">
-              <input
+              <motion.input
+                whileFocus={{ scale: 1.03, boxShadow: '0 0 0 2px #ff5a1f55' }}
                 type={showPassword ? 'text' : 'password'}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 pr-10 bg-white text-gray-900"
+                className="w-full px-4 py-3 rounded-lg bg-white/40 backdrop-blur border border-white/30 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 pr-10"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 required
                 autoComplete="current-password"
+                placeholder="Enter your password"
                 style={{ fontFamily: 'inherit', letterSpacing: showPassword ? 'normal' : '0.3em' }}
               />
               <button
@@ -77,12 +140,23 @@ const AdminLogin = () => {
               </button>
             </div>
           </div>
-          {error && <div className="text-red-600 text-sm text-center">{error}</div>}
-          <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 rounded-lg transition duration-200" disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
+          {error && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-500 text-sm text-center font-semibold">{error}</motion.div>}
+          <motion.button
+            whileHover={{ scale: 1.04, backgroundColor: '#ff5a1f', color: '#fff' }}
+            whileTap={{ scale: 0.98 }}
+            type="submit"
+            className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-lg transition duration-200 shadow-lg shadow-orange-200/30"
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                Logging in...
+              </span>
+            ) : 'Login'}
+          </motion.button>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 };

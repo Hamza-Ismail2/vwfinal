@@ -212,4 +212,24 @@
 
 .flip-card-back {
   transform: rotateY(180deg);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+.font-adminpanel { font-family: 'Inter', 'Nunito', 'Segoe UI', Arial, sans-serif; letter-spacing: 0.01em; }
+
+.custom-scrollbar-orange::-webkit-scrollbar {
+  width: 10px;
+  background: #18181b;
+  border-radius: 8px;
+}
+.custom-scrollbar-orange::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #ff5a1f, #ff8a4c);
+  border-radius: 8px;
+}
+.custom-scrollbar-orange::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #ff8a4c, #ff5a1f);
+}
+.custom-scrollbar-orange {
+  scrollbar-width: thin;
+  scrollbar-color: #ff5a1f #18181b;
 } 

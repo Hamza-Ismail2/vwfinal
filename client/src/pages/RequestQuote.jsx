@@ -33,6 +33,8 @@ const RequestQuote = () => {
     additionalInfo: ''
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const serviceTypes = [
     {
       id: 'executive-transport',
@@ -108,11 +110,39 @@ const RequestQuote = () => {
     }
   }, [location.state]);
 
+  // Utility for input sanitization
+  const sanitizeInput = (value, type = 'text') => {
+    if (typeof value !== 'string') return '';
+    let v = value.trim();
+    if (type === 'email') {
+      v = v.replace(/[^a-zA-Z0-9@._+-]/g, '');
+    } else if (type === 'phone') {
+      v = v.replace(/[^0-9]/g, ''); // Only allow numbers for phone
+    } else if (type === 'number') {
+      v = v.replace(/[^0-9]/g, '');
+    } else {
+      v = v.replace(/[<>]/g, '');
+    }
+    return v;
+  };
+
+  // Format phone as XXX-XXXXXXX
+  const formatPhone = (value) => {
+    const numbers = value.replace(/[^0-9]/g, '');
+    if (numbers.length <= 3) return numbers;
+    return numbers.slice(0, 3) + '-' + numbers.slice(3, 10);
+  };
+
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    let sanitized = value;
+    if (field === 'email') sanitized = sanitizeInput(value, 'email');
+    else if (field === 'phone') {
+      sanitized = sanitizeInput(value, 'phone');
+      sanitized = formatPhone(sanitized);
+    }
+    else if (field === 'passengers' || field === 'duration' || field === 'budget') sanitized = sanitizeInput(value, 'number');
+    else sanitized = sanitizeInput(value, 'text');
+    setFormData(prev => ({ ...prev, [field]: sanitized }));
   };
 
   const nextStep = () => {
@@ -127,11 +157,54 @@ const RequestQuote = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Quote request submitted:', formData);
-    // Here you would typically send the data to your backend
-    alert('Quote request submitted successfully! We will contact you within 24 hours.');
+    setIsSubmitting(true);
+    // Map frontend fields to backend fields
+    const payload = {
+      name: `${formData.firstName} ${formData.lastName}`.trim(),
+      email: sanitizeInput(formData.email, 'email'),
+      phone: sanitizeInput(formData.phone, 'phone').slice(0, 3) + '-' + sanitizeInput(formData.phone, 'phone').slice(3, 10),
+      company: sanitizeInput(formData.company, 'text'),
+      service: 'Helicopter Services', // or map from serviceType if needed
+      message: `Service Type: ${formData.serviceType}\nAircraft: ${formData.aircraft}\nPassengers: ${formData.passengers}\nFlight Date: ${formData.flightDate}\nFlight Time: ${formData.flightTime}\nDuration: ${formData.duration}\nOrigin: ${formData.origin}\nDestination: ${formData.destination}\nSpecial Requests: ${formData.specialRequests}\nBudget: ${formData.budget}\nFlexibility: ${formData.flexibility}\nAdditional Info: ${formData.additionalInfo}`
+    };
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert('Quote request submitted successfully! We will contact you within 24 hours.');
+        setFormData({
+          serviceType: '',
+          aircraft: '',
+          passengers: '',
+          flightDate: '',
+          flightTime: '',
+          duration: '',
+          origin: '',
+          destination: '',
+          specialRequests: '',
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          company: '',
+          budget: '',
+          flexibility: '',
+          additionalInfo: ''
+        });
+      } else {
+        alert('There was an error submitting your request. Please try again.');
+      }
+    } catch (error) {
+      alert('There was an error submitting your request. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStepContent = () => {
@@ -201,7 +274,7 @@ const RequestQuote = () => {
                 <select
                   value={formData.aircraft}
                   onChange={(e) => handleInputChange('aircraft', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                 >
                   <option value="">Select Aircraft</option>
                   <option value="robinson-r44">Robinson R44</option>
@@ -218,7 +291,7 @@ const RequestQuote = () => {
                 <select
                   value={formData.passengers}
                   onChange={(e) => handleInputChange('passengers', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                 >
                   <option value="">Select Passengers</option>
                   <option value="1">1 Passenger</option>
@@ -236,7 +309,7 @@ const RequestQuote = () => {
                   type="date"
                   value={formData.flightDate}
                   onChange={(e) => handleInputChange('flightDate', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                 />
               </div>
 
@@ -246,7 +319,7 @@ const RequestQuote = () => {
                   type="time"
                   value={formData.flightTime}
                   onChange={(e) => handleInputChange('flightTime', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                 />
               </div>
 
@@ -255,7 +328,7 @@ const RequestQuote = () => {
                 <select
                   value={formData.duration}
                   onChange={(e) => handleInputChange('duration', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                 >
                   <option value="">Select Duration</option>
                   <option value="30min">30 minutes</option>
@@ -272,7 +345,7 @@ const RequestQuote = () => {
                 <select
                   value={formData.flexibility}
                   onChange={(e) => handleInputChange('flexibility', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                 >
                   <option value="">Select Flexibility</option>
                   <option value="fixed">Fixed date and time</option>
@@ -288,7 +361,7 @@ const RequestQuote = () => {
                   value={formData.origin}
                   onChange={(e) => handleInputChange('origin', e.target.value)}
                   placeholder="Enter departure location"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                 />
               </div>
 
@@ -299,7 +372,7 @@ const RequestQuote = () => {
                   value={formData.destination}
                   onChange={(e) => handleInputChange('destination', e.target.value)}
                   placeholder="Enter destination (for point-to-point flights)"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                 />
               </div>
 
@@ -310,7 +383,7 @@ const RequestQuote = () => {
                   onChange={(e) => handleInputChange('specialRequests', e.target.value)}
                   placeholder="Any special requirements, equipment needs, or additional services"
                   rows="3"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                 />
               </div>
             </div>
@@ -334,7 +407,7 @@ const RequestQuote = () => {
                   value={formData.firstName}
                   onChange={(e) => handleInputChange('firstName', e.target.value)}
                   placeholder="Enter your first name"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                   required
                 />
               </div>
@@ -346,7 +419,7 @@ const RequestQuote = () => {
                   value={formData.lastName}
                   onChange={(e) => handleInputChange('lastName', e.target.value)}
                   placeholder="Enter your last name"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                   required
                 />
               </div>
@@ -358,7 +431,7 @@ const RequestQuote = () => {
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   placeholder="Enter your email address"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                   required
                 />
               </div>
@@ -369,8 +442,9 @@ const RequestQuote = () => {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
-                  placeholder="Enter your phone number"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="XXX-XXXXXXX"
+                  maxLength={11}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                   required
                 />
               </div>
@@ -382,7 +456,7 @@ const RequestQuote = () => {
                   value={formData.company}
                   onChange={(e) => handleInputChange('company', e.target.value)}
                   placeholder="Enter company name if applicable"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                 />
               </div>
             </div>
@@ -404,7 +478,7 @@ const RequestQuote = () => {
                 <select
                   value={formData.budget}
                   onChange={(e) => handleInputChange('budget', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                 >
                   <option value="">Select Budget Range</option>
                   <option value="under-1000">Under $1,000</option>
@@ -423,7 +497,7 @@ const RequestQuote = () => {
                   onChange={(e) => handleInputChange('additionalInfo', e.target.value)}
                   placeholder="Any additional details, questions, or special circumstances we should know about"
                   rows="4"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                 />
               </div>
 
