@@ -22,7 +22,20 @@ const contactSchema = new mongoose.Schema({
     },
     service: {
         type: String,
-        enum: ['Aircraft Maintenance', 'Helicopter Services', 'Training', 'Other'],
+        enum: [
+            'Executive Transport',
+            'Scenic Tours',
+            'Medical Emergency',
+            'Cargo & Utility',
+            'Wedding & Events',
+            'Film & Photography',
+            'Custom Charter',
+            'Aircraft Maintenance',
+            'Helicopter Services',
+            'Training',
+            'Other'
+        ],
+        default: 'Other',
         required: [true, 'Service type is required']
     },
     status: {

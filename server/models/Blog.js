@@ -25,17 +25,31 @@ const BlogSchema = new mongoose.Schema({
     tags: [{
         type: String,
         trim: true
-    }]
+    }],
+    slug: {
+        type: String,
+        unique: true,
+        sparse: true // Allow multiple null values but unique non-null values
+    }
 }, {
     timestamps: true // This will automatically add createdAt and updatedAt fields
 });
 
 // Create slug from title before saving
 BlogSchema.pre('save', function(next) {
-    this.slug = this.title
-        .toLowerCase()
-        .replace(/[^a-zA-Z0-9]/g, '-')
-        .replace(/-+/g, '-');
+    if (this.title) {
+        this.slug = this.title
+            .toLowerCase()
+            .replace(/[^a-zA-Z0-9\s]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim('-');
+        
+        // Add timestamp to ensure uniqueness
+        if (this.isNew) {
+            this.slug += '-' + Date.now();
+        }
+    }
     next();
 });
 

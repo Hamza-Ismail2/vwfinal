@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -40,6 +40,13 @@ const LoadingPage = () => (
 const PageTransition = ({ children }) => {
   const location = useLocation();
   
+  // Ensure scrolling is enabled on each route change (avoids leftover 'overflow:hidden' from modals)
+  useEffect(() => {
+    if (document && document.body) {
+      document.body.style.overflow = 'unset';
+    }
+  }, [location.pathname]);
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -217,7 +224,7 @@ const AppContent = () => {
       <div>
         {!isAdminPage && <Navbar />}
         <PageTransition>
-          <main className="overflow-hidden">
+          <main className="overflow-x-hidden">
             <Suspense fallback={<LoadingPage />}>
               <Routes>
                 <Route path="/" element={<Home />} />

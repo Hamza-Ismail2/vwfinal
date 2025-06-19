@@ -151,7 +151,7 @@ exports.deleteBlog = async (req, res) => {
             });
         }
 
-        await blog.remove();
+        await Blog.findByIdAndDelete(req.params.id);
         console.log('Blog post deleted successfully');
         res.status(200).json({
             success: true,

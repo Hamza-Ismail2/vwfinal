@@ -7,18 +7,36 @@ exports.createProject = async (req, res) => {
             title,
             category,
             description,
+            image,
+            status,
             challenges,
             solutions,
             outcomes
         } = req.body;
+        
+        // Build image URL if file uploaded
+        let imageUrl = image || null;
+        if (req.file) {
+            imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        }
+
+        // utility to split
+        const splitField = (field) => {
+            if (!field) return [];
+            if (Array.isArray(field)) return field;
+            return String(field).split(',').map(s => s.trim()).filter(Boolean);
+        };
+
         // Create project
         const project = await Project.create({
             title,
             category,
             description,
-            challenges: Array.isArray(challenges) ? challenges : [challenges],
-            solutions: Array.isArray(solutions) ? solutions : [solutions],
-            outcomes: Array.isArray(outcomes) ? outcomes : [outcomes]
+            image: imageUrl,
+            status: status || 'Active',
+            challenges: splitField(challenges),
+            solutions: splitField(solutions),
+            outcomes: splitField(outcomes)
         });
         res.status(201).json({
             success: true,
@@ -105,6 +123,8 @@ exports.updateProject = async (req, res) => {
             title,
             category,
             description,
+            image,
+            status,
             challenges,
             solutions,
             outcomes
@@ -116,13 +136,28 @@ exports.updateProject = async (req, res) => {
                 error: 'Only admins can update projects'
             });
         }
-        let updateFields = {
+
+        let imageUrl = image;
+        if (req.file) {
+            imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        }
+
+        // utility to split
+        const splitField = (field) => {
+            if (!field) return [];
+            if (Array.isArray(field)) return field;
+            return String(field).split(',').map(s => s.trim()).filter(Boolean);
+        };
+
+        const updateFields = {
             title,
             category,
             description,
-            challenges: Array.isArray(challenges) ? challenges : [challenges],
-            solutions: Array.isArray(solutions) ? solutions : [solutions],
-            outcomes: Array.isArray(outcomes) ? outcomes : [outcomes]
+            image: imageUrl,
+            status,
+            challenges: splitField(challenges),
+            solutions: splitField(solutions),
+            outcomes: splitField(outcomes)
         };
         const updatedProject = await Project.findByIdAndUpdate(
             req.params.id,
