@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 // Create email transporter
 const transporter = nodemailer.createTransport({
@@ -80,6 +81,7 @@ exports.loginUser = async (req, res) => {
 
         // Compare hashed password
         const isMatch = await bcrypt.compare(password, user.password);
+
         if (!isMatch) {
             console.log('Invalid password for user:', username);
             return res.status(401).json({
@@ -130,8 +132,15 @@ exports.loginUser = async (req, res) => {
         }
 
         console.log('User logged in successfully:', username);
+
+        // Generate JWT token (valid 1 day)
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'your_jwt_secret', {
+            expiresIn: '1d'
+        });
+
         res.status(200).json({
             success: true,
+            token, // front-end can ignore if not needed yet
             data: {
                 id: user._id,
                 username: user.username,

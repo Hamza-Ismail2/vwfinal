@@ -6,6 +6,9 @@ const rateLimit = require('express-rate-limit');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const mongoSanitize = require('express-mongo-sanitize');
+const xssClean = require('xss-clean');
+const mongoose = require('mongoose');
 
 const connectDB = require('./config/db');
 
@@ -28,6 +31,9 @@ const PORT = process.env.PORT || 5000;
 // Trust proxy for rate limiting (important for deployment behind proxy/load balancer)
 app.set('trust proxy', 1);
 
+// Add mongoose strictQuery
+mongoose.set('strictQuery', true);
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
@@ -41,6 +47,11 @@ app.use(helmet({
   },
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
+
+// HSTS (enable once HTTPS is on)
+if (process.env.NODE_ENV === 'production') {
+  app.use(helmet.hsts({ maxAge: 31536000, preload: true }));
+}
 
 // Allow all CORS requests globally
 app.use(cors({ origin: '*', credentials: true }));
@@ -63,6 +74,10 @@ app.use(limiter);
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Sanitize inputs
+app.use(mongoSanitize());
+app.use(xssClean());
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -90,13 +105,14 @@ const storage = multer.diskStorage({
   }
 });
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+  const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+  if (allowed.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Only jpg and png files are allowed!'), false);
+    cb(new Error('Only jpg, png and webp files are allowed!'), false);
   }
 };
-const upload = multer({ storage, fileFilter });
+const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
 
 // Serve uploads with CORS for safety
 app.use('/uploads', cors({ origin: '*' }), express.static(uploadDir, {
