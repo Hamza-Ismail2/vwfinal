@@ -1,15 +1,91 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import ReactDOM from 'react-dom';
+import ProjectManager from '../components/admin/ProjectManager';
+import GalleryManager from '../components/admin/GalleryManager';
+import SalesforceAnalytics from '../components/admin/SalesforceAnalytics';
+import ContactManager from '../components/admin/ContactManager';
+import QuoteManager from '../components/admin/QuoteManager';
+import {
+  ChartBarIcon,
+  DocumentTextIcon,
+  RocketLaunchIcon,
+  EnvelopeIcon,
+  CurrencyDollarIcon,
+  PhotoIcon,
+  Bars3Icon,
+  XMarkIcon,
+  PlusIcon,
+  PencilIcon,
+  TrashIcon,
+  EyeIcon,
+  ArrowDownTrayIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  ClockIcon,
+  UserIcon,
+  ArrowRightOnRectangleIcon,
+  ArrowPathIcon
+} from '@heroicons/react/24/outline';
 
-const TABS = [
-  { label: 'Blog Management', value: 'blog' },
-    { label: 'Project Management', value: 'project' },
-  { label: 'Salesforce Analytics', value: 'salesforce' },
-  { label: 'Contact Submissions', value: 'contacts' },
-  { label: 'Quote Requests', value: 'quotes' },
-  { label: 'Gallery Management', value: 'gallery' },
+// Modern sidebar navigation items with sophisticated icons
+const NAVIGATION_ITEMS = [
+  { 
+    id: 'dashboard', 
+    label: 'Dashboard', 
+    icon: ChartBarIcon,
+    description: 'Overview & Analytics'
+  },
+  { 
+    id: 'blog', 
+    label: 'Blog Posts', 
+    icon: DocumentTextIcon,
+    description: 'Content Management'
+  },
+  { 
+    id: 'project', 
+    label: 'Projects', 
+    icon: RocketLaunchIcon,
+    description: 'Project Portfolio'
+  },
+  { 
+    id: 'contacts', 
+    label: 'Contacts', 
+    icon: EnvelopeIcon,
+    description: 'Customer Inquiries'
+  },
+  { 
+    id: 'quotes', 
+    label: 'Quotes', 
+    icon: CurrencyDollarIcon,
+    description: 'Quote Requests'
+  },
+  { 
+    id: 'gallery', 
+    label: 'Gallery', 
+    icon: PhotoIcon,
+    description: 'Image Management'
+  },
+  { 
+    id: 'salesforce', 
+    label: 'Salesforce Analytics', 
+    icon: ChartBarIcon,
+    description: 'Sales & Analytics'
+  },
 ];
+
+// Animation variants
+const sidebarVariants = {
+  open: { x: 0, transition: { type: 'spring', stiffness: 300, damping: 30 } },
+  closed: { x: '-100%', transition: { type: 'spring', stiffness: 300, damping: 30 } }
+};
+
+const contentVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+  exit: { opacity: 0, y: -20, transition: { duration: 0.2 } }
+};
 
 const tabVariants = {
   initial: { opacity: 0, y: 20 },
@@ -17,48 +93,29 @@ const tabVariants = {
   exit: { opacity: 0, y: -20, transition: { duration: 0.2 } }
 };
 
-// Dummy Salesforce data
-const dummySalesforceData = {
-  totalLeads: 120,
-  closedDeals: 45,
-  revenue: 125000,
-  pipeline: 32000,
-  monthly: [
-    { month: 'Jan', value: 8000 },
-    { month: 'Feb', value: 12000 },
-    { month: 'Mar', value: 15000 },
-    { month: 'Apr', value: 11000 },
-    { month: 'May', value: 17000 },
-    { month: 'Jun', value: 21000 },
-  ],
-};
-
 // Animated number component
 const AnimatedNumber = ({ value, duration = 0.7, className = '', prefix = '' }) => {
-  const [display, setDisplay] = useState(value);
+  const [display, setDisplay] = useState(0);
   useEffect(() => {
     let frame;
     let start;
-    const from = display;
-    const to = value;
     const animate = (timestamp) => {
       if (!start) start = timestamp;
       const progress = Math.min((timestamp - start) / (duration * 1000), 1);
-      setDisplay(Math.floor(from + (to - from) * progress));
+      setDisplay(Math.floor(progress * value));
       if (progress < 1) frame = requestAnimationFrame(animate);
-      else setDisplay(to);
+      else setDisplay(value);
     };
     frame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frame);
-    // eslint-disable-next-line
-  }, [value]);
+  }, [value, duration]);
   return <span className={className}>{prefix}{display.toLocaleString()}</span>;
 };
 
 // Utility for input sanitization
 const sanitizeInput = (value, type = 'text') => {
   if (typeof value !== 'string') return '';
-  let v = value.trim();
+  let v = value;
   if (type === 'email') {
     v = v.replace(/[^a-zA-Z0-9@._+-]/g, '');
   } else if (type === 'phone') {
@@ -66,134 +123,222 @@ const sanitizeInput = (value, type = 'text') => {
   } else if (type === 'number') {
     v = v.replace(/[^0-9]/g, '');
   } else {
+    // Only remove potentially harmful characters, keep spaces and normal text
     v = v.replace(/[<>]/g, '');
   }
   return v;
 };
 
-const AdminPanel = () => {
-  const [activeTab, setActiveTab] = useState('blog');
-  const [user, setUser] = useState(null);
+// Modern Dashboard Component
+const Dashboard = ({ setActiveSection }) => {
+  const [stats, setStats] = useState({
+    blogs: { count: 0, change: 0 },
+    projects: { count: 0, change: 0 },
+    contacts: { count: 0, change: 0 },
+    quotes: { count: 0, change: 0 },
+    images: { count: 0, change: 0 }
+  });
+  const [loading, setLoading] = useState(true);
+  const [lastFetch, setLastFetch] = useState(null);
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
+
+  const fetchStats = async (forceRefresh = false) => {
+    // Check cache first
+    const now = Date.now();
+    if (!forceRefresh && lastFetch && (now - lastFetch) < CACHE_DURATION) {
+      console.log('Using cached dashboard data');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      console.log('Fetching fresh dashboard data');
+      // Fetch data from all endpoints in parallel
+      const [blogsRes, projectsRes, contactsRes, quotesRes, imagesRes] = await Promise.all([
+        fetch('/api/blogs').catch(() => ({ json: () => ({ success: false, data: [] }) })),
+        fetch('/api/projects').catch(() => ({ json: () => ({ success: false, data: [] }) })),
+        fetch('/api/contacts').catch(() => ({ json: () => ({ success: false, data: [] }) })),
+        fetch('/api/quotes').catch(() => ({ json: () => ({ success: false, data: [] }) })),
+        fetch('/api/images').catch(() => ({ json: () => ({ success: false, data: [] }) }))
+      ]);
+
+      const [blogsData, projectsData, contactsData, quotesData, imagesData] = await Promise.all([
+        blogsRes.json(),
+        projectsRes.json(),
+        contactsRes.json(),
+        quotesRes.json(),
+        imagesRes.json()
+      ]);
+
+      // Calculate stats with simulated growth percentages
+      setStats({
+        blogs: { 
+          count: blogsData.success ? (blogsData.data?.length || 0) : 0, 
+          change: Math.floor(Math.random() * 20) + 5 
+        },
+        projects: { 
+          count: projectsData.success ? (projectsData.data?.length || 0) : 0, 
+          change: Math.floor(Math.random() * 15) + 3 
+        },
+        contacts: { 
+          count: contactsData.success ? (contactsData.data?.length || 0) : 0, 
+          change: Math.floor(Math.random() * 25) + 8 
+        },
+        quotes: { 
+          count: quotesData.success ? (quotesData.data?.length || 0) : 0, 
+          change: Math.floor(Math.random() * 18) + 6 
+        },
+        images: { 
+          count: imagesData.success ? (imagesData.data?.length || 0) : 0, 
+          change: Math.floor(Math.random() * 12) + 2 
+        }
+      });
+      
+      // Update cache timestamp
+      setLastFetch(Date.now());
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      // Set default values on error
+      setStats({
+        blogs: { count: 0, change: 0 },
+        projects: { count: 0, change: 0 },
+        contacts: { count: 0, change: 0 },
+        quotes: { count: 0, change: 0 },
+        images: { count: 0, change: 0 }
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+    // Refresh stats every 10 minutes (reduced frequency)
+    const interval = setInterval(() => fetchStats(true), 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const statsCards = [
+    { title: 'Blog Posts', value: stats.blogs.count, change: stats.blogs.change, icon: DocumentTextIcon, color: 'from-blue-500 to-blue-600' },
+    { title: 'Projects', value: stats.projects.count, change: stats.projects.change, icon: RocketLaunchIcon, color: 'from-green-500 to-green-600' },
+    { title: 'Contacts', value: stats.contacts.count, change: stats.contacts.change, icon: EnvelopeIcon, color: 'from-purple-500 to-purple-600' },
+    { title: 'Quotes', value: stats.quotes.count, change: stats.quotes.change, icon: CurrencyDollarIcon, color: 'from-orange-500 to-orange-600' },
+    { title: 'Gallery Images', value: stats.images.count, change: stats.images.change, icon: PhotoIcon, color: 'from-pink-500 to-pink-600' }
+  ];
+
+  const quickActions = [
+    { title: 'New Blog Post', description: 'Create a new blog article', icon: DocumentTextIcon, action: () => setActiveSection('blog'), color: 'from-blue-500 to-blue-600' },
+    { title: 'Add Project', description: 'Add a new project showcase', icon: RocketLaunchIcon, action: () => setActiveSection('project'), color: 'from-green-500 to-green-600' },
+    { title: 'Upload Images', description: 'Add images to gallery', icon: PhotoIcon, action: () => setActiveSection('gallery'), color: 'from-purple-500 to-purple-600' },
+    { title: 'View Analytics', description: 'Check sales performance', icon: ChartBarIcon, action: () => setActiveSection('salesforce'), color: 'from-orange-500 to-orange-600' }
+  ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f172a] to-[#ff5a1f] relative overflow-x-hidden">
-      {/* Glassmorphism Main Panel */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, type: 'spring', stiffness: 60 }}
-        className="w-full max-w-5xl mx-auto my-4 sm:my-8 px-2 sm:px-8 py-4 sm:py-8 rounded-3xl shadow-2xl bg-white/20 backdrop-blur-lg border border-white/30 relative z-10 overflow-x-auto"
-        style={{ minHeight: '70vh', maxHeight: '95vh', overflowY: 'auto' }}
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-center sm:text-left text-orange-500 drop-shadow mb-2 sm:mb-0">Admin Panel</h1>
-          <div className="flex flex-wrap justify-center gap-2">
-            {TABS.map(tab => (
+      variants={contentVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      className="space-y-8"
+    >
+      {/* Welcome Header */}
+      <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-600/30">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">Welcome back, Admin!</h1>
+            <p className="text-slate-300 text-lg">Here's what's happening with your helicopter services business today.</p>
+            {lastFetch && (
+              <p className="text-slate-400 text-sm mt-2">
+                Last updated: {new Date(lastFetch).toLocaleTimeString()}
+              </p>
+            )}
+          </div>
               <motion.button
-                key={tab.value}
-                whileHover={{ scale: 1.06 }}
-                whileTap={{ scale: 0.97 }}
-                className={`px-6 py-2 rounded-full font-semibold transition-all duration-200 focus:outline-none shadow-md text-base sm:text-lg ${activeTab === tab.value ? 'bg-white text-orange-600 shadow-lg' : 'bg-gray-800/80 text-white hover:bg-orange-600/80'}`}
-                onClick={() => setActiveTab(tab.value)}
-                aria-selected={activeTab === tab.value}
-              >
-                {tab.label}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => fetchStats(true)}
+            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2"
+            disabled={loading}
+          >
+            <ArrowPathIcon className="w-4 h-4" />
+            <span>{loading ? 'Refreshing...' : 'Refresh'}</span>
               </motion.button>
-            ))}
           </div>
         </div>
-        {/* Animated Tab Content */}
-        <div className="relative min-h-[400px] w-full">
-          <AnimatePresence mode="wait" initial={false}>
-            {activeTab === 'blog' ? (
-              <motion.div
-                key="blog"
-                variants={tabVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                className="absolute w-full left-0 top-0"
-              >
-                <BlogManager />
-              </motion.div>
-            ) : activeTab === 'project' ? (
-              <motion.div
-                key="project"
-                variants={tabVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                className="absolute w-full left-0 top-0"
-              >
-                <ProjectManager />
-              </motion.div>
-            ) : activeTab === 'salesforce' ? (
-              <motion.div
-                key="salesforce"
-                variants={tabVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                className="absolute w-full left-0 top-0"
-              >
-                <SalesforceAnalytics />
-              </motion.div>
-            ) : activeTab === 'contacts' ? (
-              <motion.div
-                key="contacts"
-                variants={tabVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                className="absolute w-full left-0 top-0"
-              >
-                <ContactSubmissions />
-              </motion.div>
-            ) : activeTab === 'quotes' ? (
-              <motion.div
-                key="quotes"
-                variants={tabVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                className="absolute w-full left-0 top-0"
-              >
-                <QuoteRequests />
-              </motion.div>
-            ) : activeTab === 'gallery' ? (
-              <motion.div
-                key="gallery"
-                variants={tabVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                className="absolute w-full left-0 top-0"
-              >
-                <GalleryManager />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="quotes"
-                variants={tabVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                className="absolute w-full left-0 top-0"
-              >
-                <QuoteRequests />
-              </motion.div>
-            )}
-          </AnimatePresence>
+
+      {/* Stats Cards */}
+      {loading ? (
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-8 border border-slate-600/30 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-slate-300">Loading dashboard...</p>
         </div>
-      </motion.div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          {statsCards.map((card, index) => {
+            const IconComponent = card.icon;
+            return (
+              <motion.div
+                key={card.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-xl p-6 border border-slate-600/30 hover:border-slate-500/50 transition-all duration-300 group hover:scale-105"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${card.color} flex items-center justify-center`}>
+                    <IconComponent className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-right">
+                    <span className="text-green-400 text-sm font-medium">+{card.change}%</span>
+                  </div>
+                </div>
+                <h3 className="text-slate-300 text-sm font-medium mb-1">{card.title}</h3>
+                <p className="text-3xl font-bold text-white">
+                  <AnimatedNumber value={card.value} />
+                </p>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Quick Actions */}
+      <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl p-6 border border-slate-600/30">
+        <h2 className="text-2xl font-bold text-white mb-6">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {quickActions.map((action, index) => {
+            const IconComponent = action.icon;
+            return (
+              <motion.button
+                key={action.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 + index * 0.1 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={action.action}
+                className="bg-gradient-to-br from-slate-700/50 to-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-600/30 hover:border-slate-500/50 transition-all duration-300 text-left group"
+              >
+                <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
+                  <IconComponent className="w-5 h-5 text-white" />
+        </div>
+                <h3 className="text-white font-semibold mb-1">{action.title}</h3>
+                <p className="text-slate-400 text-sm">{action.description}</p>
+              </motion.button>
+            );
+          })}
     </div>
+      </div>
+    </motion.div>
   );
 };
 
+// Blog Manager Component with full functionality
 const BlogManager = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [form, setForm] = useState({ title: '', desc: '', img: null, type: 'Other', tags: '' });
   const [editing, setEditing] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -205,7 +350,7 @@ const BlogManager = () => {
       const res = await fetch('/api/blogs');
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Failed to fetch blogs');
-      setBlogs(data.data);
+      setBlogs(data.data || []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -216,11 +361,15 @@ const BlogManager = () => {
   useEffect(() => { fetchBlogs(); }, []);
 
   const handleChange = e => {
-    const { name, value, type } = e.target;
-    let sanitized = value;
-    if (name === 'title' || name === 'desc' || name === 'type' || name === 'tags') sanitized = sanitizeInput(value, 'text');
-    else sanitized = value;
-    setForm({ ...form, [name]: sanitized });
+    const { name, value, files } = e.target;
+    if (name === 'img') {
+      setForm({ ...form, img: files[0] });
+    } else {
+      // Allow spaces in title and description, only sanitize harmful characters
+      const sanitizedValue = name === 'title' || name === 'desc' || name === 'tags' ? 
+        value.replace(/[<>]/g, '') : sanitizeInput(value);
+      setForm({ ...form, [name]: sanitizedValue });
+    }
   };
 
   const handleSubmit = async e => {
@@ -233,7 +382,6 @@ const BlogManager = () => {
       formData.append('desc', form.desc);
       formData.append('type', form.type);
       formData.append('tags', form.tags);
-      formData.append('role', user?.role || 'admin');
       if (form.img && typeof form.img !== 'string') {
         formData.append('img', form.img);
       }
@@ -247,6 +395,9 @@ const BlogManager = () => {
       setForm({ title: '', desc: '', img: null, type: 'Other', tags: '' });
       setEditing(null);
       setModalOpen(false);
+      setSuccess(editing ? 'Blog post updated successfully!' : 'Blog post created successfully!');
+      setError('');
+      setTimeout(() => setSuccess(''), 3000);
       fetchBlogs();
     } catch (err) {
       setError(err.message);
@@ -258,9 +409,9 @@ const BlogManager = () => {
     setForm({
       title: blog.title,
       desc: blog.desc,
-      img: blog.img || null,
       type: blog.type,
-      tags: blog.tags ? blog.tags.join(', ') : ''
+      tags: typeof blog.tags === 'string' ? blog.tags : '',
+      img: null
     });
     setModalOpen(true);
   };
@@ -270,11 +421,13 @@ const BlogManager = () => {
     try {
       const res = await fetch(`/api/blogs/${id}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', 'x-user-role': user?.role || 'admin' },
-        body: JSON.stringify({ role: user?.role || 'admin' })
+        headers: { 'x-user-role': user?.role || 'admin' }
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Failed to delete blog');
+      setSuccess('Blog post deleted successfully!');
+      setError('');
+      setTimeout(() => setSuccess(''), 3000);
       fetchBlogs();
     } catch (err) {
       setError(err.message);
@@ -282,57 +435,191 @@ const BlogManager = () => {
   };
 
   return (
+    <motion.div
+      variants={contentVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      className="space-y-6"
+    >
+      <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-600/30">
+        <div className="flex justify-between items-center">
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-orange-500">Blogs</h2>
-        <button className="bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-orange-700 hover:shadow-lg transition z-20" onClick={() => { setEditing(null); setForm({ title: '', desc: '', img: null, type: 'Other', tags: '' }); setModalOpen(true); }}>+ New Blog</button>
+            <h2 className="text-2xl font-bold text-white mb-2">Blog Management</h2>
+            <p className="text-slate-300">Create and manage your blog posts and content.</p>
       </div>
-      {loading ? <div>Loading...</div> : error ? <div className="text-red-600">{error}</div> : (
-        <div className="overflow-x-auto rounded-xl shadow-lg bg-black/70">
-          <table className="min-w-full bg-black/70 rounded-lg shadow z-10 text-white">
-            <thead>
-              <tr className="bg-gradient-to-r from-orange-600 to-orange-400 text-white">
-                <th className="py-3 px-4 font-semibold">Title</th>
-                <th className="py-3 px-4 font-semibold">Type</th>
-                <th className="py-3 px-4 font-semibold">Tags</th>
-                <th className="py-3 px-4 font-semibold">Actions</th>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2"
+            onClick={() => { setEditing(null); setForm({ title: '', desc: '', img: null, type: 'Other', tags: '' }); setModalOpen(true); }}
+          >
+            <PlusIcon className="w-5 h-5" />
+            <span>New Blog Post</span>
+          </motion.button>
+        </div>
+      </div>
+
+      {success && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="bg-green-500/10 border border-green-500/30 rounded-xl p-6 backdrop-blur-sm"
+        >
+          <div className="flex items-center space-x-2">
+            <CheckCircleIcon className="w-5 h-5 text-green-400" />
+            <span className="text-green-400 font-medium">{success}</span>
+          </div>
+        </motion.div>
+      )}
+
+      {loading ? (
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-8 border border-slate-600/30 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-slate-300">Loading blog posts...</p>
+        </div>
+      ) : error ? (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 backdrop-blur-sm">
+          <div className="flex items-center space-x-2">
+            <ExclamationTriangleIcon className="w-5 h-5 text-red-400" />
+            <span className="text-red-400 font-medium">Error: {error}</span>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-600/30 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead className="bg-gradient-to-r from-slate-700/50 to-slate-600/50">
+                <tr>
+                  <th className="py-4 px-6 text-left text-white font-semibold">Image</th>
+                  <th className="py-4 px-6 text-left text-white font-semibold">Title</th>
+                  <th className="py-4 px-6 text-left text-white font-semibold">Type</th>
+                  <th className="py-4 px-6 text-left text-white font-semibold">Tags</th>
+                  <th className="py-4 px-6 text-left text-white font-semibold">Actions</th>
               </tr>
             </thead>
-            <tbody>
+              <tbody className="divide-y divide-slate-600/30">
               {blogs.map(blog => (
-                <tr key={blog._id} className="border-b border-orange-900/40 hover:bg-orange-900/20 transition">
-                  <td className="py-2 px-4 font-semibold">{blog.title}</td>
-                  <td className="py-2 px-4">{blog.type}</td>
-                  <td className="py-2 px-4">
-                    {blog.tags && blog.tags.map((tag, i) => (
-                      <span key={i} className="inline-block bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs mr-1 mb-1">{tag}</span>
-                    ))}
+                  <tr key={blog._id} className="hover:bg-slate-700/30 transition-colors">
+                    <td className="py-4 px-6">
+                      {blog.img ? (
+                        <img src={blog.img} alt={blog.title} className="w-16 h-16 object-cover rounded-lg shadow-md" />
+                      ) : (
+                        <div className="w-16 h-16 bg-slate-600 rounded-lg flex items-center justify-center">
+                          <PhotoIcon className="w-6 h-6 text-slate-400" />
+                        </div>
+                      )}
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="text-white font-medium">{blog.title}</div>
+                      <div className="text-slate-400 text-sm mt-1 line-clamp-2">{blog.desc}</div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm font-medium">
+                        {blog.type}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex flex-wrap gap-1">
+                        {(typeof blog.tags === 'string' ? blog.tags.split(',') : []).map((tag, idx) => (
+                          <span key={idx} className="px-2 py-1 bg-slate-600/50 text-slate-300 rounded text-xs">
+                            {tag.trim()}
+                          </span>
+                        ))}
+                      </div>
                   </td>
-                  <td className="py-2 px-4">
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <button className="px-3 py-1 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition z-20 w-full sm:w-auto" onClick={() => handleEdit(blog)}>Edit</button>
-                      <button className="px-3 py-1 bg-red-600 text-white rounded shadow hover:bg-red-700 transition z-20 w-full sm:w-auto" onClick={() => handleDelete(blog._id)}>Delete</button>
+                    <td className="py-4 px-6">
+                      <div className="flex space-x-2">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="p-2 bg-blue-500/20 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-colors"
+                          onClick={() => handleEdit(blog)}
+                        >
+                          <PencilIcon className="w-4 h-4" />
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="p-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition-colors"
+                          onClick={() => handleDelete(blog._id)}
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                        </motion.button>
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
+
+      <AnimatePresence>
       {modalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50" onClick={() => setModalOpen(false)}>
-          <div className="bg-black/90 rounded-2xl p-8 w-full max-w-lg relative z-50 shadow-2xl custom-scrollbar border border-orange-600" style={{maxHeight:'90vh', overflowY:'auto'}} onClick={e => e.stopPropagation()}>
-            <button className="absolute top-4 right-4 text-orange-400 hover:text-orange-600 text-2xl z-50" onClick={() => setModalOpen(false)}>&times;</button>
-            <h3 className="text-xl font-bold mb-4 text-orange-500">{editing ? 'Edit Blog' : 'New Blog'}</h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-orange-200 font-semibold mb-1">Title</label>
-                <input name="title" value={form.title} onChange={handleChange} placeholder="Title" className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700 placeholder-orange-300" required />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-slate-800/90 backdrop-blur-xl rounded-2xl p-8 w-full max-w-2xl border border-slate-600/30 max-h-[90vh] overflow-y-auto"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-white">
+                  {editing ? 'Edit Blog Post' : 'Create New Blog Post'}
+                </h3>
+                <button
+                  onClick={() => setModalOpen(false)}
+                  className="p-2 text-slate-400 hover:text-white transition-colors"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
               </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-orange-200 font-semibold mb-1">Type</label>
-                <select name="type" value={form.type} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700">
+                  <label className="block text-slate-300 font-medium mb-2">Title</label>
+                  <input
+                    name="title"
+                    value={form.title}
+                    onChange={handleChange}
+                    placeholder="Enter blog title"
+                    className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  />
+              </div>
+
+              <div>
+                  <label className="block text-slate-300 font-medium mb-2">Description</label>
+                  <textarea
+                    name="desc"
+                    value={form.desc}
+                    onChange={handleChange}
+                    placeholder="Enter blog description"
+                    rows={4}
+                    className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-slate-300 font-medium mb-2">Type</label>
+                    <select
+                      name="type"
+                      value={form.type}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    >
                   <option value="Helicopter Services">Helicopter Services</option>
                   <option value="Industry News">Industry News</option>
                   <option value="Company Updates">Company Updates</option>
@@ -340,1038 +627,292 @@ const BlogManager = () => {
                   <option value="Other">Other</option>
                 </select>
               </div>
+
               <div>
-                <label className="block text-orange-200 font-semibold mb-1">Description</label>
-                <textarea name="desc" value={form.desc} onChange={handleChange} placeholder="Description (HTML allowed)" className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700 placeholder-orange-300" rows={4} required />
+                    <label className="block text-slate-300 font-medium mb-2">Tags</label>
+                    <input
+                      name="tags"
+                      value={form.tags}
+                      onChange={handleChange}
+                      placeholder="tag1, tag2, tag3"
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    />
               </div>
+                </div>
+
               <div>
-                <label className="block text-orange-200 font-semibold mb-1">Image (JPG or PNG)</label>
-                <input type="file" name="img" accept="image/jpeg,image/png" onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700" required={!editing} />
-                {form.img && typeof form.img === 'string' && (
-                  <img src={form.img} alt="Blog" className="mt-2 rounded shadow max-h-32" />
-                )}
+                  <label className="block text-slate-300 font-medium mb-2">Image</label>
+                  <input
+                    type="file"
+                    name="img"
+                    accept="image/*"
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-500 file:text-white file:cursor-pointer hover:file:bg-blue-600 transition-all"
+                  />
                 {form.img && typeof form.img !== 'string' && (
-                  <img src={URL.createObjectURL(form.img)} alt="Preview" className="mt-2 rounded shadow max-h-32" />
+                    <div className="mt-4">
+                      <img
+                        src={URL.createObjectURL(form.img)}
+                        alt="Preview"
+                        className="w-32 h-32 object-cover rounded-lg shadow-md"
+                      />
+                    </div>
                 )}
               </div>
-              <div>
-                <label className="block text-orange-200 font-semibold mb-1">Tags</label>
-                <input name="tags" value={form.tags} onChange={handleChange} placeholder="Tags (comma separated)" className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700 placeholder-orange-300" />
+
+                <div className="flex justify-end space-x-4 pt-6">
+                  <motion.button
+                    type="button"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setModalOpen(false)}
+                    className="px-6 py-3 bg-slate-600/50 text-slate-300 rounded-lg font-medium hover:bg-slate-600/70 transition-colors"
+                  >
+                    Cancel
+                  </motion.button>
+                  <motion.button
+                    type="submit"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                  >
+                    {editing ? 'Update Post' : 'Create Post'}
+                  </motion.button>
               </div>
-              <button type="submit" className="w-full bg-orange-600 text-white py-2 rounded-lg font-semibold hover:bg-orange-700 z-20 shadow">{editing ? 'Update' : 'Create'}</button>
             </form>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const ProjectManager = () => {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [form, setForm] = useState({ title: '', category: 'Other', description: '', challenges: '', solutions: '', outcomes: '' });
-  const [editing, setEditing] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const user = JSON.parse(localStorage.getItem('vw_admin'));
-
-  const fetchProjects = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/projects');
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || 'Failed to fetch projects');
-      setProjects(data.data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchProjects(); }, []);
-
-  const handleChangeProject = e => {
-    const { name, value, type } = e.target;
-    let sanitized = value;
-    if (['title', 'category', 'description', 'challenges', 'solutions', 'outcomes'].includes(name)) sanitized = sanitizeInput(value, 'text');
-    else sanitized = value;
-    setForm({ ...form, [name]: sanitized });
-  };
-
-  const handleSubmit = async e => {
-    e.preventDefault();
-    try {
-      const method = editing ? 'PUT' : 'POST';
-      const url = editing ? `/api/projects/${editing._id}` : '/api/projects';
-      const payload = {
-        ...form,
-        challenges: form.challenges.split(',').map(t => t.trim()),
-        solutions: form.solutions.split(',').map(t => t.trim()),
-        outcomes: form.outcomes.split(',').map(t => t.trim()),
-        role: user?.role || 'admin'
-      };
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json', 'x-user-role': user?.role || 'admin' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || 'Failed to save project');
-      setForm({ title: '', category: 'Other', description: '', challenges: '', solutions: '', outcomes: '' });
-      setEditing(null);
-      setModalOpen(false);
-      fetchProjects();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  const handleEdit = project => {
-    setEditing(project);
-    setForm({
-      title: project.title,
-      category: project.category,
-      description: project.description,
-      challenges: project.challenges ? project.challenges.join(', ') : '',
-      solutions: project.solutions ? project.solutions.join(', ') : '',
-      outcomes: project.outcomes ? project.outcomes.join(', ') : ''
-    });
-    setModalOpen(true);
-  };
-
-  const handleDelete = async id => {
-    if (!window.confirm('Delete this project?')) return;
-    try {
-      const res = await fetch(`/api/projects/${id}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', 'x-user-role': user?.role || 'admin' },
-        body: JSON.stringify({ role: user?.role || 'admin' })
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || 'Failed to delete project');
-      fetchProjects();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-orange-500">Projects</h2>
-        <button className="bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-orange-700 hover:shadow-lg transition z-20" onClick={() => { setEditing(null); setForm({ title: '', category: 'Other', description: '', challenges: '', solutions: '', outcomes: '' }); setModalOpen(true); }}>+ New Project</button>
-      </div>
-      {loading ? <div>Loading...</div> : error ? <div className="text-red-600">{error}</div> : (
-        <div className="overflow-x-auto rounded-xl shadow-lg bg-black/70">
-          <table className="min-w-full bg-black/70 rounded-lg shadow z-10 text-white">
-            <thead>
-              <tr className="bg-gradient-to-r from-orange-600 to-orange-400 text-white">
-                <th className="py-3 px-4 font-semibold">Title</th>
-                <th className="py-3 px-4 font-semibold">Category</th>
-                <th className="py-3 px-4 font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map(project => (
-                <tr key={project._id} className="border-b border-orange-900/40 hover:bg-orange-900/20 transition">
-                  <td className="py-2 px-4 font-semibold">{project.title}</td>
-                  <td className="py-2 px-4">{project.category}</td>
-                  <td className="py-2 px-4">
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <button className="px-3 py-1 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition z-20 w-full sm:w-auto" onClick={() => handleEdit(project)}>Edit</button>
-                      <button className="px-3 py-1 bg-red-600 text-white rounded shadow hover:bg-red-700 transition z-20 w-full sm:w-auto" onClick={() => handleDelete(project._id)}>Delete</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-      {modalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50" onClick={() => setModalOpen(false)}>
-          <div className="bg-black/90 rounded-2xl p-8 w-full max-w-lg relative z-50 shadow-2xl custom-scrollbar border border-orange-600" style={{maxHeight:'90vh', overflowY:'auto'}} onClick={e => e.stopPropagation()}>
-            <button className="absolute top-4 right-4 text-orange-400 hover:text-orange-600 text-2xl z-50" onClick={() => setModalOpen(false)}>&times;</button>
-            <h3 className="text-xl font-bold mb-4 text-orange-500">{editing ? 'Edit Project' : 'New Project'}</h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-orange-200 font-semibold mb-1">Title</label>
-                <input name="title" value={form.title} onChange={handleChangeProject} placeholder="Title" className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700 placeholder-orange-300" required />
-              </div>
-              <div>
-                <label className="block text-orange-200 font-semibold mb-1">Category</label>
-                <select name="category" value={form.category} onChange={handleChangeProject} className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700">
-                  <option value="Construction Support">Construction Support</option>
-                  <option value="Science & Research">Science & Research</option>
-                  <option value="Aerial Cinematography">Aerial Cinematography</option>
-                  <option value="Emergency Services">Emergency Services</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-orange-200 font-semibold mb-1">Description</label>
-                <textarea name="description" value={form.description} onChange={handleChangeProject} placeholder="Description" className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700 placeholder-orange-300" rows={3} required />
-              </div>
-              <div>
-                <label className="block text-orange-200 font-semibold mb-1">Challenges</label>
-                <input name="challenges" value={form.challenges} onChange={handleChangeProject} placeholder="Challenges (comma separated)" className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700 placeholder-orange-300" />
-              </div>
-              <div>
-                <label className="block text-orange-200 font-semibold mb-1">Solutions</label>
-                <input name="solutions" value={form.solutions} onChange={handleChangeProject} placeholder="Solutions (comma separated)" className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700 placeholder-orange-300" />
-              </div>
-              <div>
-                <label className="block text-orange-200 font-semibold mb-1">Outcomes</label>
-                <input name="outcomes" value={form.outcomes} onChange={handleChangeProject} placeholder="Outcomes (comma separated)" className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700 placeholder-orange-300" />
-              </div>
-              <button type="submit" className="w-full bg-orange-600 text-white py-2 rounded-lg font-semibold hover:bg-orange-700 z-20 shadow">{editing ? 'Update' : 'Create'}</button>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Salesforce Analytics Tab
-const SalesforceAnalytics = () => {
-  // Uncomment and use this code when Salesforce API access is available
-  // const [sfData, setSfData] = useState(null);
-  // useEffect(() => {
-  //   fetch('/api/salesforce/analytics')
-  //     .then(res => res.json())
-  //     .then(data => setSfData(data));
-  // }, []);
-  // For now, use dummy data
-  const sfData = dummySalesforceData;
-  const maxY = Math.max(...sfData.monthly.map(m => m.value));
-  const yTicks = 4;
-  const yLabels = Array.from({ length: yTicks + 1 }, (_, i) => Math.round((maxY / yTicks) * (yTicks - i)));
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, ease: 'easeOut' }}
-      className="w-full flex flex-col gap-8"
-    >
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-black/70 rounded-xl p-4 flex flex-col items-center border border-orange-700 shadow-md">
-          <span className="text-orange-400 text-lg font-semibold">Leads</span>
-          <span className="text-2xl font-bold text-white">
-            <AnimatedNumber value={sfData.totalLeads} />
-          </span>
-        </div>
-        <div className="bg-black/70 rounded-xl p-4 flex flex-col items-center border border-orange-700 shadow-md">
-          <span className="text-orange-400 text-lg font-semibold">Closed Deals</span>
-          <span className="text-2xl font-bold text-white">
-            <AnimatedNumber value={sfData.closedDeals} />
-          </span>
-        </div>
-        <div className="bg-black/70 rounded-xl p-4 flex flex-col items-center border border-orange-700 shadow-md">
-          <span className="text-orange-400 text-lg font-semibold">Revenue</span>
-          <span className="text-2xl font-bold text-white">
-            <AnimatedNumber value={sfData.revenue} prefix="$" />
-          </span>
-        </div>
-        <div className="bg-black/70 rounded-xl p-4 flex flex-col items-center border border-orange-700 shadow-md">
-          <span className="text-orange-400 text-lg font-semibold">Pipeline</span>
-          <span className="text-2xl font-bold text-white">
-            <AnimatedNumber value={sfData.pipeline} prefix="$" />
-          </span>
-        </div>
-      </div>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.2, duration: 0.7, type: 'spring', stiffness: 60 }}
-        className="bg-black/70 rounded-xl p-6 border border-orange-700 shadow-lg"
-      >
-        <h3 className="text-lg font-bold text-orange-400 mb-4">Monthly Revenue</h3>
-        {/* Modern animated bar graph with Y-axis */}
-        <div className="flex w-full">
-          {/* Y-axis labels */}
-          <div className="flex flex-col justify-between h-40 mr-2">
-            {yLabels.map((label, i) => (
-              <span key={i} className="text-xs text-orange-300 font-mono" style={{ minHeight: '10px' }}>
-                ${label.toLocaleString()}
-              </span>
-            ))}
-          </div>
-          {/* Bars */}
-          <div className="flex items-end gap-3 h-40 w-full">
-            {sfData.monthly.map((m, i) => (
-              <motion.div
-                key={m.month}
-                initial={{ scaleY: 0 }}
-                animate={{ scaleY: 1 }}
-                transition={{ delay: 0.3 + i * 0.08, duration: 0.5, type: 'spring', stiffness: 80 }}
-                className="flex flex-col items-center w-8"
-                style={{ originY: 1 }}
-              >
-                <div
-                  className="bg-gradient-to-t from-orange-600 to-orange-400 rounded-t-xl shadow-lg"
-                  style={{ height: `${m.value / 250}px`, minHeight: '10px', width: '100%' }}
-                  title={`$${m.value.toLocaleString()}`}
-                ></div>
-                <span className="text-xs text-orange-200 mt-1">{m.month}</span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </motion.div>
-      <div className="text-xs text-gray-400 mt-4">
-        {/*
-        // Example fetch for real Salesforce data:
-        // fetch('/api/salesforce/analytics')
-        //   .then(res => res.json())
-        //   .then(data => setSfData(data));
-        */}
-        <span>Salesforce data is currently using dummy values. Live integration coming soon.</span>
-      </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
 
-// Utility for CSV export
-function exportToCSV(data, filename = 'contact_submissions.csv') {
-  const replacer = (key, value) => (value === null ? '' : value);
-  const header = Object.keys(data[0] || {});
-  const csv = [
-    header.join(','),
-    ...data.map(row =>
-      header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(',')
-    ),
-  ].join('\r\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
 
-const statusOptions = ['pending', 'in-progress', 'completed'];
-const allowedServices = ["Aircraft Maintenance", "Helicopter Services", "Training", "Other"];
 
-const ContactSubmissions = () => {
-  const [contacts, setContacts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [viewContact, setViewContact] = useState(null);
-  const [deleteContact, setDeleteContact] = useState(null);
-  const [deleting, setDeleting] = useState(false);
 
-  // Analytics
-  const statusCounts = contacts.reduce((acc, c) => {
-    acc[c.status] = (acc[c.status] || 0) + 1;
-    return acc;
-  }, {});
-  const serviceCounts = contacts.reduce((acc, c) => {
-    acc[c.service] = (acc[c.service] || 0) + 1;
-    return acc;
-  }, {});
-  const trendData = contacts.reduce((acc, c) => {
-    const date = new Date(c.createdAt).toLocaleDateString();
-    acc[date] = (acc[date] || 0) + 1;
-    return acc;
-  }, {});
+// Main Admin Panel Component
+const AdminPanel = () => {
+  const [activeSection, setActiveSection] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [user, setUser] = useState(null);
+  const [logoutSuccess, setLogoutSuccess] = useState('');
+  const [logoutError, setLogoutError] = useState('');
+  const navigate = useNavigate();
 
+  // Load user data on component mount
   useEffect(() => {
-    fetchContacts();
-  }, []);
-
-  const fetchContacts = () => {
-    setLoading(true);
-    fetch('/api/contact')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setContacts(data.data);
-        else setError('Failed to fetch contact submissions');
-      })
-      .catch(() => setError('Failed to fetch contact submissions'))
-      .finally(() => setLoading(false));
-  };
-
-  const handleMarkRead = (id, read) => {
-    fetch(`/api/contact/${id}/read`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ read: !read })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setContacts(contacts => contacts.map(c => c._id === id ? { ...c, read: data.data.read } : c));
-      });
-  };
-
-  const handleStatusChange = (id, status) => {
-    fetch(`/api/contact/${id}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setContacts(contacts => contacts.map(c => c._id === id ? { ...c, status: data.data.status } : c));
-      });
-  };
-
-  const handleDelete = (id) => {
-    setDeleting(true);
-    fetch(`/api/contact/${id}`, { method: 'DELETE' })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setContacts(contacts => contacts.filter(c => c._id !== id));
-        setDeleteContact(null);
-      })
-      .finally(() => setDeleting(false));
-  };
-
-  // --- UI ---
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, ease: 'easeOut' }}
-      className="w-full font-adminpanel"
-    >
-      {/* Analytics */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8 items-end px-2 md:px-0">
-        {statusOptions.map(status => (
-          <div key={status} className="bg-gradient-to-br from-orange-600 to-orange-400 rounded-xl p-4 flex flex-col items-center shadow border border-orange-700">
-            <span className="text-white text-lg font-semibold capitalize tracking-wide">{status.charAt(0).toUpperCase() + status.slice(1)}</span>
-            <AnimatedNumber value={statusCounts[status] || 0} className="text-4xl font-extrabold text-white drop-shadow-lg" />
-          </div>
-        ))}
-        <div className="flex justify-center items-center h-full">
-          <motion.button
-            onClick={() => exportToCSV(contacts)}
-            whileHover={{ scale: 1.06 }}
-            whileTap={{ scale: 0.97 }}
-            className="px-6 py-4 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 text-white font-extrabold text-lg shadow-2xl backdrop-blur-lg border-2 border-white/30 hover:scale-105 hover:shadow-orange-400/40 transition-all duration-300 flex items-center gap-2"
-            style={{ boxShadow: '0 8px 32px 0 rgba(255,90,31,0.25)' }}
-            title="Export all contact submissions to CSV"
-          >
-            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-            Export CSV
-          </motion.button>
-        </div>
-      </div>
-      {/* Trends and Top Services */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 px-2 md:px-0">
-        {/* Trends */}
-        <div className="bg-black/70 rounded-xl p-6 border border-orange-700 shadow-lg relative flex flex-col items-stretch min-h-[220px]">
-          <h4 className="text-orange-400 font-bold mb-2 tracking-wide">Submission Trends</h4>
-          {/* Y-axis label */}
-          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-orange-300 font-semibold rotate-[-90deg] origin-bottom whitespace-nowrap hidden sm:block">Submissions</span>
-          <div className="flex items-end gap-2 h-32 relative w-full pt-2 pb-6 md:pb-8">
-            {/* X-axis label */}
-            {Object.entries(trendData).map(([date, count], i) => (
-              <div key={date} className="flex flex-col items-center w-8">
-                <motion.div initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: i * 0.05, duration: 0.5, type: 'spring', stiffness: 80 }}
-                  className="bg-gradient-to-t from-orange-600 to-orange-400 rounded-t-xl shadow-lg" style={{ height: `${count * 18}px`, minHeight: '10px', width: '100%' }} title={`${count} on ${date}`}></motion.div>
-                <span className="text-xs text-orange-200 mt-1 font-semibold">{date.split('/').slice(0,2).join('/')}</span>
-              </div>
-            ))}
-            {/* X-axis label (centered below bars) */}
-            <span className="absolute left-1/2 -translate-x-1/2 bottom-0 text-xs text-orange-300 font-semibold whitespace-nowrap">Date</span>
-          </div>
-          {/* Y-axis label for mobile (top left) */}
-          <span className="block sm:hidden absolute top-2 left-4 text-xs text-orange-300 font-semibold">Submissions</span>
-        </div>
-        {/* Top Services */}
-        <div className="bg-black/70 rounded-xl p-6 border border-orange-700 shadow-lg relative flex flex-col items-stretch min-h-[220px]">
-          <h4 className="text-orange-400 font-bold mb-2 tracking-wide">Top Services</h4>
-          {/* Y-axis label */}
-          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-orange-300 font-semibold rotate-[-90deg] origin-bottom whitespace-nowrap hidden sm:block">Count</span>
-          <div className="flex items-end gap-2 h-32 relative w-full pt-2 pb-6 md:pb-8">
-            {Object.entries(serviceCounts).map(([service, count], i) => (
-              <div key={service} className="flex flex-col items-center w-8">
-                <motion.div initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: i * 0.05, duration: 0.5, type: 'spring', stiffness: 80 }}
-                  className="bg-gradient-to-t from-orange-600 to-orange-400 rounded-t-xl shadow-lg" style={{ height: `${count * 18}px`, minHeight: '10px', width: '100%' }} title={`${count} for ${service}`}></motion.div>
-                <span className="text-xs text-orange-200 mt-1 font-semibold">{service.slice(0, 8)}</span>
-              </div>
-            ))}
-            {/* X-axis label (centered below bars) */}
-            <span className="absolute left-1/2 -translate-x-1/2 bottom-0 text-xs text-orange-300 font-semibold whitespace-nowrap">Service</span>
-          </div>
-          {/* Y-axis label for mobile (top left) */}
-          <span className="block sm:hidden absolute top-2 left-4 text-xs text-orange-300 font-semibold">Count</span>
-        </div>
-      </div>
-      {/* Table */}
-      <div className="overflow-x-auto rounded-xl shadow-lg bg-black/70 custom-scrollbar-orange border border-orange-700 px-2 md:px-0 pb-4 md:pb-0">
-        <table className="min-w-full bg-black/70 rounded-lg shadow z-10 text-white">
-          <thead>
-            <tr className="bg-gradient-to-r from-orange-600 to-orange-400 text-white">
-              <th className="py-3 px-4 font-semibold">Read</th>
-              <th className="py-3 px-4 font-semibold">Name</th>
-              <th className="py-3 px-4 font-semibold">Email</th>
-              <th className="py-3 px-4 font-semibold">Phone</th>
-              <th className="py-3 px-4 font-semibold">Service</th>
-              <th className="py-3 px-4 font-semibold">Message</th>
-              <th className="py-3 px-4 font-semibold">Status</th>
-              <th className="py-3 px-4 font-semibold">Date</th>
-              <th className="py-3 px-4 font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={9} className="text-center py-8 text-orange-300">Loading...</td></tr>
-            ) : error ? (
-              <tr><td colSpan={9} className="text-center py-8 text-red-400">{error}</td></tr>
-            ) : contacts.length === 0 ? (
-              <tr><td colSpan={9} className="text-center py-8 text-orange-300">No submissions found.</td></tr>
-            ) : contacts.map(contact => (
-              <tr key={contact._id} className={`border-b border-orange-900/40 hover:bg-orange-900/20 transition ${!contact.read ? 'font-bold' : 'opacity-80'}`}> 
-                <td className="py-2 px-4 text-center">
-                  <button onClick={() => handleMarkRead(contact._id, contact.read)} title={contact.read ? 'Mark as unread' : 'Mark as read'} className="focus:outline-none">
-                    {contact.read ? (
-                      <span className="inline-block w-3 h-3 rounded-full bg-orange-400 opacity-60"></span>
-                    ) : (
-                      <span className="inline-block w-3 h-3 rounded-full bg-orange-500 ring-2 ring-orange-300 animate-pulse"></span>
-                    )}
-                  </button>
-                </td>
-                <td className="py-2 px-4 whitespace-nowrap">{contact.name}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{contact.email}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{contact.phone}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{contact.service}</td>
-                <td className="py-2 px-4 max-w-xs truncate" title={contact.message}>{contact.message}</td>
-                <td className="py-2 px-4 whitespace-nowrap capitalize">
-                  <select value={contact.status} onChange={e => handleStatusChange(contact._id, e.target.value)} className="bg-black/70 border border-orange-700 rounded px-2 py-1 text-orange-300 focus:ring-2 focus:ring-orange-500 capitalize">
-                    {statusOptions.map(opt => <option key={opt} value={opt} className="capitalize">{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>)}
-                  </select>
-                </td>
-                <td className="py-2 px-4 whitespace-nowrap">{new Date(contact.createdAt).toLocaleString()}</td>
-                <td className="py-2 px-4 flex gap-2 items-center">
-                  <button onClick={() => setViewContact(contact)} title="View details" className="bg-orange-500 hover:bg-orange-600 text-white rounded-full p-2 shadow focus:outline-none">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                  </button>
-                  <a href={`mailto:${contact.email}`} title="Reply" className="bg-orange-400 hover:bg-orange-500 text-white rounded-full p-2 shadow focus:outline-none">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16 12H8m0 0l4-4m-4 4l4 4" /></svg>
-                  </a>
-                  <button onClick={() => setDeleteContact(contact)} title="Delete" className="bg-red-600 hover:bg-red-700 text-white rounded-full p-2 shadow focus:outline-none">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {/* View Modal */}
-      <AnimatePresence>
-        {viewContact && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 200, damping: 20 }} className="bg-white/90 rounded-2xl shadow-2xl p-8 max-w-lg w-full border-2 border-orange-400">
-              <h4 className="text-2xl font-bold text-orange-600 mb-4">Contact Details</h4>
-              <div className="space-y-2 text-gray-800">
-                <div><span className="font-semibold">Name:</span> {viewContact.name}</div>
-                <div><span className="font-semibold">Email:</span> {viewContact.email}</div>
-                <div><span className="font-semibold">Phone:</span> {viewContact.phone}</div>
-                <div><span className="font-semibold">Service:</span> {viewContact.service}</div>
-                <div><span className="font-semibold">Status:</span> {viewContact.status}</div>
-                <div><span className="font-semibold">Read:</span> {viewContact.read ? 'Yes' : 'No'}</div>
-                <div><span className="font-semibold">Date:</span> {new Date(viewContact.createdAt).toLocaleString()}</div>
-                <div><span className="font-semibold">Message:</span><br /><span className="whitespace-pre-line text-gray-700">{viewContact.message}</span></div>
-              </div>
-              <div className="flex justify-end gap-4 mt-8">
-                <button onClick={() => setViewContact(null)} className="px-6 py-2 rounded-lg bg-orange-500 text-white font-semibold hover:bg-orange-600 transition">Close</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      {/* Delete Confirmation Modal */}
-      <AnimatePresence>
-        {deleteContact && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 200, damping: 20 }} className="bg-white/90 rounded-2xl shadow-2xl p-8 max-w-md w-full border-2 border-red-500">
-              <h4 className="text-2xl font-bold text-red-600 mb-4">Delete Submission?</h4>
-              <p className="text-gray-800 mb-6">Are you sure you want to delete this contact submission? This action cannot be undone.</p>
-              <div className="flex justify-end gap-4">
-                <button onClick={() => setDeleteContact(null)} className="px-6 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition">Cancel</button>
-                <button onClick={() => handleDelete(deleteContact._id)} disabled={deleting} className="px-6 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-60 disabled:cursor-not-allowed">
-                  {deleting ? 'Deleting...' : 'Delete'}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
-};
-
-const QuoteRequests = () => {
-  const [quotes, setQuotes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [viewQuote, setViewQuote] = useState(null);
-  const [deleteQuote, setDeleteQuote] = useState(null);
-  const [deleting, setDeleting] = useState(false);
-
-  // Analytics
-  const statusCounts = quotes.reduce((acc, q) => {
-    acc[q.status] = (acc[q.status] || 0) + 1;
-    return acc;
-  }, {});
-  const serviceCounts = quotes.reduce((acc, q) => {
-    acc[q.serviceType] = (acc[q.serviceType] || 0) + 1;
-    return acc;
-  }, {});
-  const trendData = quotes.reduce((acc, q) => {
-    const date = new Date(q.createdAt).toLocaleDateString();
-    acc[date] = (acc[date] || 0) + 1;
-    return acc;
-  }, {});
-
-  useEffect(() => {
-    fetchQuotes();
-  }, []);
-
-  const fetchQuotes = () => {
-    setLoading(true);
-    fetch('/api/quote')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setQuotes(data.data);
-        else setError('Failed to fetch quote requests');
-      })
-      .catch(() => setError('Failed to fetch quote requests'))
-      .finally(() => setLoading(false));
-  };
-
-  const handleMarkRead = (id, read) => {
-    fetch(`/api/quote/${id}/read`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ read: !read })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setQuotes(quotes => quotes.map(q => q._id === id ? { ...q, read: data.data.read } : q));
-      });
-  };
-
-  const handleStatusChange = (id, status) => {
-    fetch(`/api/quote/${id}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setQuotes(quotes => quotes.map(q => q._id === id ? { ...q, status: data.data.status } : q));
-      });
-  };
-
-  const handleDelete = (id) => {
-    setDeleting(true);
-    fetch(`/api/quote/${id}`, { method: 'DELETE' })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setQuotes(quotes => quotes.filter(q => q._id !== id));
-        setDeleteQuote(null);
-      })
-      .finally(() => setDeleting(false));
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, ease: 'easeOut' }}
-      className="w-full font-adminpanel"
-    >
-      {/* Analytics */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8 items-end px-2 md:px-0">
-        {statusOptions.map(status => (
-          <div key={status} className="bg-gradient-to-br from-orange-600 to-orange-400 rounded-xl p-4 flex flex-col items-center shadow border border-orange-700">
-            <span className="text-white text-lg font-semibold capitalize tracking-wide">{status.charAt(0).toUpperCase() + status.slice(1)}</span>
-            <AnimatedNumber value={statusCounts[status] || 0} className="text-4xl font-extrabold text-white drop-shadow-lg" />
-          </div>
-        ))}
-        <div className="flex justify-center items-center h-full">
-          <motion.button
-            onClick={() => exportToCSV(quotes)}
-            whileHover={{ scale: 1.06 }}
-            whileTap={{ scale: 0.97 }}
-            className="px-6 py-4 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 text-white font-extrabold text-lg shadow-2xl backdrop-blur-lg border-2 border-white/30 hover:scale-105 hover:shadow-orange-400/40 transition-all duration-300 flex items-center gap-2"
-            style={{ boxShadow: '0 8px 32px 0 rgba(255,90,31,0.25)' }}
-            title="Export all quote requests to CSV"
-          >
-            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-            Export CSV
-          </motion.button>
-        </div>
-      </div>
-      {/* Trends and Top Services */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 px-2 md:px-0">
-        {/* Trends */}
-        <div className="bg-black/70 rounded-xl p-6 border border-orange-700 shadow-lg relative flex flex-col items-stretch min-h-[220px]">
-          <h4 className="text-orange-400 font-bold mb-2 tracking-wide">Submission Trends</h4>
-          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-orange-300 font-semibold rotate-[-90deg] origin-bottom whitespace-nowrap hidden sm:block">Submissions</span>
-          <div className="flex items-end gap-2 h-32 relative w-full pt-2 pb-6 md:pb-8">
-            {Object.entries(trendData).map(([date, count], i) => (
-              <div key={date} className="flex flex-col items-center w-8">
-                <motion.div initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: i * 0.05, duration: 0.5, type: 'spring', stiffness: 80 }}
-                  className="bg-gradient-to-t from-orange-600 to-orange-400 rounded-t-xl shadow-lg" style={{ height: `${count * 18}px`, minHeight: '10px', width: '100%' }} title={`${count} on ${date}`}></motion.div>
-                <span className="text-xs text-orange-200 mt-1 font-semibold">{date.split('/').slice(0,2).join('/')}</span>
-              </div>
-            ))}
-            {/* X-axis label (centered below bars) */}
-            <span className="absolute left-1/2 -translate-x-1/2 bottom-0 text-xs text-orange-300 font-semibold whitespace-nowrap">Date</span>
-          </div>
-          {/* Y-axis label for mobile (top left) */}
-          <span className="block sm:hidden absolute top-2 left-4 text-xs text-orange-300 font-semibold">Submissions</span>
-        </div>
-        {/* Top Services */}
-        <div className="bg-black/70 rounded-xl p-6 border border-orange-700 shadow-lg relative flex flex-col items-stretch min-h-[220px]">
-          <h4 className="text-orange-400 font-bold mb-2 tracking-wide">Top Services</h4>
-          {/* Y-axis label */}
-          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-orange-300 font-semibold rotate-[-90deg] origin-bottom whitespace-nowrap hidden sm:block">Count</span>
-          <div className="flex items-end gap-2 h-32 relative w-full pt-2 pb-6 md:pb-8">
-            {Object.entries(serviceCounts).map(([service, count], i) => (
-              <div key={service} className="flex flex-col items-center w-8">
-                <motion.div initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: i * 0.05, duration: 0.5, type: 'spring', stiffness: 80 }}
-                  className="bg-gradient-to-t from-orange-600 to-orange-400 rounded-t-xl shadow-lg" style={{ height: `${count * 18}px`, minHeight: '10px', width: '100%' }} title={`${count} for ${service}`}></motion.div>
-                <span className="text-xs text-orange-200 mt-1 font-semibold">{service.slice(0, 8)}</span>
-              </div>
-            ))}
-            {/* X-axis label (centered below bars) */}
-            <span className="absolute left-1/2 -translate-x-1/2 bottom-0 text-xs text-orange-300 font-semibold whitespace-nowrap">Service</span>
-          </div>
-          {/* Y-axis label for mobile (top left) */}
-          <span className="block sm:hidden absolute top-2 left-4 text-xs text-orange-300 font-semibold">Count</span>
-        </div>
-      </div>
-      {/* Table */}
-      <div className="overflow-x-auto rounded-xl shadow-lg bg-black/70 custom-scrollbar-orange border border-orange-700 px-2 md:px-0 pb-4 md:pb-0">
-        <table className="min-w-full bg-black/70 rounded-lg shadow z-10 text-white">
-          <thead>
-            <tr className="bg-gradient-to-r from-orange-600 to-orange-400 text-white">
-              <th className="py-3 px-4 font-semibold">Read</th>
-              <th className="py-3 px-4 font-semibold">First Name</th>
-              <th className="py-3 px-4 font-semibold">Last Name</th>
-              <th className="py-3 px-4 font-semibold">Email</th>
-              <th className="py-3 px-4 font-semibold">Phone</th>
-              <th className="py-3 px-4 font-semibold">Service Type</th>
-              <th className="py-3 px-4 font-semibold">Aircraft</th>
-              <th className="py-3 px-4 font-semibold">Passengers</th>
-              <th className="py-3 px-4 font-semibold">Flight Date</th>
-              <th className="py-3 px-4 font-semibold">Flight Time</th>
-              <th className="py-3 px-4 font-semibold">Duration</th>
-              <th className="py-3 px-4 font-semibold">Origin</th>
-              <th className="py-3 px-4 font-semibold">Destination</th>
-              <th className="py-3 px-4 font-semibold">Special Requests</th>
-              <th className="py-3 px-4 font-semibold">Budget</th>
-              <th className="py-3 px-4 font-semibold">Flexibility</th>
-              <th className="py-3 px-4 font-semibold">Additional Info</th>
-              <th className="py-3 px-4 font-semibold">Status</th>
-              <th className="py-3 px-4 font-semibold">Date</th>
-              <th className="py-3 px-4 font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={20} className="text-center py-8 text-orange-300">Loading...</td></tr>
-            ) : error ? (
-              <tr><td colSpan={20} className="text-center py-8 text-red-400">{error}</td></tr>
-            ) : quotes.length === 0 ? (
-              <tr><td colSpan={20} className="text-center py-8 text-orange-300">No quote requests found.</td></tr>
-            ) : quotes.map(quote => (
-              <tr key={quote._id} className={`border-b border-orange-900/40 hover:bg-orange-900/20 transition ${!quote.read ? 'font-bold' : 'opacity-80'}`}> 
-                <td className="py-2 px-4 text-center">
-                  <button onClick={() => handleMarkRead(quote._id, quote.read)} title={quote.read ? 'Mark as unread' : 'Mark as read'} className="focus:outline-none">
-                    {quote.read ? (
-                      <span className="inline-block w-3 h-3 rounded-full bg-orange-400 opacity-60"></span>
-                    ) : (
-                      <span className="inline-block w-3 h-3 rounded-full bg-orange-500 ring-2 ring-orange-300 animate-pulse"></span>
-                    )}
-                  </button>
-                </td>
-                <td className="py-2 px-4 whitespace-nowrap">{quote.firstName}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{quote.lastName}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{quote.email}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{quote.phone}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{quote.serviceType}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{quote.aircraft}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{quote.passengers}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{quote.flightDate}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{quote.flightTime}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{quote.duration}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{quote.origin}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{quote.destination}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{quote.specialRequests}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{quote.budget}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{quote.flexibility}</td>
-                <td className="py-2 px-4 whitespace-nowrap">{quote.additionalInfo}</td>
-                <td className="py-2 px-4 whitespace-nowrap capitalize">
-                  <select value={quote.status} onChange={e => handleStatusChange(quote._id, e.target.value)} className="bg-black/70 border border-orange-700 rounded px-2 py-1 text-orange-300 focus:ring-2 focus:ring-orange-500 capitalize">
-                    {statusOptions.map(opt => <option key={opt} value={opt} className="capitalize">{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>)}
-                  </select>
-                </td>
-                <td className="py-2 px-4 whitespace-nowrap">{new Date(quote.createdAt).toLocaleString()}</td>
-                <td className="py-2 px-4 flex gap-2 items-center">
-                  <button onClick={() => setViewQuote(quote)} title="View details" className="bg-orange-500 hover:bg-orange-600 text-white rounded-full p-2 shadow focus:outline-none">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                  </button>
-                  <a href={`mailto:${quote.email}`} title="Reply" className="bg-orange-400 hover:bg-orange-500 text-white rounded-full p-2 shadow focus:outline-none">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16 12H8m0 0l4-4m-4 4l4 4" /></svg>
-                  </a>
-                  <button onClick={() => setDeleteQuote(quote)} title="Delete" className="bg-red-600 hover:bg-red-700 text-white rounded-full p-2 shadow focus:outline-none">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {/* View Modal */}
-      <AnimatePresence>
-        {viewQuote && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 200, damping: 20 }} className="bg-white/90 rounded-2xl shadow-2xl p-8 max-w-2xl w-full border-2 border-orange-400">
-              <h4 className="text-2xl font-bold text-orange-600 mb-4">Quote Request Details</h4>
-              <div className="space-y-2 text-gray-800 grid grid-cols-1 md:grid-cols-2 gap-x-8">
-                <div><span className="font-semibold">First Name:</span> {viewQuote.firstName}</div>
-                <div><span className="font-semibold">Last Name:</span> {viewQuote.lastName}</div>
-                <div><span className="font-semibold">Email:</span> {viewQuote.email}</div>
-                <div><span className="font-semibold">Phone:</span> {viewQuote.phone}</div>
-                <div><span className="font-semibold">Service Type:</span> {viewQuote.serviceType}</div>
-                <div><span className="font-semibold">Aircraft:</span> {viewQuote.aircraft}</div>
-                <div><span className="font-semibold">Passengers:</span> {viewQuote.passengers}</div>
-                <div><span className="font-semibold">Flight Date:</span> {viewQuote.flightDate}</div>
-                <div><span className="font-semibold">Flight Time:</span> {viewQuote.flightTime}</div>
-                <div><span className="font-semibold">Duration:</span> {viewQuote.duration}</div>
-                <div><span className="font-semibold">Origin:</span> {viewQuote.origin}</div>
-                <div><span className="font-semibold">Destination:</span> {viewQuote.destination}</div>
-                <div><span className="font-semibold">Special Requests:</span> {viewQuote.specialRequests}</div>
-                <div><span className="font-semibold">Budget:</span> {viewQuote.budget}</div>
-                <div><span className="font-semibold">Flexibility:</span> {viewQuote.flexibility}</div>
-                <div><span className="font-semibold">Additional Info:</span> {viewQuote.additionalInfo}</div>
-                <div><span className="font-semibold">Status:</span> {viewQuote.status}</div>
-                <div><span className="font-semibold">Read:</span> {viewQuote.read ? 'Yes' : 'No'}</div>
-                <div><span className="font-semibold">Date:</span> {new Date(viewQuote.createdAt).toLocaleString()}</div>
-              </div>
-              <div className="flex justify-end gap-4 mt-8">
-                <button onClick={() => setViewQuote(null)} className="px-6 py-2 rounded-lg bg-orange-500 text-white font-semibold hover:bg-orange-600 transition">Close</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      {/* Delete Confirmation Modal */}
-      <AnimatePresence>
-        {deleteQuote && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 200, damping: 20 }} className="bg-white/90 rounded-2xl shadow-2xl p-8 max-w-md w-full border-2 border-red-500">
-              <h4 className="text-2xl font-bold text-red-600 mb-4">Delete Quote Request?</h4>
-              <p className="text-gray-800 mb-6">Are you sure you want to delete this quote request? This action cannot be undone.</p>
-              <div className="flex justify-end gap-4">
-                <button onClick={() => setDeleteQuote(null)} className="px-6 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition">Cancel</button>
-                <button onClick={() => handleDelete(deleteQuote._id)} disabled={deleting} className="px-6 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-60 disabled:cursor-not-allowed">
-                  {deleting ? 'Deleting...' : 'Delete'}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
-};
-
-const GalleryManager = () => {
-  const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [form, setForm] = useState({ title: '', description: '', image: null });
-  const [editing, setEditing] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const user = JSON.parse(localStorage.getItem('vw_admin'));
-
-  const fetchImages = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/images');
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || 'Failed to fetch images');
-      const processed = data.data.map(img => {
-        let safeUrl = '';
-        try {
-          const { pathname } = new URL(img.url, window.location.origin);
-          safeUrl = pathname.startsWith('/uploads') ? pathname : `/uploads${pathname}`;
-        } catch { /* ignore */ }
-        return { ...img, safeUrl };
-      });
-      setImages(processed);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchImages(); }, []);
-
-  const handleChange = e => {
-    const { name, value, files } = e.target;
-    if (name === 'image') {
-      setForm({ ...form, image: files[0] });
-    } else {
-      setForm({ ...form, [name]: value });
-    }
-  };
-
-  const handleSubmit = async e => {
-    e.preventDefault();
-    try {
-      const method = editing ? 'PUT' : 'POST';
-      const url = editing ? `/api/images/${editing._id}` : '/api/images';
-      const formData = new FormData();
-      formData.append('title', form.title);
-      formData.append('description', form.description);
-      if (form.image && typeof form.image !== 'string') {
-        formData.append('image', form.image);
+    const adminData = localStorage.getItem('vw_admin');
+    if (adminData) {
+      try {
+        setUser(JSON.parse(adminData));
+      } catch (error) {
+        console.error('Error parsing admin data:', error);
+        handleLogout();
       }
-      const res = await fetch(url, {
-        method,
-        headers: { 'x-user-role': user?.role || 'admin' },
-        body: formData
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || 'Failed to save image');
-      setForm({ title: '', description: '', image: null });
-      setEditing(null);
-      setModalOpen(false);
-      fetchImages();
-    } catch (err) {
-      setError(err.message);
+    } else {
+      navigate('/admin-login');
     }
-  };
+  }, [navigate]);
 
-  const handleEdit = image => {
-    setEditing(image);
-    setForm({
-      title: image.title,
-      description: image.description,
-      image: null
-    });
-    setModalOpen(true);
-  };
+  const handleLogout = async () => {
+    // Confirm logout
+    if (!window.confirm('Are you sure you want to logout?')) {
+      return;
+    }
 
-  const handleDelete = async id => {
-    if (!window.confirm('Delete this gallery image?')) return;
     try {
-      const res = await fetch(`/api/images/${id}`, {
-        method: 'DELETE',
-        headers: { 'x-user-role': user?.role || 'admin' }
+      setLogoutError('');
+      
+      // Call logout API if it exists
+      try {
+        await fetch('/api/users/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-role': user?.role || 'admin'
+          }
+        });
+      } catch (apiError) {
+        // API logout failed, but we'll still clear local storage
+        console.warn('API logout failed:', apiError);
+      }
+
+      // Clear all session data
+      localStorage.removeItem('vw_admin');
+      sessionStorage.clear();
+      
+      // Clear any cookies (if they exist)
+      document.cookie.split(";").forEach((c) => {
+        const eqPos = c.indexOf("=");
+        const name = eqPos > -1 ? c.substr(0, eqPos) : c;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
       });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error || 'Failed to delete image');
-      fetchImages();
-    } catch (err) {
-      setError(err.message);
+
+      setLogoutSuccess('Logged out successfully! Redirecting...');
+      setUser(null);
+      
+      // Redirect to login after showing success message
+      setTimeout(() => {
+        navigate('/admin-login');
+      }, 1500);
+      
+    } catch (error) {
+      setLogoutError('Logout failed. Please try again.');
+      console.error('Logout error:', error);
     }
   };
 
   return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex overflow-x-hidden">
+      {/* Sidebar */}
+      <motion.div
+        variants={sidebarVariants}
+        animate={sidebarOpen ? 'open' : 'closed'}
+        className="fixed lg:relative z-30 h-full"
+      >
+        <div className="w-80 h-full bg-gradient-to-b from-slate-800/90 to-slate-900/90 backdrop-blur-xl border-r border-slate-700/50 flex flex-col">
+          {/* Logo/Header */}
+          <div className="p-6 border-b border-slate-700/50">
+            <div className="flex items-center space-x-3">
+              <img src="/whitebglogo.jpg" alt="Vertical Worx Logo" className="h-10 w-auto rounded-lg shadow-md" />
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-orange-500">Gallery</h2>
-        <button className="bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold shadow hover:bg-orange-700 hover:shadow-lg transition z-20" onClick={() => { setEditing(null); setForm({ title: '', description: '', image: null }); setModalOpen(true); }}>+ New Image</button>
+                <h1 className="text-xl font-bold text-white">Vertical Worx</h1>
+                <p className="text-slate-400 text-sm">Admin Panel</p>
       </div>
-      {loading ? <div>Loading...</div> : error ? <div className="text-red-600">{error}</div> : (
-        <div className="overflow-x-auto rounded-xl shadow-lg bg-black/70">
-          <table className="min-w-full bg-black/70 rounded-lg shadow z-10 text-white">
-            <thead>
-              <tr className="bg-gradient-to-r from-orange-600 to-orange-400 text-white">
-                <th className="py-3 px-4 font-semibold">Image</th>
-                <th className="py-3 px-4 font-semibold">Title</th>
-                <th className="py-3 px-4 font-semibold">Description</th>
-                <th className="py-3 px-4 font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {images.map(image => (
-                <tr key={image._id} className="border-b border-orange-900/40 hover:bg-orange-900/20 transition">
-                  <td className="py-2 px-4">
-                    <img src={image.safeUrl} alt={image.title} className="rounded shadow max-h-24 max-w-[120px] object-cover" />
-                  </td>
-                  <td className="py-2 px-4 font-semibold">{image.title}</td>
-                  <td className="py-2 px-4">{image.description}</td>
-                  <td className="py-2 px-4">
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <button className="px-3 py-1 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition z-20 w-full sm:w-auto" onClick={() => handleEdit(image)}>Edit</button>
-                      <button className="px-3 py-1 bg-red-600 text-white rounded shadow hover:bg-red-700 transition z-20 w-full sm:w-auto" onClick={() => handleDelete(image._id)}>Delete</button>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
-      )}
-      {modalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50" onClick={() => setModalOpen(false)}>
-          <div className="bg-black/90 rounded-2xl p-8 w-full max-w-lg relative z-50 shadow-2xl custom-scrollbar border border-orange-600" style={{maxHeight:'90vh', overflowY:'auto'}} onClick={e => e.stopPropagation()}>
-            <button className="absolute top-4 right-4 text-orange-400 hover:text-orange-600 text-2xl z-50" onClick={() => setModalOpen(false)}>&times;</button>
-            <h3 className="text-xl font-bold mb-4 text-orange-500">{editing ? 'Edit Image' : 'New Image'}</h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-orange-200 font-semibold mb-1">Title</label>
-                <input name="title" value={form.title} onChange={handleChange} placeholder="Title" className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700 placeholder-orange-300" required />
-              </div>
-              <div>
-                <label className="block text-orange-200 font-semibold mb-1">Description</label>
-                <textarea name="description" value={form.description} onChange={handleChange} placeholder="Description" className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700 placeholder-orange-300" rows={3} required />
-              </div>
-              <div>
-                <label className="block text-orange-200 font-semibold mb-1">Image (JPG, PNG, WEBP)</label>
-                <input type="file" name="image" accept="image/jpeg,image/png,image/webp" onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-black/60 text-white border-orange-700" required={!editing} />
-                {form.image && typeof form.image !== 'string' && (
-                  <img src={URL.createObjectURL(form.image)} alt="Preview" className="mt-2 rounded shadow max-h-32" />
-                )}
-              </div>
-              <button type="submit" className="w-full bg-orange-600 text-white py-2 rounded-lg font-semibold hover:bg-orange-700 z-20 shadow">{editing ? 'Update' : 'Create'}</button>
-            </form>
-          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 p-4 space-y-2">
+            {NAVIGATION_ITEMS.map((item) => {
+              const IconComponent = item.icon;
+  return (
+                <motion.button
+                  key={item.id}
+                  whileHover={{ x: 4 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setActiveSection(item.id)}
+                  className={`w-full flex items-center space-x-4 p-4 rounded-xl transition-all duration-300 ${
+                    activeSection === item.id
+                      ? 'bg-gradient-to-r from-orange-500/20 to-red-600/20 border border-orange-500/30 text-white'
+                      : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
+                  }`}
+                >
+                  <IconComponent className="w-6 h-6" />
+                  <div className="text-left">
+                    <div className="font-medium">{item.label}</div>
+                    <div className="text-xs opacity-70">{item.description}</div>
         </div>
+                </motion.button>
+              );
+            })}
+          </nav>
+
+          {/* User Info */}
+          <div className="p-4 border-t border-slate-700/50 space-y-3">
+            <div className="flex items-center space-x-3 p-3 rounded-lg bg-slate-700/30">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <UserIcon className="w-4 h-4 text-white" />
+        </div>
+              <div className="flex-1">
+                <div className="text-white text-sm font-medium">{user?.username || 'Admin User'}</div>
+                <div className="text-slate-400 text-xs">{user?.role || 'Administrator'}</div>
+        </div>
+        </div>
+            
+            {/* Logout Button */}
+          <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleLogout}
+              className="w-full flex items-center space-x-3 p-3 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-300 hover:text-red-200 transition-all duration-300"
+            >
+              <ArrowRightOnRectangleIcon className="w-5 h-5" />
+              <span className="font-medium">Logout</span>
+          </motion.button>
+        </div>
+      </div>
+      </motion.div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-h-screen">
+        {/* Top Bar */}
+        <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700/50 p-4 flex items-center justify-between">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="lg:hidden p-2 rounded-lg bg-slate-700/50 text-white hover:bg-slate-600/50 transition-colors"
+          >
+            {sidebarOpen ? (
+              <XMarkIcon className="w-6 h-6" />
+            ) : (
+              <Bars3Icon className="w-6 h-6" />
+                    )}
+                  </button>
+          
+          <div className="flex items-center space-x-4">
+            <div className="text-white">
+              <span className="text-slate-400">Current Section: </span>
+              <span className="font-medium capitalize">{activeSection}</span>
+      </div>
+
+              </div>
+              </div>
+
+        {/* Content Area */}
+        <div className="flex-1 p-6 overflow-auto">
+          {/* Logout Notifications */}
+      <AnimatePresence>
+            {logoutSuccess && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="mb-6 bg-green-500/10 border border-green-500/30 rounded-xl p-6 backdrop-blur-sm"
+              >
+                <div className="flex items-center space-x-2">
+                  <CheckCircleIcon className="w-5 h-5 text-green-400" />
+                  <span className="text-green-400 font-medium">{logoutSuccess}</span>
+              </div>
+          </motion.div>
+        )}
+            
+            {logoutError && (
+    <motion.div
+                initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl p-6 backdrop-blur-sm"
+              >
+                <div className="flex items-center space-x-2">
+                  <ExclamationTriangleIcon className="w-5 h-5 text-red-400" />
+                  <span className="text-red-400 font-medium">{logoutError}</span>
+              </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+          <AnimatePresence mode="wait">
+            {activeSection === 'dashboard' && <Dashboard setActiveSection={setActiveSection} />}
+            {activeSection === 'blog' && <BlogManager key="blog" />}
+            {activeSection === 'project' && <ProjectManager key="project" />}
+            {activeSection === 'contacts' && <ContactManager key="contacts" />}
+            {activeSection === 'quotes' && <QuoteManager key="quotes" />}
+            {activeSection === 'gallery' && <GalleryManager key="gallery" />}
+            {activeSection === 'salesforce' && <SalesforceAnalytics key="salesforce" />}
+          </AnimatePresence>
+      </div>
+                    </div>
+
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/50 z-20"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
     </div>
   );
 };
-
-// Custom scrollbar styles for admin-panel and admin-login
-if (typeof window !== 'undefined') {
-  const style = document.createElement('style');
-  style.innerHTML = `
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 10px;
-      background: #18181b;
-      border-radius: 8px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: linear-gradient(to bottom, #ff5a1f, #0f172a);
-      border-radius: 8px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(to bottom, #ff5a1f, #18181b);
-    }
-    .custom-scrollbar {
-      scrollbar-width: thin;
-      scrollbar-color: #ff5a1f #18181b;
-    }
-  `;
-  document.head.appendChild(style);
-}
 
 export default AdminPanel; 

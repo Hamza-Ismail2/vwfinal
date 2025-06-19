@@ -1,6 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { 
+  CheckCircleIcon, 
+  ExclamationTriangleIcon,
+  EyeIcon,
+  EyeSlashIcon 
+} from '@heroicons/react/24/outline';
 
 const bgGradient = {
   background: 'linear-gradient(135deg, #0f172a 0%, #ff5a1f 100%)',
@@ -18,8 +24,24 @@ const AdminLogin = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const adminData = localStorage.getItem('vw_admin');
+    if (adminData) {
+      try {
+        const user = JSON.parse(adminData);
+        if (user.role === 'admin') {
+          navigate('/admin-panel');
+        }
+      } catch (error) {
+        localStorage.removeItem('vw_admin');
+      }
+    }
+  }, [navigate]);
 
   // Utility for input sanitization
   const sanitizeInput = (value, type = 'text') => {
@@ -61,7 +83,11 @@ const AdminLogin = () => {
       if (!data.success) throw new Error(data.error || 'Login failed');
       if (data.data.role !== 'admin') throw new Error('Admin access only');
       localStorage.setItem('vw_admin', JSON.stringify(data.data));
-      navigate('/admin-panel');
+      setSuccess('Login successful! Redirecting...');
+      setError('');
+      setTimeout(() => {
+        navigate('/admin-panel');
+      }, 1000);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -133,14 +159,42 @@ const AdminLogin = () => {
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-.274.857-.676 1.664-1.186 2.393M15.54 15.54A5.978 5.978 0 0112 17c-3.314 0-6-2.686-6-6 0-.795.155-1.552.44-2.24" /></svg>
+                  <EyeSlashIcon className="h-5 w-5" />
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.657.403-3.22 1.125-4.575m1.664-2.13A9.956 9.956 0 0112 3c5.523 0 10 4.477 10 10 0 1.657-.403 3.22-1.125 4.575m-1.664 2.13A9.956 9.956 0 0112 21c-5.523 0-10-4.477-10-10 0-1.657.403-3.22 1.125-4.575" /></svg>
+                  <EyeIcon className="h-5 w-5" />
                 )}
               </button>
             </div>
           </div>
-          {error && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-500 text-sm text-center font-semibold">{error}</motion.div>}
+          
+          {/* Success Notification */}
+          {success && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 backdrop-blur-sm"
+            >
+              <div className="flex items-center space-x-2">
+                <CheckCircleIcon className="w-4 h-4 text-green-400" />
+                <span className="text-green-400 text-sm font-semibold">{success}</span>
+              </div>
+            </motion.div>
+          )}
+          
+          {/* Error Notification */}
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 backdrop-blur-sm"
+            >
+              <div className="flex items-center space-x-2">
+                <ExclamationTriangleIcon className="w-4 h-4 text-red-400" />
+                <span className="text-red-400 text-sm font-semibold">{error}</span>
+              </div>
+            </motion.div>
+          )}
+          
           <motion.button
             whileHover={{ scale: 1.04, backgroundColor: '#ff5a1f', color: '#fff' }}
             whileTap={{ scale: 0.98 }}

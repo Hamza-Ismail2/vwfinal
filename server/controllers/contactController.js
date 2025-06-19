@@ -18,6 +18,14 @@ exports.createContact = async (req, res) => {
             });
         }
 
+        // Ensure service is valid; fallback to 'Other'
+        const allowedServices = [
+            'Executive Transport', 'Scenic Tours', 'Medical Emergency', 'Cargo & Utility', 'Wedding & Events', 'Film & Photography', 'Custom Charter', 'Aircraft Maintenance', 'Helicopter Services', 'Training', 'Other'
+        ];
+        if (!allowedServices.includes(req.body.service)) {
+            req.body.service = 'Other';
+        }
+
         console.log('Creating new contact in database...');
         const contact = await Contact.create(req.body);
         console.log('Contact created successfully with ID:', contact._id);

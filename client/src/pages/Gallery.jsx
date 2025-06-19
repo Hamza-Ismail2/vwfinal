@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import ImageCarousel3D from '../components/ImageCarousel3D';
 
 // Import default background image
 import kohCoast from '../images/HI_KOH-COAST_407_001-SHIBSTY-1-scaled.jpg';
@@ -105,6 +106,9 @@ const Gallery = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* 3D Carousel */}
+      <ImageCarousel3D />
 
       {/* Gallery Grid */}
       <section className="py-16 bg-gray-50">

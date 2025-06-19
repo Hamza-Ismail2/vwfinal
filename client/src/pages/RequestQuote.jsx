@@ -140,7 +140,8 @@ const RequestQuote = () => {
       sanitized = sanitizeInput(value, 'phone');
       sanitized = formatPhone(sanitized);
     }
-    else if (field === 'passengers' || field === 'budget') sanitized = sanitizeInput(value, 'number');
+    else if (field === 'passengers') sanitized = sanitizeInput(value, 'number');
+    else if (field === 'budget') sanitized = sanitizeInput(value, 'text');
     else sanitized = sanitizeInput(value, 'text');
     setFormData(prev => ({ ...prev, [field]: sanitized }));
   };
@@ -245,7 +246,7 @@ const RequestQuote = () => {
     }
     
     setIsSubmitting(true);
-    // Prepare payload for /api/quote
+    // Prepare payload for /api/quotes
     const payload = {
       serviceType: formData.serviceType,
       aircraft: formData.aircraft,
@@ -266,7 +267,7 @@ const RequestQuote = () => {
       additionalInfo: formData.additionalInfo
     };
     try {
-      const response = await fetch('/api/quote', {
+      const response = await fetch('/api/quotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -765,7 +766,7 @@ const RequestQuote = () => {
                   <button
                     type="button"
                     onClick={nextStep}
-                    className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+                    className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 text-sm sm:text-base sm:px-5 sm:py-2.5 md:px-6 md:py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
                   >
                     Next
                   </button>
@@ -776,7 +777,7 @@ const RequestQuote = () => {
                       e.preventDefault();
                       handleSubmit(e);
                     }}
-                    className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+                    className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 text-sm sm:text-base sm:px-5 sm:py-2.5 md:px-6 md:py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? 'Submitting...' : 'Submit Quote Request'}

@@ -35,10 +35,11 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:"],
-      scriptSrc: ["'self'", "'unsafe-eval'"], // needed for Three.js
-    },
+      imgSrc: ["'self'", "data:", "https:", "http:"],
+      scriptSrc: ["'self'", "'unsafe-eval'"] // needed for Three.js
+    }
   },
+  crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
 // Allow all CORS requests globally
@@ -113,6 +114,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // API routes
+app.use('/api/contacts', contactRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/services', servicesRoutes);
 app.use('/api/images', imageRoutes);
@@ -120,7 +122,7 @@ app.use('/api/images', imageRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/projects', projectRoutes);
-app.use('/api/quote', quoteRoutes);
+app.use('/api/quotes', quoteRoutes);
 
 
 // Error handling middleware
