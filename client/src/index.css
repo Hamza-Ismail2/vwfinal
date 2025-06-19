@@ -232,4 +232,14 @@
 .custom-scrollbar-orange {
   scrollbar-width: thin;
   scrollbar-color: #ff5a1f #18181b;
+}
+
+/* Animation for hero video pan */
+@keyframes hero-pan {
+  0% { object-position: 25% center; }
+  100% { object-position: 50% center; }
+}
+
+.hero-pan {
+  animation: hero-pan 20s ease-in-out infinite;
 } 

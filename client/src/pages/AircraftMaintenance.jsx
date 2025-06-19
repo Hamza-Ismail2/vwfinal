@@ -83,7 +83,7 @@ const AircraftMaintenance = () => {
                 Schedule Service
               </button>
               <button 
-                onClick={() => window.location.href = 'tel:+18085551234'}
+                onClick={() => window.location.href = 'tel:+18089309826'}
                 className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-gray-900 transition-all duration-300"
               >
                 Emergency Support
@@ -215,7 +215,7 @@ const AircraftMaintenance = () => {
                   </div>
                 </div>
                 <button 
-                  onClick={() => window.location.href = 'tel:+18085551234'}
+                  onClick={() => window.location.href = 'tel:+18089309826'}
                   className="bg-white text-orange-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-300 w-full"
                 >
                   Call Emergency Line: (808) 555-1234
