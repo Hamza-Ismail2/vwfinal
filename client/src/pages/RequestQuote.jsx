@@ -797,8 +797,8 @@ const RequestQuote = () => {
             Our team is here to help you plan the perfect helicopter service experience.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="tel:+1808XXXXXXX" className="bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors duration-300">
-              Call (808) XXX-XXXX
+            <a href="tel:+18089309826" className="bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors duration-300">
+              Call (808) 930-9826
             </a>
             <a href="mailto:quotes@verticalworx.com" className="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-gray-800 transition-all duration-300">
               Email Us

@@ -270,7 +270,7 @@ const AppContent = () => {
                 transition={{ delay: 1, type: "spring", stiffness: 260, damping: 20 }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                className="flex items-center justify-center w-14 h-14 bg-red-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
+                className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-red-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
                 title="Call Vertical Worx"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">

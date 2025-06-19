@@ -1,4 +1,4 @@
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,17 +15,41 @@ const Hero = () => {
     }
   };
 
+  // Smooth pan logic – tie objectPosition to playback progress
+  const videoRef = useRef(null);
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid) return;
+    const onTime = () => {
+      if (!vid.duration || vid.duration === Infinity) return;
+      const ratio = vid.currentTime / vid.duration; // 0 → 1
+      // Map 0 → 25% (left focus), 1 → 50% (center)
+      const pos = 25 + 25 * ratio;
+      vid.style.objectPosition = `${pos}% center`;
+    };
+    vid.addEventListener('timeupdate', onTime);
+    return () => vid.removeEventListener('timeupdate', onTime);
+  }, []);
+
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden pt-32 lg:pt-36">
+    <section
+      className="relative h-screen flex items-center justify-center overflow-hidden pt-24 sm:pt-28 lg:pt-32"
+      style={{
+        backgroundImage:
+          'linear-gradient(0deg, #2D2F1F 0%, #2D2F1F 50%, #5E6670 50%, #5E6670 100%)'
+      }}
+    >
       {/* ————— Background looping video ————— */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
+      <div className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden">
         <video
-          src="/videos/parked-helicopter1.mp4" // place file in client/public/videos
+          src="/videos/parked-helicopter1.mp4"
+          ref={videoRef}
           className="w-full h-full object-cover"
           autoPlay
           loop
           muted
           playsInline
+          preload="auto"
         />
       </div>
 
