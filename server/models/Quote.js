@@ -19,7 +19,11 @@ const quoteSchema = new mongoose.Schema({
   flexibility: String,
   additionalInfo: String,
   createdAt: { type: Date, default: Date.now },
-  status: { type: String, enum: ['pending', 'in-progress', 'completed'], default: 'pending' },
+  status: {
+    type: String,
+    enum: ['pending', 'in-progress', 'completed', 'quoted', 'accepted', 'rejected'],
+    default: 'pending'
+  },
   read: { type: Boolean, default: false }
 });
 

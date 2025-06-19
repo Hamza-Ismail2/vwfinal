@@ -27,10 +27,17 @@ exports.createAdminUser = async (req, res) => {
             });
         }
 
+        // Accept credentials from request body if provided, otherwise use defaults
+        const username = req.body?.username?.trim() || 'admin';
+        const plainPassword = req.body?.password || 'admin123';
+
+        // Hash the password before storing
+        const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
         // Create new admin user
         const admin = await User.create({
-            username: 'admin',
-            password: 'admin123',
+            username,
+            password: hashedPassword,
             role: 'admin',
             isActive: true
         });
@@ -72,8 +79,9 @@ exports.loginUser = async (req, res) => {
             });
         }
 
-        // Check password (plain text for now)
-        const isMatch = await user.matchPassword(password);
+        // Compare hashed password
+        const isMatch = await bcrypt.compare(password, user.password);
+
         if (!isMatch) {
             console.log('Invalid password for user:', username);
             return res.status(401).json({
@@ -224,7 +232,7 @@ exports.updateUser = async (req, res) => {
             user.username = username;
         }
         if (password) {
-            user.password = password; // will be hashed by pre-save hook
+            user.password = await bcrypt.hash(password, 10);
         }
         if (isActive !== undefined) {
             user.isActive = isActive;

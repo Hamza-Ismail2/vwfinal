@@ -36,7 +36,18 @@ const QuoteManager = () => {
       const res = await fetch('/api/quotes');
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Failed to fetch quotes');
-      setQuotes(data.data || []);
+      // Map API data to fields expected by the UI for backward compatibility
+      const mapped = (data.data || []).map(q => ({
+        ...q,
+        // Combine first & last name for display convenience
+        name: `${q.firstName || ''} ${q.lastName || ''}`.trim() || q.name || 'Unknown',
+        service: q.serviceType || q.service || '—',
+        departure: q.origin || q.departure || '—',
+        departureDate: q.flightDate || q.departureDate || '—',
+        // Preserve existing returnDate if present
+        returnDate: q.returnDate || '—'
+      }));
+      setQuotes(mapped);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -122,11 +133,12 @@ const QuoteManager = () => {
   };
 
   const filteredQuotes = quotes.filter(quote => {
-    const matchesSearch = !searchTerm || 
-      quote.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      quote.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      quote.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      quote.message.toLowerCase().includes(searchTerm.toLowerCase());
+    const lowerSearch = searchTerm.toLowerCase();
+    const matchesSearch = !searchTerm ||
+      (quote.name && quote.name.toLowerCase().includes(lowerSearch)) ||
+      (quote.email && quote.email.toLowerCase().includes(lowerSearch)) ||
+      (quote.service && quote.service.toLowerCase().includes(lowerSearch)) ||
+      (quote.additionalInfo && quote.additionalInfo.toLowerCase().includes(lowerSearch));
     
     const matchesStatus = statusFilter === 'all' || quote.status === statusFilter;
     
