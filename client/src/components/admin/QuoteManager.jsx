@@ -11,6 +11,7 @@ import {
   PhoneIcon,
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
+import { getAdminHeaders } from '../../utils/authHeaders';
 
 const contentVariants = {
   initial: { opacity: 0, y: 20 },
@@ -61,10 +62,7 @@ const QuoteManager = () => {
     try {
       const res = await fetch(`/api/quotes/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-role': user?.role || 'admin'
-        },
+        headers: getAdminHeaders(user, { 'Content-Type': 'application/json' }),
         body: JSON.stringify({ status })
       });
       const data = await res.json();
@@ -83,7 +81,7 @@ const QuoteManager = () => {
     try {
       const res = await fetch(`/api/quotes/${id}`, {
         method: 'DELETE',
-        headers: { 'x-user-role': user?.role || 'admin' }
+        headers: getAdminHeaders(user)
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Failed to delete quote');
@@ -105,7 +103,7 @@ const QuoteManager = () => {
         selectedQuotes.map(id =>
           fetch(`/api/quotes/${id}`, {
             method: 'DELETE',
-            headers: { 'x-user-role': user?.role || 'admin' }
+            headers: getAdminHeaders(user)
           })
         )
       );

@@ -82,7 +82,9 @@ const AdminLogin = () => {
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Login failed');
       if (data.data.role !== 'admin') throw new Error('Admin access only');
-      localStorage.setItem('vw_admin', JSON.stringify(data.data));
+      // Store user data along with JWT token for authenticated admin actions
+      localStorage.setItem('vw_admin', JSON.stringify({ ...data.data, token: data.token }));
+      localStorage.setItem('vw_admin_token', data.token);
       setSuccess('Login successful! Redirecting...');
       setError('');
       setTimeout(() => {

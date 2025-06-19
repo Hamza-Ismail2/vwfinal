@@ -28,6 +28,7 @@ import {
   ArrowRightOnRectangleIcon,
   ArrowPathIcon
 } from '@heroicons/react/24/outline';
+import { getAdminHeaders } from '../utils/authHeaders';
 
 // Modern sidebar navigation items with sophisticated icons
 const NAVIGATION_ITEMS = [
@@ -387,7 +388,7 @@ const BlogManager = () => {
       }
       const res = await fetch(url, {
         method,
-        headers: { 'x-user-role': user?.role || 'admin' },
+        headers: getAdminHeaders(user),
         body: formData
       });
       const data = await res.json();
@@ -421,7 +422,7 @@ const BlogManager = () => {
     try {
       const res = await fetch(`/api/blogs/${id}`, {
         method: 'DELETE',
-        headers: { 'x-user-role': user?.role || 'admin' }
+        headers: getAdminHeaders(user)
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Failed to delete blog');
@@ -687,9 +688,6 @@ const BlogManager = () => {
     </motion.div>
   );
 };
-
-
-
 
 // Main Admin Panel Component
 const AdminPanel = () => {

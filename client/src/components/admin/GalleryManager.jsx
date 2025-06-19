@@ -9,6 +9,7 @@ import {
   XMarkIcon,
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
+import { getAdminHeaders } from '../../utils/authHeaders';
 
 const contentVariants = {
   initial: { opacity: 0, y: 20 },
@@ -86,7 +87,7 @@ const GalleryManager = () => {
       }
       const res = await fetch(url, {
         method,
-        headers: { 'x-user-role': user?.role || 'admin' },
+        headers: getAdminHeaders(user),
         body: formData
       });
       const data = await res.json();
@@ -118,7 +119,7 @@ const GalleryManager = () => {
     try {
       const res = await fetch(`/api/images/${id}`, {
         method: 'DELETE',
-        headers: { 'x-user-role': user?.role || 'admin' }
+        headers: getAdminHeaders(user)
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Failed to delete image');
