@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
+import {
+  BriefcaseIcon,
+  MapIcon,
+  LifebuoyIcon,
+  CubeIcon,
+  GiftIcon,
+  CameraIcon
+} from '@heroicons/react/24/outline';
 import helicopterBg from '../images/Bell-407-Hughes-500-Flight-over-Old-Flow.jpg';
 
 const RequestQuote = () => {
@@ -34,48 +42,49 @@ const RequestQuote = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const todayStr = new Date().toISOString().split('T')[0];
 
   const serviceTypes = [
     {
       id: 'executive-transport',
       title: 'Executive Transport',
       description: 'VIP transportation for business executives and special occasions',
-      icon: '🚁',
+      icon: BriefcaseIcon,
       features: ['Luxury interiors', 'Professional pilots', 'Flexible scheduling', 'Ground transportation coordination']
     },
     {
       id: 'scenic-tours',
       title: 'Scenic Tours',
       description: 'Breathtaking aerial tours of the Hawaiian Islands',
-      icon: '🌺',
+      icon: MapIcon,
       features: ['Experienced tour guides', 'Photo opportunities', 'Multiple tour routes', 'Group discounts available']
     },
     {
       id: 'medical-emergency',
       title: 'Medical Emergency',
       description: 'Critical medical transportation and emergency services',
-      icon: '🚨',
+      icon: LifebuoyIcon,
       features: ['24/7 availability', 'Medical equipment', 'Trained medical crew', 'Hospital coordination']
     },
     {
       id: 'cargo-utility',
       title: 'Cargo & Utility',
       description: 'Heavy lifting, construction support, and cargo transportation',
-      icon: '📦',
+      icon: CubeIcon,
       features: ['External load operations', 'Construction support', 'Survey missions', 'Specialized equipment']
     },
     {
       id: 'wedding-events',
       title: 'Wedding & Events',
       description: 'Make your special day unforgettable with helicopter services',
-      icon: '💒',
+      icon: GiftIcon,
       features: ['Wedding transportation', 'Aerial photography', 'Special decorations', 'Custom packages']
     },
     {
       id: 'film-photography',
       title: 'Film & Photography',
       description: 'Professional aerial filming and photography services',
-      icon: '📽️',
+      icon: CameraIcon,
       features: ['Professional crew', 'Specialized equipment', 'Multiple angles', 'Post-production support']
     }
   ];
@@ -172,6 +181,16 @@ const RequestQuote = () => {
         return false;
       }
     }
+
+    // ADD: ensure flightDate is not in the past
+    const selectedDate = new Date(formData.flightDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate < today) {
+      alert('Preferred Date cannot be in the past.');
+      return false;
+    }
+
     return true;
   };
 
@@ -329,7 +348,9 @@ const RequestQuote = () => {
                   }`}
                   onClick={() => handleInputChange('serviceType', service.id)}
                 >
-                  <div className="text-4xl mb-4">{service.icon}</div>
+                  <div className="mb-4">
+                    {React.createElement(service.icon, { className: 'w-10 h-10 text-orange-500' })}
+                  </div>
                   <h4 className="text-xl font-bold text-gray-800 mb-2">{service.title}</h4>
                   <p className="text-gray-600 mb-4 text-sm">{service.description}</p>
                   <ul className="space-y-1">
@@ -368,7 +389,7 @@ const RequestQuote = () => {
             <h3 className="text-2xl font-bold text-gray-800 mb-6">Service Details</h3>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Aircraft Type Preference *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Aircraft Type Preference <span className="text-red-500">*</span></label>
                 <select
                   value={formData.aircraft}
                   onChange={(e) => handleInputChange('aircraft', e.target.value)}
@@ -386,7 +407,7 @@ const RequestQuote = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Number of Passengers *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Number of Passengers <span className="text-red-500">*</span></label>
                 <select
                   value={formData.passengers}
                   onChange={(e) => handleInputChange('passengers', e.target.value)}
@@ -404,18 +425,19 @@ const RequestQuote = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Date *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Date <span className="text-red-500">*</span></label>
                 <input
                   type="date"
                   value={formData.flightDate}
                   onChange={(e) => handleInputChange('flightDate', e.target.value)}
+                  min={todayStr}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Time *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Time <span className="text-red-500">*</span></label>
                 <input
                   type="time"
                   value={formData.flightTime}
@@ -426,7 +448,7 @@ const RequestQuote = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Duration *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Duration <span className="text-red-500">*</span></label>
                 <select
                   value={formData.duration}
                   onChange={(e) => handleInputChange('duration', e.target.value)}
@@ -444,7 +466,7 @@ const RequestQuote = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Flight Flexibility *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Flight Flexibility <span className="text-red-500">*</span></label>
                 <select
                   value={formData.flexibility}
                   onChange={(e) => handleInputChange('flexibility', e.target.value)}
@@ -459,7 +481,7 @@ const RequestQuote = () => {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Origin/Departure Point *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Origin/Departure Point <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={formData.origin}
@@ -506,7 +528,7 @@ const RequestQuote = () => {
             <h3 className="text-2xl font-bold text-gray-800 mb-6">Contact Information</h3>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">First Name <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={formData.firstName}
@@ -518,7 +540,7 @@ const RequestQuote = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={formData.lastName}
@@ -530,7 +552,7 @@ const RequestQuote = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address <span className="text-red-500">*</span></label>
                 <input
                   type="email"
                   value={formData.email}
@@ -542,7 +564,7 @@ const RequestQuote = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number <span className="text-red-500">*</span></label>
                 <input
                   type="tel"
                   value={formData.phone}
@@ -611,23 +633,23 @@ const RequestQuote = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Service Type:</span>
-                    <span className="font-medium">{serviceTypes.find(s => s.id === formData.serviceType)?.title || 'Not selected'}</span>
+                    <span className="font-medium text-gray-800">{serviceTypes.find(s => s.id === formData.serviceType)?.title || 'Not selected'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Date:</span>
-                    <span className="font-medium">{formData.flightDate || 'Not specified'}</span>
+                    <span className="font-medium text-gray-800">{formData.flightDate || 'Not specified'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Passengers:</span>
-                    <span className="font-medium">{formData.passengers || 'Not specified'}</span>
+                    <span className="font-medium text-gray-800">{formData.passengers || 'Not specified'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Duration:</span>
-                    <span className="font-medium">{formData.duration || 'Not specified'}</span>
+                    <span className="font-medium text-gray-800">{formData.duration || 'Not specified'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Contact:</span>
-                    <span className="font-medium">{formData.firstName} {formData.lastName}</span>
+                    <span className="font-medium text-gray-800">{formData.firstName} {formData.lastName}</span>
                   </div>
                 </div>
               </div>

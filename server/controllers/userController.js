@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
+const bcrypt = require('bcryptjs');
 
 // Create email transporter
 const transporter = nodemailer.createTransport({
@@ -25,10 +26,17 @@ exports.createAdminUser = async (req, res) => {
             });
         }
 
+        // Accept credentials from request body if provided, otherwise use defaults
+        const username = req.body?.username?.trim() || 'admin';
+        const plainPassword = req.body?.password || 'admin123';
+
+        // Hash the password before storing
+        const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
         // Create new admin user
         const admin = await User.create({
-            username: 'admin',
-            password: 'admin123',
+            username,
+            password: hashedPassword,
             role: 'admin',
             isActive: true
         });
@@ -70,8 +78,9 @@ exports.loginUser = async (req, res) => {
             });
         }
 
-        // Check password (plain text for now)
-        if (password !== user.password) {
+        // Compare hashed password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
             console.log('Invalid password for user:', username);
             return res.status(401).json({
                 success: false,
@@ -201,7 +210,7 @@ exports.updateUser = async (req, res) => {
         }
 
         // Verify current password if provided for sensitive updates
-        if ((password || isActive !== undefined) && (!currentPassword || currentPassword !== user.password)) {
+        if ((password || isActive !== undefined) && (!currentPassword || !(await bcrypt.compare(currentPassword, user.password)))) {
             console.log('Invalid current password');
             return res.status(401).json({
                 success: false,
@@ -214,7 +223,7 @@ exports.updateUser = async (req, res) => {
             user.username = username;
         }
         if (password) {
-            user.password = password;
+            user.password = await bcrypt.hash(password, 10);
         }
         if (isActive !== undefined) {
             user.isActive = isActive;
