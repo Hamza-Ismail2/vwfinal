@@ -10,6 +10,7 @@ import {
   XMarkIcon,
   EyeIcon
 } from '@heroicons/react/24/outline';
+import { getAdminHeaders } from '../../utils/authHeaders';
 
 const contentVariants = {
   initial: { opacity: 0, y: 20 },
@@ -50,10 +51,7 @@ const ContactManager = () => {
     try {
       const res = await fetch(`/api/contacts/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-role': user?.role || 'admin'
-        },
+        headers: getAdminHeaders(user, { 'Content-Type': 'application/json' }),
         body: JSON.stringify({ status })
       });
       const data = await res.json();
@@ -72,7 +70,7 @@ const ContactManager = () => {
     try {
       const res = await fetch(`/api/contacts/${id}`, {
         method: 'DELETE',
-        headers: { 'x-user-role': user?.role || 'admin' }
+        headers: getAdminHeaders(user)
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Failed to delete contact');
@@ -89,10 +87,7 @@ const ContactManager = () => {
     try {
       const res = await fetch(`/api/contacts/${id}/read`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-role': user?.role || 'admin'
-        },
+        headers: getAdminHeaders(user, { 'Content-Type': 'application/json' }),
         body: JSON.stringify({ read })
       });
       const data = await res.json();
@@ -114,7 +109,7 @@ const ContactManager = () => {
         selectedContacts.map(id =>
           fetch(`/api/contacts/${id}`, {
             method: 'DELETE',
-            headers: { 'x-user-role': user?.role || 'admin' }
+            headers: getAdminHeaders(user)
           })
         )
       );
