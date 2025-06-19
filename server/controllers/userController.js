@@ -1,5 +1,7 @@
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 // Create email transporter
 const transporter = nodemailer.createTransport({
@@ -71,7 +73,8 @@ exports.loginUser = async (req, res) => {
         }
 
         // Check password (plain text for now)
-        if (password !== user.password) {
+        const isMatch = await user.matchPassword(password);
+        if (!isMatch) {
             console.log('Invalid password for user:', username);
             return res.status(401).json({
                 success: false,
@@ -121,8 +124,15 @@ exports.loginUser = async (req, res) => {
         }
 
         console.log('User logged in successfully:', username);
+
+        // Generate JWT token (valid 1 day)
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'your_jwt_secret', {
+            expiresIn: '1d'
+        });
+
         res.status(200).json({
             success: true,
+            token, // front-end can ignore if not needed yet
             data: {
                 id: user._id,
                 username: user.username,
@@ -201,7 +211,7 @@ exports.updateUser = async (req, res) => {
         }
 
         // Verify current password if provided for sensitive updates
-        if ((password || isActive !== undefined) && (!currentPassword || currentPassword !== user.password)) {
+        if ((password || isActive !== undefined) && (!currentPassword || !(await bcrypt.compare(currentPassword, user.password)))) {
             console.log('Invalid current password');
             return res.status(401).json({
                 success: false,
@@ -214,7 +224,7 @@ exports.updateUser = async (req, res) => {
             user.username = username;
         }
         if (password) {
-            user.password = password;
+            user.password = password; // will be hashed by pre-save hook
         }
         if (isActive !== undefined) {
             user.isActive = isActive;

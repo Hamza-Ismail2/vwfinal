@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const router = express.Router();
+const protect = require('../middleware/auth');
 
 const {
     getImages,
@@ -48,12 +49,12 @@ const upload = multer({
 router.get('/', getImages);
 router.get('/:id', getImage);
 
-// Admin routes (will need authentication middleware in production)
-router.post('/', upload.single('image'), createImage);
-router.put('/:id', upload.single('image'), updateImage);
-router.delete('/:id', deleteImage);
+// Admin routes
+router.post('/', protect('admin'), upload.single('image'), createImage);
+router.put('/:id', protect('admin'), upload.single('image'), updateImage);
+router.delete('/:id', protect('admin'), deleteImage);
 
 // Bulk upload route
-router.post('/bulk', upload.array('images', 20), bulkUploadImages);
+router.post('/bulk', protect('admin'), upload.array('images', 20), bulkUploadImages);
 
 module.exports = router; 
