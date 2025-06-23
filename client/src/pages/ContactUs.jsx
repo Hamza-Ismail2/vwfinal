@@ -158,7 +158,7 @@ const ContactUs = () => {
         {/* Overlay */}
         <div className="absolute inset-0 bg-black/60"></div>
         
-        <div className="relative z-10 container mx-auto px-4 py-20 text-center">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -168,7 +168,7 @@ const ContactUs = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 leading-tight"
             >
               Contact <span className="text-orange-500">Us</span>
             </motion.h1>
@@ -176,7 +176,7 @@ const ContactUs = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-xl md:text-2xl text-gray-200 max-w-4xl mx-auto leading-relaxed mb-8"
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-200 max-w-4xl mx-auto leading-relaxed mb-8"
             >
               Ready to experience precision aviation? Get in touch with our expert team 
               for service inquiries, bookings, and all your helicopter needs.
@@ -185,15 +185,15 @@ const ContactUs = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-2xl mx-auto"
             >
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-6 py-3 text-white">
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-4 sm:px-6 py-3 text-white text-sm sm:text-base">
                 <span className="text-orange-400 font-semibold">🚁</span> Expert pilots
               </div>
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-6 py-3 text-white">
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-4 sm:px-6 py-3 text-white text-sm sm:text-base">
                 <span className="text-orange-400 font-semibold">⚡</span> 24/7 support
               </div>
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-6 py-3 text-white">
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-4 sm:px-6 py-3 text-white text-sm sm:text-base">
                 <span className="text-orange-400 font-semibold">📞</span> Instant response
               </div>
             </motion.div>

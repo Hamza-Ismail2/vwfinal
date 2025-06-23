@@ -89,17 +89,17 @@ const Gallery = () => {
           />
         </div>
         <div className="absolute inset-0 bg-black/60"></div>
-        <div className="relative z-10 container mx-auto px-6 py-20 text-center">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h3 className="text-orange-500 font-semibold text-lg mb-4">Our Work</h3>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            <h3 className="text-orange-500 font-semibold text-base sm:text-lg mb-4">Our Work</h3>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
               Gallery of <span className="bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">Excellence</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-200 max-w-4xl mx-auto leading-relaxed mb-8">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-200 max-w-4xl mx-auto leading-relaxed mb-8">
               Explore our collection of professional helicopter operations, scenic flights, and aerial services 
               across the beautiful Hawaiian Islands. Every image tells a story of precision, safety, and excellence.
             </p>
@@ -112,7 +112,7 @@ const Gallery = () => {
 
       {/* Gallery Grid */}
       <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {loading && (
             <div className="flex justify-center items-center py-20">
               <div className="text-center">

@@ -67,8 +67,8 @@ const Footer = () => {
 
   return (
     <footer className="bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-20">
-        <div className="grid md:grid-cols-1 lg:grid-cols-5 gap-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           
           {/* Company Info & Location */}
           <motion.div
@@ -76,43 +76,43 @@ const Footer = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="space-y-8 lg:col-span-2"
+            className="space-y-6 lg:space-y-8 md:col-span-2 lg:col-span-2"
           >
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            <div className="flex flex-col items-center sm:items-start sm:flex-row gap-4 sm:gap-6">
               <img 
                 src="/blackbglogo.png" 
                 alt="Vertical Worx Logo" 
-                className="w-60 h-50 object-contain"
+                className="w-40 sm:w-48 lg:w-60 h-auto object-contain"
               />
-              <div className="space-y-2">
-                <span className="text-2xl font-bold text-white">
+              <div className="space-y-2 text-center sm:text-left">
+                <span className="text-xl sm:text-2xl font-bold text-white">
                   Vertical Worx
                 </span>
-                <p className="text-gray-300 leading-relaxed max-w-md">
+                <p className="text-gray-300 leading-relaxed max-w-md text-sm sm:text-base">
                   FAA-Certified Aerial Solutions for Hawaii's Most Demanding Missions.
                 </p>
               </div>
             </div>
             
             {/* Contact Information */}
-            <div className="grid sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
               {/* Location */}
-              <div className="space-y-3">
-                <h4 className="text-lg font-semibold text-white mb-3">Location</h4>
-                <div className="space-y-2 text-sm text-gray-300">
+              <div className="space-y-2 sm:space-y-3">
+                <h4 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Location</h4>
+                <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-300">
                   <p className="flex items-start gap-2">
                     <svg className="w-4 h-4 mt-0.5 text-orange-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                     </svg>
-                    73 Uʻu Street<br />Kailua-Kona, Hawaiʻi 96740
+                    <span>73 Uʻu Street<br />Kailua-Kona, Hawaiʻi 96740</span>
                   </p>
                 </div>
               </div>
               
               {/* Phone */}
-              <div className="space-y-3">
-                <h4 className="text-lg font-semibold text-white mb-3">Phone</h4>
-                <div className="space-y-2 text-sm text-gray-300">
+              <div className="space-y-2 sm:space-y-3">
+                <h4 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Phone</h4>
+                <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-300">
                   <p className="flex items-center gap-2">
                     <svg className="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
@@ -123,9 +123,9 @@ const Footer = () => {
               </div>
 
               {/* Email */}
-              <div className="space-y-3">
-                <h4 className="text-lg font-semibold text-white mb-3">Email</h4>
-                <div className="space-y-2 text-sm text-gray-300">
+              <div className="space-y-2 sm:space-y-3">
+                <h4 className="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Email</h4>
+                <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-300">
                   <p className="flex items-center gap-2">
                     <svg className="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />

@@ -12,7 +12,7 @@ const ImageCarousel3D = () => {
     '/uploads/14-gallery-professional-aviation.jpg',
     '/uploads/7-gallery-hawaiian-landscape.jpg',
     '/uploads/13-gallery-fleet-ops.jpg',
-    '/uploads/12-gallery-bell-hughes.jpg',
+    '/uploads/1750106077204-gallery.jpg',
     '/uploads/11-gallery-koh-coast.jpg',
   ];
 

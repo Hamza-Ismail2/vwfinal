@@ -147,10 +147,10 @@ const Services = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6">
             Our <span className="bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">Services</span>
           </h2>
-          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             From executive transport to emergency services, we provide comprehensive helicopter solutions 
             tailored to your specific needs with the highest standards of safety and professionalism.
           </p>

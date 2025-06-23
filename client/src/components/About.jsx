@@ -147,13 +147,13 @@ const About = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="mb-20"
         >
-          <div className="bg-white rounded-2xl shadow-lg p-8 lg:p-12">
+          <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 lg:p-12">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-              <div>
-                <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
+              <div className="text-center lg:text-left">
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
                   Our Story
                 </h3>
-                <div className="space-y-4 text-gray-600 leading-relaxed">
+                <div className="space-y-4 text-gray-600 leading-relaxed text-sm sm:text-base">
                   <p>
                     Founded in 2008 by a team of passionate aviation professionals, Elite Helicopters 
                     began with a simple mission: to provide uncompromising safety, exceptional service, 
@@ -171,17 +171,17 @@ const About = () => {
                 </div>
               </div>
               
-              <div className="relative">
+              <div className="relative mt-6 lg:mt-0">
                 <div className="relative rounded-2xl overflow-hidden shadow-lg">
                   <img
                     src={helicopterFleet}
                     alt="Fleet of helicopters in flight"
-                    className="w-full h-80 object-cover"
+                    className="w-full h-64 sm:h-80 object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-blue-900/90 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <h4 className="text-2xl font-bold mb-3">Our Mission</h4>
-                    <p className="text-blue-100 leading-relaxed">
+                  <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white">
+                    <h4 className="text-lg sm:text-2xl font-bold mb-2 sm:mb-3">Our Mission</h4>
+                    <p className="text-blue-100 leading-relaxed text-sm sm:text-base">
                       To deliver exceptional helicopter services that exceed expectations while 
                       maintaining the highest standards of safety, professionalism, and customer satisfaction.
                     </p>

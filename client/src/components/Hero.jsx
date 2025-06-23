@@ -60,11 +60,11 @@ const Hero = () => {
           muted
           playsInline
           preload="metadata"
-          poster="/videos/parked-helicopter-poster.jpg"
+          poster="/videos/hero-poster.jpg"
           onCanPlayThrough={() => setVideoReady(true)}
         >
-          <source src="/videos/parked-helicopter1.webm" type="video/webm" />
-          <source src="/videos/parked-helicopter1.mp4" type="video/mp4" />
+          <source src="/videos/hero-3s.webm" type="video/webm" />
+          <source src="/videos/hero-3s.mp4" type="video/mp4" />
         </video>
       </div>
 
