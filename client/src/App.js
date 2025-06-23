@@ -267,31 +267,16 @@ const AppContent = () => {
         {/* Quick Action Buttons */}
         {!isAdminPage && (
           <>
-            <div className="fixed bottom-6 right-6 z-50 space-y-3">
-              {/* Emergency Contact */}
-              <motion.a
-                href="tel:(808)930-9826"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 1, type: "spring", stiffness: 260, damping: 20 }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-red-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
-                title="Call Vertical Worx"
-              >
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                </svg>
-              </motion.a>
+            <div className="fixed bottom-15 right-0 z-50 space-y-3 pr-4" style={{ bottom: '60px' }}>
               {/* Quote Request */}
               <motion.a
                 href="/request-quote"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: 1.2, type: "spring", stiffness: 260, damping: 20 }}
+                transition={{ delay: 1, type: "spring", stiffness: 260, damping: 20 }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                className="flex items-center justify-center w-14 h-14 bg-orange-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
+                className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-orange-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group ml-auto"
                 title="Request Quote"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -300,15 +285,15 @@ const AppContent = () => {
               </motion.a>
             </div>
             {/* Mobile-only call button */}
-            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-orange-500 to-red-600 p-4 z-40 md:hidden">
+            <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-orange-500 to-red-600 p-3 z-40 md:hidden">
               <a
                 href="tel:(808)930-9826"
-                className="flex items-center justify-center w-full bg-white text-orange-600 py-3 rounded-lg font-semibold text-lg shadow-lg"
+                className="flex items-center justify-center w-full bg-white text-orange-600 py-4 px-6 rounded-lg font-semibold shadow-lg"
               >
-                <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-4 h-4 mr-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                 </svg>
-                Call Now - (808) 930-9826
+                <span className="text-base sm:text-lg whitespace-nowrap">Call Now - (808) 930-9826</span>
               </a>
             </div>
           </>

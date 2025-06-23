@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,33 +15,6 @@ const Hero = () => {
     }
   };
 
-  // Smooth pan logic – tie objectPosition to playback progress
-  const videoRef = useRef(null);
-  const [videoReady, setVideoReady] = useState(false);
-  const [minDelayPassed, setMinDelayPassed] = useState(false);
-
-  // Ensure loader stays at least 3s
-  useEffect(() => {
-    const t = setTimeout(() => setMinDelayPassed(true), 3000);
-    return () => clearTimeout(t);
-  }, []);
-
-  const showLoader = !(videoReady && minDelayPassed);
-
-  useEffect(() => {
-    const vid = videoRef.current;
-    if (!vid) return;
-    const onTime = () => {
-      if (!vid.duration || vid.duration === Infinity) return;
-      const ratio = vid.currentTime / vid.duration; // 0 → 1
-      // Map 0 → 25% (left focus), 1 → 50% (center)
-      const pos = 25 + 25 * ratio;
-      vid.style.objectPosition = `${pos}% center`;
-    };
-    vid.addEventListener('timeupdate', onTime);
-    return () => vid.removeEventListener('timeupdate', onTime);
-  }, []);
-
   return (
     <section
       className="relative h-screen flex items-center justify-center overflow-hidden pt-24 sm:pt-28 lg:pt-32"
@@ -53,7 +26,6 @@ const Hero = () => {
       {/* ————— Background looping video ————— */}
       <div className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden">
         <video
-          ref={videoRef}
           className="w-full h-full object-cover"
           autoPlay
           loop
@@ -61,19 +33,15 @@ const Hero = () => {
           playsInline
           preload="metadata"
           poster="/videos/hero-poster.jpg"
-          onCanPlayThrough={() => setVideoReady(true)}
+          webkit-playsinline="true"
+          x5-playsinline="true"
+          controls={false}
+          disablePictureInPicture
         >
           <source src="/videos/hero-3s.webm" type="video/webm" />
           <source src="/videos/hero-3s.mp4" type="video/mp4" />
         </video>
       </div>
-
-      {showLoader && (
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm">
-          <img src="/whitebglogo.jpg" alt="Vertical Worx Logo" className="h-20 w-auto mb-4 animate-pulse" />
-          <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      )}
 
       {/* Hero Content */}
       <div className="relative z-20 text-center text-white px-4 sm:px-6 max-w-6xl mx-auto py-4 sm:py-8">

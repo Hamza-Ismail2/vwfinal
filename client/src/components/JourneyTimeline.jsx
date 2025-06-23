@@ -46,6 +46,10 @@ const JourneyTimeline = ({ milestones = [] }) => {
         preload="auto"
         muted
         playsInline
+        webkit-playsinline="true"
+        x5-playsinline="true"
+        controls={false}
+        disablePictureInPicture
       />
 
       {/* ————— Timeline cards ————— */}
