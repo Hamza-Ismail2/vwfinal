@@ -16,17 +16,28 @@ const Hero = () => {
   };
 
   return (
-    <section
-      className="relative h-screen flex items-center justify-center overflow-hidden pt-24 sm:pt-28 lg:pt-32"
-      style={{
-        backgroundImage:
-          'linear-gradient(0deg, #2D2F1F 0%, #2D2F1F 50%, #5E6670 50%, #5E6670 100%)'
-      }}
-    >
+    <>
+      <style jsx>{`
+        @media (min-width: 768px) {
+          .hero-video {
+            object-position: center !important;
+          }
+        }
+      `}</style>
+      <section
+        className="relative h-screen flex items-center justify-center overflow-hidden pt-24 sm:pt-28 lg:pt-32"
+        style={{
+          backgroundImage:
+            'linear-gradient(0deg, #2D2F1F 0%, #2D2F1F 50%, #5E6670 50%, #5E6670 100%)'
+        }}
+      >
       {/* ————— Background looping video ————— */}
       <div className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden">
         <video
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover hero-video"
+          style={{
+            objectPosition: 'calc(50% - 30px) center'
+          }}
           autoPlay
           loop
           muted
@@ -38,8 +49,7 @@ const Hero = () => {
           controls={false}
           disablePictureInPicture
         >
-          <source src="/videos/hero-3s.webm" type="video/webm" />
-          <source src="/videos/hero-3s.mp4" type="video/mp4" />
+          <source src="/videos/10secclip.mp4" type="video/mp4" />
         </video>
       </div>
 
@@ -107,6 +117,7 @@ const Hero = () => {
         </motion.div>
       </div>
     </section>
+    </>
   );
 };
 
