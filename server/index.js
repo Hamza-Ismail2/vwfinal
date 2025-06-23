@@ -41,8 +41,10 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:", "http:"],
-      scriptSrc: ["'self'", "'unsafe-eval'"] // needed for Three.js
+      imgSrc: ["'self'", "data:", "https:", "http:", "https://tile.openstreetmap.org"],
+      scriptSrc: ["'self'", "'unsafe-eval'"], // needed for Three.js
+      // Allow embedded OpenStreetMap iframes
+      frameSrc: ["'self'", "https://www.openstreetmap.org"]
     }
   },
   crossOriginResourcePolicy: { policy: "cross-origin" }
@@ -125,7 +127,10 @@ const clientBuildPath = path.join(__dirname, '../client/build');
 
 // Serve static React assets first so that CSS/JS/images are resolved quickly
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(clientBuildPath));
+  app.use(express.static(clientBuildPath, { maxAge: '7d', etag: true }));
+
+  // Serve videos with longer cache
+  app.use('/videos', express.static(path.join(clientBuildPath, 'videos'), { maxAge: '30d', etag: true }));
 }
 
 // API routes
