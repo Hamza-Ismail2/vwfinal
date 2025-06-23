@@ -279,12 +279,18 @@ const Services = () => {
                 <p className="text-gray-600 mb-6">
                   Contact us today for a personalized quote and let us make your helicopter experience unforgettable.
                 </p>
-                <button 
+                <div className="flex flex-col sm:flex-row items-center sm:space-x-2 gap-1">
+                  <span className="text-xl">📞</span>
+                  <span className="text-lg whitespace-nowrap">(808) 930-9826</span>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => handleRequestQuote()}
-                  className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                  className="mt-6 bg-white text-orange-600 px-4 sm:px-6 py-4 rounded-lg font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all duration-300 w-full"
                 >
                   Get Quote Now
-                </button>
+                </motion.button>
               </div>
             </div>
           </div>

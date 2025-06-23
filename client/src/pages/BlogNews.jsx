@@ -271,17 +271,17 @@ const BlogNews = () => {
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white min-h-screen flex items-center">
         <div className="absolute inset-0 bg-black/50"></div>
-        <div className="relative z-10 container mx-auto px-6 py-20 text-center">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h3 className="text-orange-500 font-semibold text-lg mb-4">Stay Informed</h3>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            <h3 className="text-orange-500 font-semibold text-sm sm:text-base lg:text-lg mb-4">Stay Informed</h3>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
               Blog & <span className="text-orange-500">News</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-200 max-w-4xl mx-auto leading-relaxed mb-8">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-200 max-w-4xl mx-auto leading-relaxed mb-8">
               Aviation industry insights, safety education, company updates, and expert perspectives 
               from Hawaii's premier helicopter service provider.
             </p>
@@ -297,7 +297,7 @@ const BlogNews = () => {
                   });
                 }
               }}
-              className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all duration-300 whitespace-nowrap"
             >
               Subscribe to Updates
             </motion.button>
@@ -306,25 +306,25 @@ const BlogNews = () => {
       </section>
 
       {/* Featured Articles */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-6">
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-16"
+            className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4 sm:mb-6">
               Featured <span className="text-orange-600">Articles</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
               In-depth insights into aviation industry trends, safety practices, 
               and operational excellence from our experienced team.
             </p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {blogs.slice(0, 3).map((blog, index) => (
               <motion.div
                 key={blog._id}
@@ -335,26 +335,26 @@ const BlogNews = () => {
                 whileHover={{ y: -10 }}
                 className="bg-gray-50 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"
               >
-                <div className="bg-gradient-to-r from-orange-500 to-red-600 h-48 flex items-center justify-center">
+                <div className="bg-gradient-to-r from-orange-500 to-red-600 h-40 sm:h-48 flex items-center justify-center">
                   {blog.img ? (
-                    <img src={blog.img} alt={blog.title} className="object-cover h-full w-full rounded-2xl" />
+                    <img src={blog.img} alt={blog.title} className="object-cover h-full w-full" />
                   ) : (
-                    <div className="text-8xl">📰</div>
+                    <div className="text-6xl sm:text-8xl">📰</div>
                   )}
                 </div>
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+                <div className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 gap-2">
+                    <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs sm:text-sm font-medium w-fit">
                       {blog.type}
                     </span>
-                    <span className="text-gray-500 text-sm">
+                    <span className="text-gray-500 text-xs sm:text-sm">
                       {new Date(blog.createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-3">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 line-clamp-2">
                     {blog.title}
                   </h3>
-                  <p className="text-gray-600 mb-4 leading-relaxed">
+                  <p className="text-sm sm:text-base text-gray-600 mb-4 leading-relaxed line-clamp-3">
                     {blog.desc?.replace(/<[^>]+>/g, '').slice(0, 120)}...
                   </p>
                   <div className="flex flex-wrap gap-2 mb-4">
@@ -364,13 +364,13 @@ const BlogNews = () => {
                       </span>
                     ))}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-500 text-sm">{new Date(blog.createdAt).toLocaleDateString()}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <span className="text-gray-500 text-xs sm:text-sm">{new Date(blog.createdAt).toLocaleDateString()}</span>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => openModal(blog)}
-                      className="text-orange-600 font-semibold hover:text-orange-800 transition-colors duration-300"
+                      className="text-orange-600 font-semibold hover:text-orange-800 transition-colors duration-300 text-sm sm:text-base text-left sm:text-right"
                     >
                       Read More →
                     </motion.button>
@@ -383,30 +383,30 @@ const BlogNews = () => {
       </section>
 
       {/* Recent News & Categories */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-6">
-          <div className="grid lg:grid-cols-4 gap-8">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
             {/* Categories Sidebar */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 space-y-6 lg:space-y-8">
               <motion.div
                 initial={{ opacity: 0, x: -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}
-                className="bg-white rounded-2xl p-6 shadow-lg"
+                className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg order-2 lg:order-1"
               >
-                <h3 className="text-xl font-bold text-gray-800 mb-6">Categories</h3>
-                <ul className="space-y-3">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">Categories</h3>
+                <ul className="space-y-2 sm:space-y-3">
                   {categories.map((category, index) => (
                     <li key={index}>
-                      <button className={`w-full text-left px-3 py-2 rounded-lg transition-colors duration-300 ${
+                      <button className={`w-full text-left px-3 py-2 rounded-lg transition-colors duration-300 text-sm sm:text-base ${
                         category.active 
                           ? 'bg-orange-100 text-orange-800 font-semibold' 
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}>
                         <div className="flex justify-between items-center">
                           <span>{category.name}</span>
-                          <span className="text-sm">({category.count})</span>
+                          <span className="text-xs sm:text-sm">({category.count})</span>
                         </div>
                       </button>
                     </li>
@@ -420,16 +420,16 @@ const BlogNews = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="bg-white rounded-2xl p-6 shadow-lg mt-8"
+                className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg order-3 lg:order-2"
               >
-                <h3 className="text-xl font-bold text-gray-800 mb-6">Resources</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">Resources</h3>
                 <div className="space-y-4">
                   {educationalResources.map((resource, index) => (
                     <div key={index} className="border-b border-gray-100 pb-4 last:border-b-0">
                       <div className="flex items-start space-x-3">
-                        <span className="text-2xl">{resource.icon}</span>
-                        <div>
-                          <h4 className="font-semibold text-gray-800 text-sm mb-1">
+                        <span className="text-xl sm:text-2xl">{resource.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-gray-800 text-xs sm:text-sm mb-1">
                             {resource.title}
                           </h4>
                           <p className="text-gray-600 text-xs mb-2">
@@ -447,17 +447,17 @@ const BlogNews = () => {
             </div>
 
             {/* Recent News */}
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-3 order-1 lg:order-2">
               <motion.div
                 initial={{ opacity: 0, x: 50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}
-                className="mb-12"
+                className="mb-8 sm:mb-12"
               >
-                <h2 className="text-3xl font-bold text-gray-800 mb-8">Recent News & Updates</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 sm:mb-8">Recent News & Updates</h2>
                 
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   {recentNews.map((news, index) => (
                     <motion.div
                       key={news.id}
@@ -465,26 +465,26 @@ const BlogNews = () => {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.6, delay: index * 0.1 }}
-                      className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
+                      className="bg-white rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300"
                     >
-                      <div className="flex items-start space-x-4">
-                        <div className="text-3xl">{news.image}</div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+                      <div className="flex flex-col sm:flex-row sm:items-start space-y-3 sm:space-y-0 sm:space-x-4">
+                        <div className="text-2xl sm:text-3xl text-center sm:text-left">{news.image}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
+                            <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs sm:text-sm font-medium w-fit">
                               {news.category}
                             </span>
-                            <span className="text-gray-500 text-sm">{news.date}</span>
+                            <span className="text-gray-500 text-xs sm:text-sm">{news.date}</span>
                           </div>
-                          <h3 className="text-xl font-bold text-gray-800 mb-2">
+                          <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 line-clamp-2">
                             {news.title}
                           </h3>
-                          <p className="text-gray-600 mb-3">
+                          <p className="text-sm sm:text-base text-gray-600 mb-3 line-clamp-3">
                             {news.excerpt}
                           </p>
                           <button 
                             onClick={() => openModal(news)}
-                            className="text-orange-600 font-semibold hover:text-orange-800 transition-colors duration-300"
+                            className="text-orange-600 font-semibold hover:text-orange-800 transition-colors duration-300 text-sm sm:text-base"
                           >
                             Read Full Article →
                           </button>
@@ -500,38 +500,38 @@ const BlogNews = () => {
       </section>
 
       {/* Newsletter Subscription */}
-      <section id="newsletter-section" className="py-20 bg-gradient-to-r from-orange-500 to-red-600 text-white">
-        <div className="container mx-auto px-6 text-center">
+      <section id="newsletter-section" className="py-12 sm:py-16 lg:py-20 bg-gradient-to-r from-orange-500 to-red-600 text-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6">
               Stay Connected
             </h2>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto mb-12 leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-white/90 max-w-3xl mx-auto mb-8 sm:mb-12 leading-relaxed">
               Subscribe to our newsletter for the latest aviation industry insights, safety updates, 
               company news, and educational content delivered directly to your inbox.
             </p>
             
             <div className="max-w-md mx-auto">
-              <div className="flex gap-4 mb-6">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <input 
                   type="email" 
                   placeholder="Enter your email address"
-                  className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-white"
+                  className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-white text-sm sm:text-base"
                 />
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-white text-orange-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-300"
+                  className="bg-white text-orange-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-300 text-sm sm:text-base whitespace-nowrap w-full sm:w-auto"
                 >
                   Subscribe
                 </motion.button>
               </div>
-              <p className="text-white/70 text-sm">
+              <p className="text-white/70 text-xs sm:text-sm">
                 No spam, unsubscribe at any time. Privacy policy applies.
               </p>
             </div>
@@ -546,7 +546,7 @@ const BlogNews = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4"
             onClick={closeModal}
           >
             <motion.div
@@ -554,39 +554,39 @@ const BlogNews = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 50 }}
               transition={{ duration: 0.3 }}
-              className="bg-white rounded-2xl max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl"
+              className="bg-white rounded-2xl w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Header */}
-              <div className="bg-gradient-to-r from-orange-500 to-red-600 text-white p-6 relative">
+              <div className="bg-gradient-to-r from-orange-500 to-red-600 text-white p-4 sm:p-6 relative">
                 <button
                   onClick={closeModal}
-                  className="absolute top-4 right-4 text-white hover:text-gray-200 transition-colors duration-300"
+                  className="absolute top-3 right-3 sm:top-4 sm:right-4 text-white hover:text-gray-200 transition-colors duration-300"
                 >
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
-                <div className="flex items-center space-x-4 mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 mb-4">
                   {selectedArticle.img ? (
-                    <img src={selectedArticle.img} alt={selectedArticle.title} className="h-16 w-16 object-cover rounded-full border-4 border-white shadow" />
+                    <img src={selectedArticle.img} alt={selectedArticle.title} className="h-12 w-12 sm:h-16 sm:w-16 object-cover rounded-full border-2 sm:border-4 border-white shadow mx-auto sm:mx-0" />
                   ) : (
-                    <div className="text-4xl">📰</div>
+                    <div className="text-2xl sm:text-4xl mx-auto sm:mx-0">📰</div>
                   )}
-                  <div>
-                    <span className="bg-white/20 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  <div className="text-center sm:text-left">
+                    <span className="bg-white/20 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
                       {selectedArticle.type}
                     </span>
                   </div>
                 </div>
-                <h1 className="text-3xl font-bold mb-2">{selectedArticle.title}</h1>
-                <div className="flex items-center space-x-4 text-white/90">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 pr-8 sm:pr-12">{selectedArticle.title}</h1>
+                <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 text-white/90 text-sm sm:text-base">
                   <span>{new Date(selectedArticle.createdAt).toLocaleDateString()}</span>
                 </div>
                 {selectedArticle.tags && (
-                  <div className="flex flex-wrap gap-2 mt-4">
+                  <div className="flex flex-wrap gap-2 mt-3 sm:mt-4">
                     {selectedArticle.tags.map((tag, idx) => (
-                      <span key={idx} className="bg-white/20 text-white px-2 py-1 rounded text-sm">
+                      <span key={idx} className="bg-white/20 text-white px-2 py-1 rounded text-xs sm:text-sm">
                         {tag}
                       </span>
                     ))}
@@ -594,8 +594,8 @@ const BlogNews = () => {
                 )}
               </div>
               {/* Modal Content */}
-              <div className="p-6 overflow-y-auto max-h-[60vh]">
-                <div className="prose prose-lg max-w-none">
+              <div className="p-4 sm:p-6 overflow-y-auto max-h-[50vh] sm:max-h-[60vh]">
+                <div className="prose prose-sm sm:prose-lg max-w-none">
                   <div 
                     dangerouslySetInnerHTML={{ 
                       __html: selectedArticle.desc || ''
@@ -604,17 +604,17 @@ const BlogNews = () => {
                 </div>
               </div>
               {/* Modal Footer */}
-              <div className="bg-gray-50 px-6 py-4 flex justify-between items-center">
-                <div className="text-sm text-gray-600">
+              <div className="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
                   Published on {new Date(selectedArticle.createdAt).toLocaleDateString()}
                 </div>
-                <div className="flex space-x-4">
-                  <button className="text-orange-600 hover:text-orange-800 font-semibold transition-colors duration-300">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                  <button className="text-orange-600 hover:text-orange-800 font-semibold transition-colors duration-300 text-sm sm:text-base">
                     Share Article
                   </button>
                   <button 
                     onClick={closeModal}
-                    className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors duration-300"
+                    className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors duration-300 text-sm sm:text-base w-full sm:w-auto"
                   >
                     Close
                   </button>
