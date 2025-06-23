@@ -31,13 +31,10 @@ exports.createAdminUser = async (req, res) => {
         const username = req.body?.username?.trim() || 'admin';
         const plainPassword = req.body?.password || 'admin123';
 
-        // Hash the password before storing
-        const hashedPassword = await bcrypt.hash(plainPassword, 10);
-
-        // Create new admin user
+        // Create new admin user (password will be hashed by the Mongoose pre-save hook)
         const admin = await User.create({
             username,
-            password: hashedPassword,
+            password: plainPassword,
             role: 'admin',
             isActive: true
         });
