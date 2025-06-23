@@ -120,13 +120,12 @@ app.use('/uploads', cors({ origin: '*' }), express.static(uploadDir, {
   etag: true
 }));
 
-// Serve React frontend in production
+// Absolute path to the React build folder (used in production)
+const clientBuildPath = path.join(__dirname, '../client/build');
+
+// Serve static React assets first so that CSS/JS/images are resolved quickly
 if (process.env.NODE_ENV === 'production') {
-  const clientBuildPath = path.join(__dirname, '../client/build');
   app.use(express.static(clientBuildPath));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(clientBuildPath, 'index.html'));
-  });
 }
 
 // API routes
@@ -140,6 +139,15 @@ app.use('/api/blogs', blogRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/quotes', quoteRoutes);
 
+// ---------------------------
+//  React catch-all (client-side routing)
+// ---------------------------
+if (process.env.NODE_ENV === 'production') {
+  // Any GET request that hasn't matched an earlier route (including API routes) will be handed to React
+  app.get(/^\/(?!api).*/, (req, res) => {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {
