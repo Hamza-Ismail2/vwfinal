@@ -6,7 +6,7 @@ const ImageCarousel3D = () => {
   const images = [
     '/uploads/6-gallery-wedding-aerial.jpg',
     '/uploads/1-gallery-vip-arrival.jpg',
-    '/uploads/2-gallery-bell-hughes.jpg',
+    '/uploads/2-gallery-vip-premium.jpg',
     '/uploads/3-gallery-raptor-atv.jpg',
     '/uploads/4-gallery-oahu-magnum.jpg',
     '/uploads/14-gallery-professional-aviation.jpg',
