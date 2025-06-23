@@ -9,11 +9,11 @@ const ImageCarousel3D = () => {
     '/uploads/2-gallery-bell-hughes.jpg',
     '/uploads/3-gallery-raptor-atv.jpg',
     '/uploads/4-gallery-oahu-magnum.jpg',
-    '/uploads/14-gallery-wedding-photo.jpg',
+    '/uploads/14-gallery-professional-aviation.jpg',
     '/uploads/7-gallery-hawaiian-landscape.jpg',
-    '/uploads/13-gallery-coastal-ops.jpg',
-    '/uploads/12-gallery-island-aviation.jpg',
-    '/uploads/11-gallery-horseback-sky.jpg',
+    '/uploads/13-gallery-fleet-ops.jpg',
+    '/uploads/12-gallery-bell-hughes.jpg',
+    '/uploads/11-gallery-koh-coast.jpg',
   ];
 
   return (
