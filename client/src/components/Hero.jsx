@@ -1,4 +1,4 @@
-import React, { Suspense, useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,6 +17,17 @@ const Hero = () => {
 
   // Smooth pan logic – tie objectPosition to playback progress
   const videoRef = useRef(null);
+  const [videoReady, setVideoReady] = useState(false);
+  const [minDelayPassed, setMinDelayPassed] = useState(false);
+
+  // Ensure loader stays at least 3s
+  useEffect(() => {
+    const t = setTimeout(() => setMinDelayPassed(true), 3000);
+    return () => clearTimeout(t);
+  }, []);
+
+  const showLoader = !(videoReady && minDelayPassed);
+
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
@@ -42,16 +53,27 @@ const Hero = () => {
       {/* ————— Background looping video ————— */}
       <div className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden">
         <video
-          src="/videos/parked-helicopter1.mp4"
           ref={videoRef}
           className="w-full h-full object-cover"
           autoPlay
           loop
           muted
           playsInline
-          preload="auto"
-        />
+          preload="metadata"
+          poster="/videos/parked-helicopter-poster.jpg"
+          onCanPlayThrough={() => setVideoReady(true)}
+        >
+          <source src="/videos/parked-helicopter1.webm" type="video/webm" />
+          <source src="/videos/parked-helicopter1.mp4" type="video/mp4" />
+        </video>
       </div>
+
+      {showLoader && (
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm">
+          <img src="/whitebglogo.jpg" alt="Vertical Worx Logo" className="h-20 w-auto mb-4 animate-pulse" />
+          <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
 
       {/* Hero Content */}
       <div className="relative z-20 text-center text-white px-4 sm:px-6 max-w-6xl mx-auto py-4 sm:py-8">

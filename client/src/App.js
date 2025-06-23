@@ -4,7 +4,6 @@ import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Lazy load pages for better performance
@@ -28,10 +27,17 @@ const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 
 // Loading component
 const LoadingPage = () => (
-  <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-    <div className="text-center">
-      <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-      <p className="text-gray-600 font-semibold">Loading...</p>
+  <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+    {/* Decorative blurred circles */}
+    <div className="absolute -top-32 -left-32 w-80 h-80 bg-orange-500 rounded-full opacity-30 filter blur-3xl"></div>
+    <div className="absolute bottom-0 right-0 w-96 h-96 bg-red-600 rounded-full opacity-20 filter blur-3xl"></div>
+
+    <div className="relative z-10 flex flex-col items-center">
+      <img src="/whitebglogo.jpg" alt="Vertical Worx Logo" className="h-24 w-auto mb-6 drop-shadow-lg animate-pulse" />
+      <p className="text-white font-semibold tracking-widest text-lg flex items-center gap-2">
+        <span className="animate-spin inline-block w-5 h-5 border-2 border-current border-t-transparent rounded-full"></span>
+        Loading…
+      </p>
     </div>
   </div>
 );

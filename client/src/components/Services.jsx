@@ -187,11 +187,7 @@ const Services = () => {
 
                 {/* Content */}
                 <div className="p-6 lg:p-8">
-                  <div className="mb-3">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r ${service.color} text-white`}>
-                      {service.price}
-                    </span>
-                  </div>
+                  {/* Price removed as per requirements */}
                   
                   <p className="text-gray-600 mb-6 leading-relaxed">
                     {service.description}
