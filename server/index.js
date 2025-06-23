@@ -143,8 +143,13 @@ app.use('/api/quotes', quoteRoutes);
 //  React catch-all (client-side routing)
 // ---------------------------
 if (process.env.NODE_ENV === 'production') {
-  // Any GET request that hasn't matched an earlier route (including API routes) will be handed to React
-  app.get(/^\/(?!api).*/, (req, res) => {
+  /*
+    Any GET request that hasn't matched an earlier route (including /api/** or /uploads/**)
+    will be handed to the React application. We explicitly exclude those prefixes so they
+    never fall through to the SPA, avoiding cases where missing images return index.html
+    instead of a proper 404.
+  */
+  app.get(/^\/(?!api)(?!uploads).*/, (req, res) => {
     res.sendFile(path.join(clientBuildPath, 'index.html'));
   });
 }
