@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
+import ScrollToTop from './components/ScrollToTop';
+
 
 // Lazy load pages for better performance
 const Home = lazy(() => import('./pages/Home'));
@@ -308,6 +310,7 @@ const App = () => {
   return (
     <HelmetProvider>
       <Router>
+        <ScrollToTop />
         <AppContent />
       </Router>
     </HelmetProvider>

@@ -1,6 +1,100 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
+// Project Image Carousel Component
+const ProjectImageCarousel = ({ images, title }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const nextImage = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === images.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const prevImage = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+    );
+  };
+
+  if (images.length === 1) {
+    return (
+      <img
+        src={images[0]}
+        alt={title}
+        className="w-full h-full object-cover"
+        onError={(e) => {
+          e.target.parentElement.innerHTML = `
+            <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+              <div class="text-center text-gray-500">
+                <div class="text-6xl mb-4">🚁</div>
+                <p class="text-lg font-semibold">Project Image</p>
+              </div>
+            </div>
+          `;
+        }}
+      />
+    );
+  }
+
+  return (
+    <div className="relative w-full h-full group">
+      <img
+        src={images[currentIndex]}
+        alt={`${title} - Image ${currentIndex + 1}`}
+        className="w-full h-full object-cover transition-opacity duration-300"
+        onError={(e) => {
+          e.target.parentElement.innerHTML = `
+            <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+              <div class="text-center text-gray-500">
+                <div class="text-6xl mb-4">🚁</div>
+                <p class="text-lg font-semibold">Project Image</p>
+              </div>
+            </div>
+          `;
+        }}
+      />
+      
+      {/* Navigation Arrows */}
+      <button
+        onClick={prevImage}
+        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      
+      <button
+        onClick={nextImage}
+        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+
+      {/* Dots Indicator */}
+      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+        {images.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(index)}
+            className={`w-2 h-2 rounded-full transition-colors duration-300 ${
+              index === currentIndex ? 'bg-white' : 'bg-white/50'
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Image Counter */}
+      <div className="absolute top-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs">
+        {currentIndex + 1} / {images.length}
+      </div>
+    </div>
+  );
+};
+
 // Static data for industry overview and capabilities
 const industryProjects = [
   {
@@ -117,13 +211,14 @@ const ProjectsCaseStudies = () => {
               We've supported construction, film, agriculture, and emergency response projects across Hawaii — 
               proving our ability to adapt and deliver on any terrain, in any conditions.
             </p>
-            <motion.button
+            <motion.a
+              href="/contact"
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+              className="inline-block bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
             >
               Request Project Consultation
-            </motion.button>
+            </motion.a>
           </motion.div>
         </div>
       </section>
@@ -202,9 +297,17 @@ const ProjectsCaseStudies = () => {
           </motion.div>
 
           {loading ? (
-            <div className="flex justify-center items-center h-40">Loading...</div>
+            <div className="flex justify-center items-center h-40">
+              <div className="text-center">
+                <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-600 font-semibold">Loading projects...</p>
+              </div>
+            </div>
           ) : error ? (
-            <div className="text-red-600 text-center">{error}</div>
+            <div className="text-red-600 text-center p-8">
+              <div className="text-4xl mb-4">⚠️</div>
+              <p className="text-lg font-semibold">{error}</p>
+            </div>
           ) : (
             <div className="space-y-12">
               {projects.map((project, index) => (
@@ -216,77 +319,104 @@ const ProjectsCaseStudies = () => {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
                 >
-                  <div className="grid lg:grid-cols-3 gap-8 p-8">
-                    {/* Project Overview */}
-                    <div className="lg:col-span-1">
-                      <div className="flex items-center mb-4">
-                        <div className="text-3xl mr-4">{project.icon || '🚁'}</div>
-                        <div>
-                          <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
-                            {project.category}
-                          </span>
-                        </div>
-                      </div>
-                      <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                        {project.title}
-                      </h3>
-                      <p className="text-gray-600 mb-6 leading-relaxed">
-                        {project.description}
-                      </p>
-                      {project.testimonial && (
-                        <div className="bg-gray-50 rounded-lg p-4">
-                          <p className="text-gray-700 italic mb-3">
-                            "{project.testimonial}"
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            — {project.clientContact}
-                          </p>
-                          <p className="text-sm font-semibold text-orange-600">
-                            {project.client}
-                          </p>
+                  <div className="grid lg:grid-cols-2 gap-0">
+                    {/* Project Images */}
+                    <div className="relative h-48 lg:h-auto">
+                      {project.images && project.images.length > 0 ? (
+                        <ProjectImageCarousel images={project.images} title={project.title} />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                          <div className="text-center text-gray-500">
+                            <div className="text-6xl mb-4">🚁</div>
+                            <p className="text-lg font-semibold">Project Image</p>
+                          </div>
                         </div>
                       )}
+                      <div className="absolute top-4 left-4 z-10">
+                        <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
+                          {project.category}
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Project Details */}
-                    <div className="lg:col-span-2">
-                      <div className="grid md:grid-cols-3 gap-6">
+                    {/* Project Content */}
+                    <div className="p-8">
+                      {/* Header */}
+                      <div className="mb-6">
+                        <h3 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-3">
+                          {project.title}
+                        </h3>
+                        <p className="text-gray-600 leading-relaxed">
+                          {project.description}
+                        </p>
+                      </div>
+
+                      {/* Project Details Grid */}
+                      <div className="grid md:grid-cols-3 gap-6 mb-6">
                         <div>
-                          <h4 className="text-lg font-semibold text-gray-800 mb-3">Challenges</h4>
+                          <h4 className="text-lg font-semibold text-red-600 mb-3 flex items-center">
+                            <span className="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                            Challenges
+                          </h4>
                           <ul className="space-y-2">
-                            {project.challenges && project.challenges.map((challenge, idx) => (
-                              <li key={idx} className="flex items-start text-sm text-gray-700">
-                                <span className="w-2 h-2 bg-red-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                                {challenge}
+                            {project.challenges && project.challenges.slice(0, 3).map((challenge, idx) => (
+                              <li key={idx} className="text-sm text-gray-700 leading-relaxed">
+                                • {challenge}
                               </li>
                             ))}
                           </ul>
                         </div>
 
                         <div>
-                          <h4 className="text-lg font-semibold text-gray-800 mb-3">Solutions</h4>
+                          <h4 className="text-lg font-semibold text-blue-600 mb-3 flex items-center">
+                            <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                            Solutions
+                          </h4>
                           <ul className="space-y-2">
-                            {project.solutions && project.solutions.map((solution, idx) => (
-                              <li key={idx} className="flex items-start text-sm text-gray-700">
-                                <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                                {solution}
+                            {project.solutions && project.solutions.slice(0, 3).map((solution, idx) => (
+                              <li key={idx} className="text-sm text-gray-700 leading-relaxed">
+                                • {solution}
                               </li>
                             ))}
                           </ul>
                         </div>
 
                         <div>
-                          <h4 className="text-lg font-semibold text-gray-800 mb-3">Outcomes</h4>
+                          <h4 className="text-lg font-semibold text-green-600 mb-3 flex items-center">
+                            <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                            Outcomes
+                          </h4>
                           <ul className="space-y-2">
-                            {project.outcomes && project.outcomes.map((outcome, idx) => (
-                              <li key={idx} className="flex items-start text-sm text-gray-700">
-                                <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                                {outcome}
+                            {project.outcomes && project.outcomes.slice(0, 3).map((outcome, idx) => (
+                              <li key={idx} className="text-sm text-gray-700 leading-relaxed">
+                                • {outcome}
                               </li>
                             ))}
                           </ul>
                         </div>
                       </div>
+
+                      {/* Testimonial */}
+                      {project.testimonial && (
+                        <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-6 border-l-4 border-orange-500">
+                          <div className="flex items-start">
+                            <div className="text-orange-500 text-3xl mr-4 flex-shrink-0">"</div>
+                            <div>
+                              <p className="text-gray-700 italic mb-3 leading-relaxed">
+                                {project.testimonial}
+                              </p>
+                              <div className="text-sm">
+                                <p className="font-semibold text-gray-800">
+                                  {project.clientContact}
+                                </p>
+                                <p className="text-orange-600 font-medium">
+                                  {project.client}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </motion.div>

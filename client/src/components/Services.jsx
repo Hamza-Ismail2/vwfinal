@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import executiveTransport from '../images/kahua-VIP-arrival-scaled.jpg';
 import scenicTours from '../images/Oahu-Magnum-Experience-over-water-scaled.jpg';
 import weddingService from '../images/OA_WEDD_MAG_OFF_004-SHIBSTY-1-scaled.jpg';
@@ -9,11 +9,6 @@ import cargoService from '../images/Raptor_ATV_action-scaled.jpg';
 import coastalView from '../images/HI_KOH-COAST_407_001-SHIBSTY-1-scaled.jpg';
 
 const Services = () => {
-  const navigate = useNavigate();
-
-  const handleRequestQuote = (serviceTitle = '') => {
-    navigate('/request-quote', { state: { selectedService: serviceTitle } });
-  };
 
   const services = [
     {
@@ -207,12 +202,12 @@ const Services = () => {
 
                   {/* CTA */}
                   <div className="border-t border-gray-100 pt-6">
-                    <button 
-                      onClick={() => handleRequestQuote(service.title)}
-                      className={`w-full py-3 px-6 bg-gradient-to-r ${service.color} text-white font-semibold rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300`}
+                    <Link 
+                      to="/request-quote"
+                      className={`w-full py-3 px-6 bg-gradient-to-r ${service.color} text-white font-semibold rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 inline-block text-center`}
                     >
                       Request Quote
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -283,14 +278,18 @@ const Services = () => {
                   <span className="text-xl">📞</span>
                   <span className="text-lg whitespace-nowrap">(808) 930-9826</span>
                 </div>
-                <motion.button
+                <motion.div
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => handleRequestQuote()}
-                  className="mt-6 bg-white text-orange-600 px-4 sm:px-6 py-4 rounded-lg font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all duration-300 w-full"
+                  className="mt-6 w-full"
                 >
-                  Get Quote Now
-                </motion.button>
+                  <Link
+                    to="/request-quote"
+                    className="bg-white text-orange-600 px-4 sm:px-6 py-4 rounded-lg font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all duration-300 w-full inline-block text-center"
+                  >
+                    Get Quote Now
+                  </Link>
+                </motion.div>
               </div>
             </div>
           </div>

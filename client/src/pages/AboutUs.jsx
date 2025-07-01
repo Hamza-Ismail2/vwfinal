@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import aboutBackground from '../images/HI_KOH-COAST_407_001-SHIBSTY-1-scaled.jpg';
 import helicopterFleet from '../images/Bell-407-Hughes-500-Flight-over-Old-Flow.jpg';
 import operationsImage from '../images/IMG_7065-scaled.jpg';
@@ -446,21 +447,29 @@ const AboutUs = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <motion.button
+              <motion.div
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
               >
-                Request Quote
-              </motion.button>
+                <Link
+                  to="/request-quote"
+                  className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 inline-block"
+                >
+                  Request Quote
+                </Link>
+              </motion.div>
               
-              <motion.button
+              <motion.div
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-gray-900 transition-all duration-300"
               >
-                View Our Projects
-              </motion.button>
+                <Link
+                  to="/projects-case-studies"
+                  className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-gray-900 transition-all duration-300 inline-block"
+                >
+                  View Our Projects
+                </Link>
+              </motion.div>
             </div>
           </motion.div>
         </div>

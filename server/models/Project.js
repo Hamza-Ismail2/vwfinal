@@ -18,10 +18,9 @@ const ProjectSchema = new mongoose.Schema({
         required: [true, 'Please provide a description'],
         trim: true
     },
-    image: {
-        type: String,
-        default: null
-    },
+    images: [{
+        type: String
+    }],
     status: {
         type: String,
         enum: ['Active', 'Completed', 'On Hold'],

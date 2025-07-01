@@ -122,15 +122,17 @@ const RequestQuote = () => {
   // Utility for input sanitization
   const sanitizeInput = (value, type = 'text') => {
     if (typeof value !== 'string') return '';
-    let v = value.trim();
+    let v = value;
     if (type === 'email') {
-      v = v.replace(/[^a-zA-Z0-9@._+-]/g, '');
+      v = v.trim().replace(/[^a-zA-Z0-9@._+-]/g, '');
     } else if (type === 'phone') {
       v = v.replace(/[^0-9]/g, ''); // Only allow numbers for phone
     } else if (type === 'number') {
       v = v.replace(/[^0-9]/g, '');
+    } else if (type === 'message') {
+      v = v.replace(/[<>]/g, ''); // Remove angle brackets but preserve all spaces
     } else {
-      v = v.replace(/[<>]/g, '');
+      v = v.trim().replace(/[<>]/g, '');
     }
     return v;
   };
@@ -151,6 +153,9 @@ const RequestQuote = () => {
     }
     else if (field === 'passengers') sanitized = sanitizeInput(value, 'number');
     else if (field === 'budget') sanitized = sanitizeInput(value, 'text');
+    else if (field === 'specialRequests') sanitized = value; // Don't sanitize while typing
+    else if (field === 'additionalInfo') sanitized = value; // Don't sanitize while typing
+    else if (field === 'company') sanitized = value; // Don't sanitize while typing (allow spaces in company names)
     else sanitized = sanitizeInput(value, 'text');
     setFormData(prev => ({ ...prev, [field]: sanitized }));
   };
@@ -822,7 +827,7 @@ const RequestQuote = () => {
             <a href="tel:+18089309826" className="w-full sm:w-auto bg-orange-500 text-white px-4 sm:px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors duration-300 text-center whitespace-nowrap">
               Call (808) 930-9826
             </a>
-            <a href="mailto:quotes@verticalworx.com" className="w-full sm:w-auto border-2 border-white text-white px-4 sm:px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-gray-800 transition-all duration-300 text-center whitespace-nowrap">
+            <a href="mailto:info@verticalworx.aero" className="w-full sm:w-auto border-2 border-white text-white px-4 sm:px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-gray-800 transition-all duration-300 text-center whitespace-nowrap">
               Email Us
             </a>
           </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import certificationsBackground from '../images/Bell-407-Hughes-500-Flight-over-Old-Flow.jpg';
 import safetyImage from '../images/IMG_7097-scaled-1-1462x2048.jpg';
 
@@ -407,22 +408,18 @@ const CertificationsCompliance = () => {
               operational procedures, and safety protocols for your specific mission requirements.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <motion.button
+            <div className="flex justify-center">
+              <motion.div
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
               >
-                Schedule Safety Consultation
-              </motion.button>
-              
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-gray-900 transition-all duration-300"
-              >
-                Download Safety Manual
-              </motion.button>
+                <Link
+                  to="/faqs"
+                  className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 inline-block"
+                >
+                  Learn More
+                </Link>
+              </motion.div>
             </div>
           </motion.div>
         </div>

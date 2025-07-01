@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import ImageCarousel3D from '../components/ImageCarousel3D';
+import { 
+  ClipboardDocumentListIcon,
+  ChatBubbleLeftRightIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  StarIcon,
+  CogIcon,
+  ShieldCheckIcon,
+  BoltIcon
+} from '@heroicons/react/24/outline';
 
 // Import default background image
 import kohCoast from '../images/HI_KOH-COAST_407_001-SHIBSTY-1-scaled.jpg';
@@ -108,7 +118,7 @@ const Gallery = () => {
       </section>
 
       {/* 3D Carousel */}
-      <ImageCarousel3D />
+      {/* <ImageCarousel3D /> */}
 
       {/* Gallery Grid */}
       <section className="py-16 bg-gray-50">
@@ -225,6 +235,131 @@ const Gallery = () => {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Call to Action Section */}
+      <section className="py-20 bg-gradient-to-r from-orange-500 to-red-600">
+        <div className="container mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-center text-white"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Ready to Experience Excellence?
+            </h2>
+            <p className="text-xl md:text-2xl text-orange-100 max-w-3xl mx-auto mb-12 leading-relaxed">
+              Let's discuss your helicopter service needs. Our expert team is ready to make your vision take flight.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 max-w-6xl mx-auto">
+              <motion.a
+                href="/request-quote"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                whileHover={{ y: -3, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-white/10 backdrop-blur-sm border-2 border-white text-white px-6 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-orange-600 transition-all duration-300 flex flex-col items-center"
+              >
+                <ClipboardDocumentListIcon className="h-8 w-8 mb-2" />
+                <span>Request a Quote</span>
+              </motion.a>
+              
+              <motion.a
+                href="/contact"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                whileHover={{ y: -3, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-white/10 backdrop-blur-sm border-2 border-white text-white px-6 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-orange-600 transition-all duration-300 flex flex-col items-center"
+              >
+                <ChatBubbleLeftRightIcon className="h-8 w-8 mb-2" />
+                <span>Contact Us Today</span>
+              </motion.a>
+              
+              <motion.a
+                href="tel:+18089309826"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                whileHover={{ y: -3, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-white/10 backdrop-blur-sm border-2 border-white text-white px-6 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-orange-600 transition-all duration-300 flex flex-col items-center"
+              >
+                <PhoneIcon className="h-8 w-8 mb-2" />
+                <span>Call Us Now</span>
+              </motion.a>
+              
+              <motion.a
+                href="mailto:info@verticalworx.aero"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                whileHover={{ y: -3, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-white/10 backdrop-blur-sm border-2 border-white text-white px-6 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-orange-600 transition-all duration-300 flex flex-col items-center"
+              >
+                <EnvelopeIcon className="h-8 w-8 mb-2" />
+                <span>Email Us Now</span>
+              </motion.a>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+                whileHover={{ y: -3, scale: 1.02 }}
+                className="bg-white/10 backdrop-blur-sm border-2 border-white text-white px-6 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-orange-600 transition-all duration-300 flex flex-col items-center cursor-pointer"
+                onClick={() => {
+                  // Scroll to testimonials section if it exists, or redirect to about page
+                  const testimonialsSection = document.getElementById('testimonials');
+                  if (testimonialsSection) {
+                    testimonialsSection.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    window.location.href = '/about#testimonials';
+                  }
+                }}
+              >
+                <StarIcon className="h-8 w-8 mb-2" />
+                <span>Customer Reviews</span>
+              </motion.div>
+            </div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="mt-12 text-center"
+            >
+              <p className="text-orange-100 text-lg mb-4">
+                <span className="font-semibold">24/7 Emergency Services Available</span>
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center text-orange-100">
+                <div className="flex items-center">
+                  <CogIcon className="h-5 w-5 text-orange-300 mr-2" />
+                  Professional Pilots
+                </div>
+                <div className="flex items-center">
+                  <ShieldCheckIcon className="h-5 w-5 text-orange-300 mr-2" />
+                  Fully Insured
+                </div>
+                <div className="flex items-center">
+                  <BoltIcon className="h-5 w-5 text-orange-300 mr-2" />
+                  Rapid Response
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 

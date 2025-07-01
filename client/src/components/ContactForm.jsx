@@ -19,15 +19,17 @@ const Contact = () => {
   // Utility for input sanitization
   const sanitizeInput = (value, type = 'text') => {
     if (typeof value !== 'string') return '';
-    let v = value.trim();
+    let v = value;
     if (type === 'email') {
-      v = v.replace(/[^a-zA-Z0-9@._+-]/g, '');
+      v = v.trim().replace(/[^a-zA-Z0-9@._+-]/g, '');
     } else if (type === 'phone') {
       v = v.replace(/[^0-9]/g, ''); // Only allow numbers for phone
     } else if (type === 'number') {
       v = v.replace(/[^0-9]/g, '');
+    } else if (type === 'message') {
+      v = v.replace(/[<>]/g, ''); // Remove angle brackets but preserve all spaces
     } else {
-      v = v.replace(/[<>]/g, ''); // Remove angle brackets to prevent HTML injection
+      v = v.trim().replace(/[<>]/g, ''); // Remove angle brackets to prevent HTML injection
     }
     return v;
   };
@@ -48,6 +50,7 @@ const Contact = () => {
       sanitized = formatPhone(sanitized);
     }
     else if (name === 'passengers') sanitized = sanitizeInput(value, 'number');
+    else if (name === 'message') sanitized = value; // Don't sanitize while typing
     else sanitized = sanitizeInput(value, 'text');
     setFormData(prev => ({ ...prev, [name]: sanitized }));
   };
@@ -60,7 +63,7 @@ const Contact = () => {
       email: sanitizeInput(formData.email, 'email'),
       phone: sanitizeInput(formData.phone, 'phone').slice(0, 3) + '-' + sanitizeInput(formData.phone, 'phone').slice(3, 10),
       service: sanitizeInput(formData.service, 'text'),
-      message: sanitizeInput(formData.message, 'text'),
+      message: sanitizeInput(formData.message, 'message'),
       date: sanitizeInput(formData.date, 'text'),
       passengers: sanitizeInput(formData.passengers, 'number'),
     };
@@ -102,28 +105,23 @@ const Contact = () => {
     {
       icon: "📞",
       title: "Call Us 24/7",
-      content: "+1 (555) 123-HELI",
+      content: "(808) 930-9826",
       description: "Emergency hotline available around the clock",
-      color: "from-green-500 to-green-700"
+      color: "from-green-500 to-green-700",
+      action: "tel:+18089309826"
     },
     {
       icon: "✉️",
       title: "Email Us",
-      content: "info@elitehelicopters.com",
+      content: "info@verticalworx.aero",
       description: "We'll respond within 2 hours",
-      color: "from-blue-500 to-blue-700"
-    },
-    {
-      icon: "💬",
-      title: "Live Chat",
-      content: "Available 9 AM - 10 PM",
-      description: "Instant support for urgent requests",
-      color: "from-purple-500 to-purple-700"
+      color: "from-blue-500 to-blue-700",
+      action: "mailto:info@verticalworx.aero"
     },
     {
       icon: "📍",
       title: "Visit Our Base",
-      content: "123 Aviation Way, Skyport, SP 12345",
+      content: "73 Uu Street, Kailua-Kona, HI 96740",
       description: "Tour our facility and fleet",
       color: "from-orange-500 to-orange-700"
     }
@@ -176,30 +174,36 @@ const Contact = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="mb-16"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {contactMethods.map((method, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="group bg-white rounded-2xl shadow-lg p-6 lg:p-8 hover:shadow-xl transition-all duration-300 cursor-pointer"
-              >
-                <div className={`w-16 h-16 bg-gradient-to-r ${method.color} rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                  <span className="text-2xl">{method.icon}</span>
-                </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">
-                  {method.title}
-                </h3>
-                <p className="text-blue-600 font-semibold text-center mb-2">
-                  {method.content}
-                </p>
-                <p className="text-gray-600 text-sm text-center">
-                  {method.description}
-                </p>
-              </motion.div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
+            {contactMethods.map((method, index) => {
+              const Component = method.action ? motion.a : motion.div;
+              const props = method.action ? { href: method.action } : {};
+              
+              return (
+                                  <Component
+                    key={index}
+                    {...props}
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: index * 0.15 }}
+                    className="group bg-white rounded-2xl shadow-lg p-6 lg:p-10 hover:shadow-xl transition-all duration-300 cursor-pointer h-full flex flex-col justify-center"
+                  >
+                    <div className={`w-18 h-18 lg:w-20 lg:h-20 bg-gradient-to-r ${method.color} rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                      <span className="text-3xl lg:text-4xl">{method.icon}</span>
+                    </div>
+                    <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-3 text-center">
+                      {method.title}
+                    </h3>
+                    <p className="text-blue-600 font-semibold text-center mb-3 text-base lg:text-lg">
+                      {method.content}
+                    </p>
+                    <p className="text-gray-600 text-sm lg:text-base text-center leading-relaxed">
+                      {method.description}
+                    </p>
+                  </Component>
+              );
+            })}
           </div>
         </motion.div>
 
@@ -412,8 +416,8 @@ const Contact = () => {
                   <div>
                     <h4 className="text-lg font-semibold text-gray-900 mb-2">Our Location</h4>
                     <p className="text-gray-600">
-                      123 Aviation Way<br />
-                      Skyport, SP 12345<br />
+                      73 Uu Street<br />
+                      Kailua-Kona, HI 96740<br />
                       United States
                     </p>
                   </div>
@@ -446,22 +450,37 @@ const Contact = () => {
                     <p className="text-gray-600">
                       FAA Part 135 Certified<br />
                       DOT Safety Approved<br />
-                      Insurance: $10M Coverage
+                      Insurance: $5M Coverage
                     </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Map Placeholder */}
+            {/* Interactive Map */}
             <div className="bg-white rounded-2xl shadow-lg p-8 lg:p-10">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Find Us</h3>
-              <div className="bg-gray-200 rounded-lg h-64 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <div className="text-4xl mb-2">🗺️</div>
-                  <p>Interactive Map</p>
-                  <p className="text-sm">Coming Soon</p>
+              <div className="relative rounded-lg overflow-hidden h-64 mb-4">
+                <iframe
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=-156.0514%2C19.7191%2C-156.0314%2C19.7391&layer=mapnik&marker=19.729143754036354%2C-156.04140276501104"
+                  className="w-full h-full border-0"
+                  title="Vertical Worx Location - 73 Uu Street, Kailua-Kona, Hawaii"
+                  loading="lazy"
+                ></iframe>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  <p className="font-semibold">73 Uu Street, Kailua-Kona, HI 96740</p>
+                  <p>Click map to open in new window</p>
                 </div>
+                <a
+                  href="https://www.openstreetmap.org/?mlat=19.729143754036354&mlon=-156.04140276501104#map=16/19.729143754036354/-156.04140276501104"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-300"
+                >
+                  View Larger Map
+                </a>
               </div>
             </div>
           </motion.div>
@@ -534,7 +553,7 @@ const Contact = () => {
                     Are flights insured?
                   </h4>
                   <p className="text-gray-600">
-                    All flights are fully insured with $10M coverage. Additional insurance can be arranged for special requirements.
+                    All flights are fully insured with $5M coverage. Additional insurance can be arranged for special requirements.
                   </p>
                 </div>
               </div>

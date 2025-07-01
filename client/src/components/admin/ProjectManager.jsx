@@ -38,9 +38,10 @@ const ProjectManager = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [form, setForm] = useState({ title: '', description: '', category: 'Other', image: null, status: 'Active', challenges: '', solutions: '', outcomes: '' });
+  const [form, setForm] = useState({ title: '', description: '', category: 'Other', images: [], status: 'Active', challenges: '', solutions: '', outcomes: '' });
   const [editing, setEditing] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [imagesToDelete, setImagesToDelete] = useState([]);
   const user = JSON.parse(localStorage.getItem('vw_admin'));
 
   const fetchProjects = async () => {
@@ -61,14 +62,27 @@ const ProjectManager = () => {
 
   const handleChange = e => {
     const { name, value, files } = e.target;
-    if (name === 'image') {
-      setForm({ ...form, image: files[0] });
+    if (name === 'images') {
+      setForm({ ...form, images: Array.from(files) });
     } else {
       // Allow spaces in title and description, only sanitize harmful characters
       const sanitizedValue = name === 'title' || name === 'description' ? 
         value.replace(/[<>]/g, '') : sanitizeInput(value);
       setForm({ ...form, [name]: sanitizedValue });
     }
+  };
+
+  const handleRemoveCurrentImage = (imageUrl) => {
+    setImagesToDelete(prev => [...prev, imageUrl]);
+  };
+
+  const handleRemoveNewImage = (index) => {
+    const newImages = form.images.filter((_, i) => i !== index);
+    setForm({ ...form, images: newImages });
+  };
+
+  const handleRestoreCurrentImage = (imageUrl) => {
+    setImagesToDelete(prev => prev.filter(img => img !== imageUrl));
   };
 
   const handleSubmit = async e => {
@@ -84,8 +98,16 @@ const ProjectManager = () => {
       formData.append('challenges', form.challenges);
       formData.append('solutions', form.solutions);
       formData.append('outcomes', form.outcomes);
-      if (form.image && typeof form.image !== 'string') {
-        formData.append('image', form.image);
+      if (editing) {
+        formData.append('keepExistingImages', 'true');
+        if (imagesToDelete.length > 0) {
+          formData.append('imagesToDelete', JSON.stringify(imagesToDelete));
+        }
+      }
+      if (form.images && form.images.length > 0) {
+        form.images.forEach(image => {
+          formData.append('images', image);
+        });
       }
       const res = await fetch(url, {
         method,
@@ -94,9 +116,10 @@ const ProjectManager = () => {
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Failed to save project');
-      setForm({ title: '', description: '', category: 'Other', image: null, status: 'Active', challenges: '', solutions: '', outcomes: '' });
+      setForm({ title: '', description: '', category: 'Other', images: [], status: 'Active', challenges: '', solutions: '', outcomes: '' });
       setEditing(null);
       setModalOpen(false);
+      setImagesToDelete([]);
       setSuccess(editing ? 'Project updated successfully!' : 'Project created successfully!');
       setError('');
       setTimeout(() => setSuccess(''), 3000);
@@ -108,12 +131,13 @@ const ProjectManager = () => {
 
   const handleEdit = project => {
     setEditing(project);
+    setImagesToDelete([]);
     setForm({
       title: project.title,
       description: project.description,
       category: project.category || 'Other',
       status: project.status,
-      image: null,
+      images: [],
       challenges: Array.isArray(project.challenges) ? project.challenges.join(', ') : (project.challenges || ''),
       solutions: Array.isArray(project.solutions) ? project.solutions.join(', ') : (project.solutions || ''),
       outcomes: Array.isArray(project.outcomes) ? project.outcomes.join(', ') : (project.outcomes || '')
@@ -157,7 +181,7 @@ const ProjectManager = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2"
-            onClick={() => { setEditing(null); setForm({ title: '', description: '', category: 'Other', image: null, status: 'Active', challenges: '', solutions: '', outcomes: '' }); setModalOpen(true); }}
+            onClick={() => { setEditing(null); setImagesToDelete([]); setForm({ title: '', description: '', category: 'Other', images: [], status: 'Active', challenges: '', solutions: '', outcomes: '' }); setModalOpen(true); }}
           >
             <PlusIcon className="w-5 h-5" />
             <span>New Project</span>
@@ -208,8 +232,15 @@ const ProjectManager = () => {
                 {projects.map(project => (
                   <tr key={project._id} className="hover:bg-slate-700/30 transition-colors">
                     <td className="py-4 px-6">
-                      {project.image ? (
-                        <img src={project.image} alt={project.title} className="w-16 h-16 object-cover rounded-lg shadow-md" />
+                      {project.images && project.images.length > 0 ? (
+                        <div className="relative">
+                          <img src={project.images[0]} alt={project.title} className="w-16 h-16 object-cover rounded-lg shadow-md" />
+                          {project.images.length > 1 && (
+                            <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                              {project.images.length}
+                            </span>
+                          )}
+                        </div>
                       ) : (
                         <div className="w-16 h-16 bg-slate-600 rounded-lg flex items-center justify-center">
                           <RocketLaunchIcon className="w-6 h-6 text-slate-400" />
@@ -280,7 +311,7 @@ const ProjectManager = () => {
                   {editing ? 'Edit Project' : 'Create New Project'}
                 </h3>
                 <button
-                  onClick={() => setModalOpen(false)}
+                  onClick={() => { setModalOpen(false); setImagesToDelete([]); }}
                   className="p-2 text-slate-400 hover:text-white transition-colors"
                 >
                   <XMarkIcon className="w-6 h-6" />
@@ -385,21 +416,129 @@ const ProjectManager = () => {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-medium mb-2">Image</label>
+                  <label className="block text-slate-300 font-medium mb-2">Images (Select up to 5)</label>
+                  
+                  {/* Show existing images when editing */}
+                  {editing && editing.images && editing.images.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-slate-300 text-sm mb-3">
+                        Current Images ({editing.images.length})
+                        {imagesToDelete.length > 0 && (
+                          <span className="ml-2 text-red-400">
+                            • {imagesToDelete.length} marked for deletion
+                          </span>
+                        )}
+                      </p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                        {editing.images.map((imageUrl, index) => {
+                          const isMarkedForDeletion = imagesToDelete.includes(imageUrl);
+                          return (
+                            <div key={index} className="relative group">
+                              <img
+                                src={imageUrl}
+                                alt={`Current ${index + 1}`}
+                                className={`w-full h-20 object-cover rounded-lg shadow-md transition-all duration-200 ${
+                                  isMarkedForDeletion ? 'opacity-50 grayscale' : ''
+                                }`}
+                              />
+                              <span className={`absolute top-1 left-1 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center ${
+                                isMarkedForDeletion ? 'bg-red-500' : 'bg-blue-500'
+                              }`}>
+                                {index + 1}
+                              </span>
+                              
+                              {/* Delete/Restore button */}
+                              {isMarkedForDeletion ? (
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleRestoreCurrentImage(imageUrl);
+                                  }}
+                                  className="absolute top-1 right-1 bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-green-600 transition-colors z-10 shadow-md"
+                                  title="Restore image"
+                                >
+                                  ↺
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleRemoveCurrentImage(imageUrl);
+                                  }}
+                                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100 z-10 shadow-md"
+                                  title="Mark for deletion"
+                                >
+                                  ✕
+                                </button>
+                              )}
+
+                              <div className={`absolute inset-0 rounded-lg flex items-center justify-center transition-opacity duration-200 ${
+                                isMarkedForDeletion 
+                                  ? 'bg-red-500/70 opacity-100' 
+                                  : 'bg-black/50 opacity-0 group-hover:opacity-100'
+                              }`}>
+                                <span className="text-white text-xs font-medium">
+                                  {isMarkedForDeletion ? 'WILL DELETE' : 'Current'}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   <input
                     type="file"
-                    name="image"
+                    name="images"
                     accept="image/*"
+                    multiple
                     onChange={handleChange}
                     className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-green-500 file:text-white file:cursor-pointer hover:file:bg-green-600 transition-all"
                   />
-                  {form.image && typeof form.image !== 'string' && (
+                  
+                  {/* Show new images being uploaded */}
+                  {form.images && form.images.length > 0 && (
                     <div className="mt-4">
-                      <img
-                        src={URL.createObjectURL(form.image)}
-                        alt="Preview"
-                        className="w-32 h-32 object-cover rounded-lg shadow-md"
-                      />
+                      <p className="text-slate-300 text-sm mb-3">New Images to Add ({form.images.length})</p>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {form.images.map((image, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={URL.createObjectURL(image)}
+                              alt={`New ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-lg shadow-md"
+                            />
+                            <span className="absolute top-1 left-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                              +{index + 1}
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleRemoveNewImage(index);
+                              }}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100 z-10 shadow-md"
+                              title="Remove image"
+                            >
+                              ✕
+                            </button>
+                            <div className="absolute bottom-1 right-1 bg-green-500 text-white text-xs px-1 rounded">
+                              NEW
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {editing && (
+                    <div className="mt-3 p-3 bg-slate-700/30 rounded-lg">
+                      <p className="text-slate-300 text-sm">
+                        <strong>Note:</strong> You can remove current images by clicking the ❌ icon (they'll be marked for deletion). New images will be added to the remaining ones. Hover over images to see controls.
+                      </p>
                     </div>
                   )}
                 </div>
@@ -409,7 +548,7 @@ const ProjectManager = () => {
                     type="button"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => setModalOpen(false)}
+                    onClick={() => { setModalOpen(false); setImagesToDelete([]); }}
                     className="px-6 py-3 bg-slate-600/50 text-slate-300 rounded-lg font-medium hover:bg-slate-600/70 transition-colors"
                   >
                     Cancel

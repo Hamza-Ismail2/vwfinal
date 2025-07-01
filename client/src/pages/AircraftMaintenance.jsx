@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const AircraftMaintenance = () => {
   const maintenancePrograms = [
@@ -296,12 +297,12 @@ const AircraftMaintenance = () => {
               >
                 Schedule Service
               </button>
-              <button 
-                onClick={() => window.location.href = '/request-quote'}
-                className="border-2 border-orange-500 text-orange-500 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-orange-500 hover:text-white transition-all duration-300"
+              <Link 
+                to="/request-quote"
+                className="border-2 border-orange-500 text-orange-500 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-orange-500 hover:text-white transition-all duration-300 inline-block"
               >
                 Request Quote
-              </button>
+              </Link>
             </div>
           </motion.div>
         </div>

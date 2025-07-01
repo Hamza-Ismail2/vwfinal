@@ -1,13 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const Services = () => {
-  const navigate = useNavigate();
-
-  const handleRequestQuote = (serviceTitle = '') => {
-    navigate('/request-quote', { state: { selectedService: serviceTitle } });
-  };
 
   const services = [
     {
@@ -173,14 +168,17 @@ const Services = () => {
               industries like construction, agriculture, media, and emergency response. Our experienced 
               team delivers safe, precise, and efficient aerial solutions—every mission, every time.
             </p>
-            <motion.button
+            <motion.div
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => handleRequestQuote()}
-              className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              Request Quote
-            </motion.button>
+              <Link
+                to="/request-quote"
+                className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 inline-block"
+              >
+                Request Quote
+              </Link>
+            </motion.div>
           </motion.div>
         </div>
       </section>
@@ -259,14 +257,17 @@ const Services = () => {
                     <div className="text-orange-600 font-semibold text-lg">
                       {service.pricing}
                     </div>
-                    <motion.button
+                    <motion.div
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => handleRequestQuote(service.title)}
-                      className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-300"
                     >
-                      Request Quote
-                    </motion.button>
+                      <Link
+                        to="/request-quote"
+                        className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-2 rounded-lg font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-300 inline-block"
+                      >
+                        Request Quote
+                      </Link>
+                    </motion.div>
                   </div>
                 </div>
               </motion.div>
@@ -437,14 +438,18 @@ const Services = () => {
                     <span className="text-lg">info@verticalworx.aero</span>
                   </div>
                 </div>
-                <motion.button
+                <motion.div
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => handleRequestQuote()}
-                  className="mt-6 bg-white text-orange-600 px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 w-full"
+                  className="mt-6 w-full"
                 >
-                  Request Service Quote
-                </motion.button>
+                  <Link
+                    to="/request-quote"
+                    className="bg-white text-orange-600 px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 w-full inline-block text-center"
+                  >
+                    Request Service Quote
+                  </Link>
+                </motion.div>
               </div>
             </motion.div>
           </div>
@@ -468,23 +473,18 @@ const Services = () => {
               specific requirements and deliver customized aviation solutions.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <motion.button
+            <div className="flex justify-center">
+              <motion.div
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => handleRequestQuote()}
-                className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
               >
-                Schedule Consultation
-              </motion.button>
-              
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-gray-900 transition-all duration-300"
-              >
-                View Our Projects
-              </motion.button>
+                <Link
+                  to="/projects-case-studies"
+                  className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-gray-900 transition-all duration-300 inline-block"
+                >
+                  View Our Projects
+                </Link>
+              </motion.div>
             </div>
           </motion.div>
         </div>

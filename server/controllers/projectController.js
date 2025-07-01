@@ -7,17 +7,18 @@ exports.createProject = async (req, res) => {
             title,
             category,
             description,
-            image,
             status,
             challenges,
             solutions,
             outcomes
         } = req.body;
         
-        // Build image URL if file uploaded
-        let imageUrl = image || null;
-        if (req.file) {
-            imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        // Build image URLs array if files uploaded
+        let imageUrls = [];
+        if (req.files && req.files.length > 0) {
+            imageUrls = req.files.map(file => 
+                `${req.protocol}://${req.get('host')}/uploads/${file.filename}`
+            );
         }
 
         // utility to split
@@ -32,7 +33,7 @@ exports.createProject = async (req, res) => {
             title,
             category,
             description,
-            image: imageUrl,
+            images: imageUrls,
             status: status || 'Active',
             challenges: splitField(challenges),
             solutions: splitField(solutions),
@@ -123,11 +124,11 @@ exports.updateProject = async (req, res) => {
             title,
             category,
             description,
-            image,
             status,
             challenges,
             solutions,
-            outcomes
+            outcomes,
+            keepExistingImages
         } = req.body;
         const role = req.body.role || req.headers['x-user-role'];
         if (role !== 'admin') {
@@ -137,9 +138,31 @@ exports.updateProject = async (req, res) => {
             });
         }
 
-        let imageUrl = image;
-        if (req.file) {
-            imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        // Get existing project to preserve images if needed
+        const existingProject = await Project.findById(req.params.id);
+        let imageUrls = [];
+        
+        // If keeping existing images, start with those
+        if (keepExistingImages === 'true' && existingProject.images) {
+            imageUrls = [...existingProject.images];
+        }
+
+        // Remove images marked for deletion
+        if (req.body.imagesToDelete) {
+            try {
+                const imagesToDelete = JSON.parse(req.body.imagesToDelete);
+                imageUrls = imageUrls.filter(imageUrl => !imagesToDelete.includes(imageUrl));
+            } catch (error) {
+                console.error('Error parsing imagesToDelete:', error);
+            }
+        }
+        
+        // Add new uploaded images
+        if (req.files && req.files.length > 0) {
+            const newImageUrls = req.files.map(file => 
+                `${req.protocol}://${req.get('host')}/uploads/${file.filename}`
+            );
+            imageUrls = [...imageUrls, ...newImageUrls];
         }
 
         // utility to split
@@ -153,7 +176,7 @@ exports.updateProject = async (req, res) => {
             title,
             category,
             description,
-            image: imageUrl,
+            images: imageUrls,
             status,
             challenges: splitField(challenges),
             solutions: splitField(solutions),

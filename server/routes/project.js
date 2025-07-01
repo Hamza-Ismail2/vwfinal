@@ -40,8 +40,8 @@ const upload = multer({
 // All routes are public
 router.get('/', getProjects);
 router.get('/:id', getProject);
-router.post('/', upload.single('image'), createProject);
-router.put('/:id', upload.single('image'), updateProject);
+router.post('/', upload.array('images', 5), createProject);
+router.put('/:id', upload.array('images', 5), updateProject);
 router.delete('/:id', deleteProject);
 
 module.exports = router; 
