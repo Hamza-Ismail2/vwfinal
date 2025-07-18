@@ -4,6 +4,7 @@ import { TrophyIcon, PaperAirplaneIcon, ShieldCheckIcon, ClockIcon, StarIcon, Ro
 import helicopterFleet from '../images/Bell-407-Hughes-500-Flight-over-Old-Flow.jpg';
 import vipArrival from '../images/kahua-VIP-arrival-scaled.jpg';
 import helicopterAction from '../images/IMG_7065-scaled.jpg';
+import { Link } from 'react-router-dom';
 
 const About = () => {
   const stats = [
@@ -131,7 +132,7 @@ const About = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-            About <span className="bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">Elite Helicopters</span>
+            About <span className="bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">Vertical Worx</span>
           </h2>
           <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             With over 15 years of excellence in aviation, we are your trusted partner for safe, 
@@ -155,7 +156,7 @@ const About = () => {
                 </h3>
                 <div className="space-y-4 text-gray-600 leading-relaxed text-sm sm:text-base">
                   <p>
-                    Founded in 2008 by a team of passionate aviation professionals, Elite Helicopters 
+                    Founded in 2008 by a team of passionate aviation professionals, Vertical Worx 
                     began with a simple mission: to provide uncompromising safety, exceptional service, 
                     and unforgettable experiences in the skies.
                   </p>
@@ -473,9 +474,11 @@ const About = () => {
               Join thousands of satisfied customers who trust us with their aerial transportation needs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <button className="bg-white text-orange-500 px-8 py-4 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 min-w-[200px]">
-                Contact Us Today
-              </button>
+              <Link to="/contact">
+                <button className="bg-white text-orange-500 px-8 py-4 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 min-w-[200px]">
+                  Contact Us Today
+                </button>
+              </Link>
               <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-orange-500 transition-all duration-300 min-w-[200px]">
                 View Our Fleet
               </button>

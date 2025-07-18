@@ -111,20 +111,28 @@ const AboutUs = () => {
                 with unmatched professionalism and safety across the Hawaiian Islands.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <motion.button
+                <motion.div
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
                 >
-                  Our Services
-                </motion.button>
-                <motion.button
+                  <Link
+                    to="/services"
+                    className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 inline-block"
+                  >
+                    Our Services
+                  </Link>
+                </motion.div>
+                <motion.div
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-gray-900 transition-all duration-300"
                 >
-                  Contact Us
-                </motion.button>
+                  <Link
+                    to="/contact"
+                    className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-gray-900 transition-all duration-300 inline-block"
+                  >
+                    Contact Us
+                  </Link>
+                </motion.div>
               </div>
             </motion.div>
             
