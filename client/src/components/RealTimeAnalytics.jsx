@@ -8,6 +8,11 @@ function fetchLocal() {
 const RealTimeAnalytics = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  // UI state for collapsing/expanding long tables
+  const [showAllPages, setShowAllPages] = useState(false);
+  const [showAllButtons, setShowAllButtons] = useState(false);
+  const [userSet, setUserSet] = useState(new Set());
+  const [activeViews, setActiveViews] = useState(0);
 
   const load = async (showLoading = false) => {
     if (showLoading) setLoading(true);
@@ -33,9 +38,7 @@ const RealTimeAnalytics = () => {
   // Aggregations
   const pageCounts = {};
   const buttonCounts = {};
-  const userSet = new Set();
   const now = Date.now();
-  let activeViews = 0;
 
   events.forEach((e) => {
     userSet.add(e.params?.uid || '');
@@ -58,64 +61,92 @@ const RealTimeAnalytics = () => {
     return { btn, from, count };
   }).sort((a, b) => b.count - a.count);
 
+  // Derive max counts for inline bar visuals
+  const maxPageCount = pageRows.length ? pageRows[0][1] : 0;
+  const maxButtonCount = buttonRows.length ? buttonRows[0].count : 0;
+
+  // Slice rows when collapsed
+  const displayPages = showAllPages ? pageRows : pageRows.slice(0, 5);
+  const displayButtons = showAllButtons ? buttonRows : buttonRows.slice(0, 5);
+
   return (
-    <section className="bg-white shadow rounded-lg p-6 my-8 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-gray-900">Real-Time Analytics</h2>
+    <section className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 backdrop-blur-sm border border-slate-600/30 rounded-2xl p-6 my-8 max-w-4xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4 text-gray-100">Real-Time Analytics</h2>
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="p-4 bg-gray-100 rounded">
-          <p className="text-sm text-gray-500">Active Views (5 min)</p>
-          <p className="text-3xl font-semibold text-gray-900">{activeViews}</p>
+        <div className="p-4 bg-slate-700/50 rounded border border-slate-600/30">
+          <p className="text-sm text-gray-400">Active Views (5 min)</p>
+          <p className="text-3xl font-semibold text-white">{activeViews}</p>
         </div>
-        <div className="p-4 bg-gray-100 rounded">
-          <p className="text-sm text-gray-500">Total Unique Users</p>
-          <p className="text-3xl font-semibold text-gray-900">{userSet.size}</p>
+        <div className="p-4 bg-slate-700/50 rounded border border-slate-600/30">
+          <p className="text-sm text-gray-400">Total Unique Users</p>
+          <p className="text-3xl font-semibold text-white">{userSet.size}</p>
         </div>
       </div>
 
-      <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-700">Top Pages</h3>
-      <table className="min-w-full text-sm mb-6">
+      <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-200">Top Pages</h3>
+      <div className="max-h-72 overflow-y-auto rounded-md">
+      <table className="min-w-full text-sm mb-2">
         <thead>
-          <tr className="text-left text-gray-500">
+          <tr className="text-left text-gray-400 sticky top-0 bg-slate-800/80 backdrop-blur-sm">
             <th className="py-2 pr-4">Path</th>
             <th className="py-2">Views</th>
           </tr>
         </thead>
         <tbody>
-          {pageRows.map(([path, count]) => (
-            <tr key={path} className="border-t border-gray-200">
-              <td className="py-2 pr-4 text-gray-800">{path}</td>
-              <td className="py-2 text-gray-800">{count}</td>
+          {displayPages.map(([path, count]) => (
+            <tr key={path} className="border-t border-slate-600/30">
+              <td className="py-2 pr-4 text-gray-100 whitespace-nowrap">{path}</td>
+              <td className="py-2 text-gray-100 relative">
+                <span className="absolute inset-0 bg-slate-600/40" style={{ width: `${(count / (maxPageCount || 1)) * 100}%` }}></span>
+                <span className="relative z-10 pl-1">{count}</span>
+              </td>
             </tr>
           ))}
           {pageRows.length === 0 && (
-            <tr><td colSpan="2" className="py-4 text-center text-gray-500">No data</td></tr>
+            <tr><td colSpan="2" className="py-4 text-center text-gray-400">No data</td></tr>
           )}
         </tbody>
       </table>
+      </div>
+      {pageRows.length > 5 && (
+        <button onClick={() => setShowAllPages(!showAllPages)} className="text-xs text-blue-400 hover:underline mb-6">
+          {showAllPages ? 'Show Less' : `Show All (${pageRows.length})`}
+        </button>
+      )}
 
       {/* Button Clicks */}
-      <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-700">Button Clicks</h3>
-      <table className="min-w-full text-sm">
+      <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-200">Button Clicks</h3>
+      <div className="max-h-72 overflow-y-auto rounded-md">
+      <table className="min-w-full text-sm mb-2">
         <thead>
-          <tr className="text-left text-gray-500">
+          <tr className="text-left text-gray-400 sticky top-0 bg-slate-800/80 backdrop-blur-sm">
             <th className="py-2 pr-4">Button</th>
             <th className="py-2 pr-4">From Path</th>
             <th className="py-2">Clicks</th>
           </tr>
         </thead>
         <tbody>
-          {buttonRows.map((row) => (
-            <tr key={row.btn + row.from} className="border-t border-gray-200">
-              <td className="py-2 pr-4 text-gray-800">{row.btn}</td>
-              <td className="py-2 pr-4 text-gray-800">{row.from}</td>
-              <td className="py-2 text-gray-800">{row.count}</td>
+          {displayButtons.map((row) => (
+            <tr key={row.btn + row.from} className="border-t border-slate-600/30">
+              <td className="py-2 pr-4 text-gray-100 whitespace-nowrap">{row.btn}</td>
+              <td className="py-2 pr-4 text-gray-100 whitespace-nowrap">{row.from}</td>
+              <td className="py-2 text-gray-100 relative">
+                <span className="absolute inset-0 bg-slate-600/40" style={{ width: `${(row.count / (maxButtonCount || 1)) * 100}%` }}></span>
+                <span className="relative z-10 pl-1">{row.count}</span>
+              </td>
             </tr>
           ))}
           {buttonRows.length === 0 && (
-            <tr><td colSpan="3" className="py-4 text-center text-gray-500">No clicks yet</td></tr>
+            <tr><td colSpan="3" className="py-4 text-center text-gray-400">No clicks yet</td></tr>
           )}
         </tbody>
       </table>
+      </div>
+      {buttonRows.length > 5 && (
+        <button onClick={() => setShowAllButtons(!showAllButtons)} className="text-xs text-blue-400 hover:underline mt-2">
+          {showAllButtons ? 'Show Less' : `Show All (${buttonRows.length})`}
+        </button>
+      )}
     </section>
   );
 };

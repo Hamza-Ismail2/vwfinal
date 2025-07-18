@@ -5,7 +5,7 @@ import Services from '../components/Services';
 import ContactForm from '../components/ContactForm';
 import ImageCarousel3D from '../components/ImageCarousel3D';
 // import EventAnalyticsSummary from '../components/EventAnalyticsSummary';
-import RealTimeAnalytics from '../components/RealTimeAnalytics';
+// import RealTimeAnalytics from '../components/RealTimeAnalytics';
 
 const Home = () => {
   return (
@@ -14,7 +14,7 @@ const Home = () => {
       <About />
       <Services />
       <ContactForm />
-      <RealTimeAnalytics />
+      {/* <RealTimeAnalytics /> */}
     </div>
   );
 };
