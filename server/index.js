@@ -18,6 +18,7 @@ require('dotenv').config();
 const contactRoutes = require('./routes/contact');
 const servicesRoutes = require('./routes/services');
 const imageRoutes = require('./routes/images');
+const salesforceRoutes = require('./routes/salesforce');
 
 const userRoutes = require('./routes/user');
 const blogRoutes = require('./routes/blog');
@@ -138,6 +139,7 @@ app.use('/api/contacts', contactRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/services', servicesRoutes);
 app.use('/api/images', imageRoutes);
+app.use('/api/salesforce', salesforceRoutes);
 
 app.use('/api/users', userRoutes);
 app.use('/api/blogs', blogRoutes);

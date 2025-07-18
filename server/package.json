@@ -6,14 +6,17 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "db:migrate": "node scripts/migrate.js"
+    "db:migrate": "node scripts/migrate.js",
+    "test:salesforce": "node test-salesforce.js"
   },
   "dependencies": {
+    "axios": "^1.10.0",
     "bcryptjs": "^2.4.3",
     "compression": "^1.8.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
+    "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^7.5.0",
     "express-validator": "^7.0.1",
     "helmet": "^7.2.0",
@@ -22,10 +25,9 @@
     "mongoose": "^8.15.1",
     "multer": "^1.4.5-lts.2",
     "nodemailer": "^6.10.1",
-    "express-mongo-sanitize": "^2.2.0",
     "xss-clean": "^0.1.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
   }
-} 
+}
