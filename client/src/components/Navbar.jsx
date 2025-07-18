@@ -262,6 +262,7 @@ const Navbar = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                data-track-click="navbar_quote_button"
                 onClick={() => handlePageChange('/request-quote')}
                 className="hidden lg:flex items-center space-x-2 bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
               >
@@ -400,6 +401,7 @@ const Navbar = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 }}
+                  data-track-click="mobile_navbar_quote_button"
                   onClick={() => handlePageChange('/request-quote')}
                   className="w-full mt-8 bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-4 rounded-lg font-semibold shadow-lg"
                 >

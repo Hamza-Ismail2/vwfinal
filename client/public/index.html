@@ -34,5 +34,16 @@
     
     <!-- Preload critical resources -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" as="style">
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FHPWQ60C47"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);} // eslint-disable-line
+      gtag('js', new Date());
+      // Disable automatic page view to control via React Router
+      gtag('config', 'G-FHPWQ60C47', { send_page_view: false });
+    </script>
+    <!-- End Google Analytics -->
   </body>
 </html> 
