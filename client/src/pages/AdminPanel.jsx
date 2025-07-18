@@ -7,7 +7,9 @@ import GalleryManager from '../components/admin/GalleryManager';
 import SalesforceAnalytics from '../components/admin/SalesforceAnalytics';
 import ContactManager from '../components/admin/ContactManager';
 import QuoteManager from '../components/admin/QuoteManager';
-import EventFeed from '../components/admin/EventFeed';
+// import EventFeed from '../components/admin/EventFeed';
+import RealTimeAnalytics from '../components/RealTimeAnalytics';
+
 import {
   ChartBarIcon,
   DocumentTextIcon,
@@ -33,45 +35,45 @@ import { getAdminHeaders } from '../utils/authHeaders';
 
 // Modern sidebar navigation items with sophisticated icons
 const NAVIGATION_ITEMS = [
-  { 
-    id: 'dashboard', 
-    label: 'Dashboard', 
+  {
+    id: 'dashboard',
+    label: 'Dashboard',
     icon: ChartBarIcon,
     description: 'Overview & Analytics'
   },
-  { 
-    id: 'blog', 
-    label: 'Blog Posts', 
+  {
+    id: 'blog',
+    label: 'Blog Posts',
     icon: DocumentTextIcon,
     description: 'Content Management'
   },
-  { 
-    id: 'project', 
-    label: 'Projects', 
+  {
+    id: 'project',
+    label: 'Projects',
     icon: RocketLaunchIcon,
     description: 'Project Portfolio'
   },
-  { 
-    id: 'contacts', 
-    label: 'Contacts', 
+  {
+    id: 'contacts',
+    label: 'Contacts',
     icon: EnvelopeIcon,
     description: 'Customer Inquiries'
   },
-  { 
-    id: 'quotes', 
-    label: 'Quotes', 
+  {
+    id: 'quotes',
+    label: 'Quotes',
     icon: CurrencyDollarIcon,
     description: 'Quote Requests'
   },
-  { 
-    id: 'gallery', 
-    label: 'Gallery', 
+  {
+    id: 'gallery',
+    label: 'Gallery',
     icon: PhotoIcon,
     description: 'Image Management'
   },
-  { 
-    id: 'salesforce', 
-    label: 'Salesforce Analytics', 
+  {
+    id: 'salesforce',
+    label: 'Salesforce Analytics',
     icon: ChartBarIcon,
     description: 'Sales & Analytics'
   },
@@ -174,28 +176,28 @@ const Dashboard = ({ setActiveSection }) => {
 
       // Calculate stats with simulated growth percentages
       setStats({
-        blogs: { 
-          count: blogsData.success ? (blogsData.data?.length || 0) : 0, 
-          change: Math.floor(Math.random() * 20) + 5 
+        blogs: {
+          count: blogsData.success ? (blogsData.data?.length || 0) : 0,
+          change: Math.floor(Math.random() * 20) + 5
         },
-        projects: { 
-          count: projectsData.success ? (projectsData.data?.length || 0) : 0, 
-          change: Math.floor(Math.random() * 15) + 3 
+        projects: {
+          count: projectsData.success ? (projectsData.data?.length || 0) : 0,
+          change: Math.floor(Math.random() * 15) + 3
         },
-        contacts: { 
-          count: contactsData.success ? (contactsData.data?.length || 0) : 0, 
-          change: Math.floor(Math.random() * 25) + 8 
+        contacts: {
+          count: contactsData.success ? (contactsData.data?.length || 0) : 0,
+          change: Math.floor(Math.random() * 25) + 8
         },
-        quotes: { 
-          count: quotesData.success ? (quotesData.data?.length || 0) : 0, 
-          change: Math.floor(Math.random() * 18) + 6 
+        quotes: {
+          count: quotesData.success ? (quotesData.data?.length || 0) : 0,
+          change: Math.floor(Math.random() * 18) + 6
         },
-        images: { 
-          count: imagesData.success ? (imagesData.data?.length || 0) : 0, 
-          change: Math.floor(Math.random() * 12) + 2 
+        images: {
+          count: imagesData.success ? (imagesData.data?.length || 0) : 0,
+          change: Math.floor(Math.random() * 12) + 2
         }
       });
-      
+
       // Update cache timestamp
       setLastFetch(Date.now());
     } catch (error) {
@@ -236,7 +238,7 @@ const Dashboard = ({ setActiveSection }) => {
   ];
 
   return (
-      <motion.div
+    <motion.div
       variants={contentVariants}
       initial="initial"
       animate="animate"
@@ -255,7 +257,7 @@ const Dashboard = ({ setActiveSection }) => {
               </p>
             )}
           </div>
-              <motion.button
+          <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => fetchStats(true)}
@@ -264,9 +266,9 @@ const Dashboard = ({ setActiveSection }) => {
           >
             <ArrowPathIcon className="w-4 h-4" />
             <span>{loading ? 'Refreshing...' : 'Refresh'}</span>
-              </motion.button>
-          </div>
+          </motion.button>
         </div>
+      </div>
 
       {/* Stats Cards */}
       {loading ? (
@@ -323,17 +325,17 @@ const Dashboard = ({ setActiveSection }) => {
               >
                 <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
                   <IconComponent className="w-5 h-5 text-white" />
-        </div>
+                </div>
                 <h3 className="text-white font-semibold mb-1">{action.title}</h3>
                 <p className="text-slate-400 text-sm">{action.description}</p>
               </motion.button>
             );
           })}
-    </div>
+        </div>
       </div>
 
-      {/* Analytics Event Feed */}
-      <EventFeed />
+      {/* Analytics GTM */}
+      <RealTimeAnalytics />
     </motion.div>
   );
 };
@@ -371,7 +373,7 @@ const BlogManager = () => {
       setForm({ ...form, img: files[0] });
     } else {
       // Allow spaces in title and description, only sanitize harmful characters
-      const sanitizedValue = name === 'title' || name === 'desc' || name === 'tags' ? 
+      const sanitizedValue = name === 'title' || name === 'desc' || name === 'tags' ?
         value.replace(/[<>]/g, '') : sanitizeInput(value);
       setForm({ ...form, [name]: sanitizedValue });
     }
@@ -449,10 +451,10 @@ const BlogManager = () => {
     >
       <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-600/30">
         <div className="flex justify-between items-center">
-    <div>
+          <div>
             <h2 className="text-2xl font-bold text-white mb-2">Blog Management</h2>
             <p className="text-slate-300">Create and manage your blog posts and content.</p>
-      </div>
+          </div>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -502,10 +504,10 @@ const BlogManager = () => {
                   <th className="py-4 px-6 text-left text-white font-semibold">Type</th>
                   <th className="py-4 px-6 text-left text-white font-semibold">Tags</th>
                   <th className="py-4 px-6 text-left text-white font-semibold">Actions</th>
-              </tr>
-            </thead>
+                </tr>
+              </thead>
               <tbody className="divide-y divide-slate-600/30">
-              {blogs.map(blog => (
+                {blogs.map(blog => (
                   <tr key={blog._id} className="hover:bg-slate-700/30 transition-colors">
                     <td className="py-4 px-6">
                       {blog.img ? (
@@ -533,7 +535,7 @@ const BlogManager = () => {
                           </span>
                         ))}
                       </div>
-                  </td>
+                    </td>
                     <td className="py-4 px-6">
                       <div className="flex space-x-2">
                         <motion.button
@@ -552,18 +554,18 @@ const BlogManager = () => {
                         >
                           <TrashIcon className="w-4 h-4" />
                         </motion.button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
       <AnimatePresence>
-      {modalOpen && (
+        {modalOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -591,7 +593,7 @@ const BlogManager = () => {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
+                <div>
                   <label className="block text-slate-300 font-medium mb-2">Title</label>
                   <input
                     name="title"
@@ -601,9 +603,9 @@ const BlogManager = () => {
                     className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     required
                   />
-              </div>
+                </div>
 
-              <div>
+                <div>
                   <label className="block text-slate-300 font-medium mb-2">Description</label>
                   <textarea
                     name="desc"
@@ -625,15 +627,15 @@ const BlogManager = () => {
                       onChange={handleChange}
                       className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     >
-                  <option value="Helicopter Services">Helicopter Services</option>
-                  <option value="Industry News">Industry News</option>
-                  <option value="Company Updates">Company Updates</option>
-                  <option value="Safety Tips">Safety Tips</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
+                      <option value="Helicopter Services">Helicopter Services</option>
+                      <option value="Industry News">Industry News</option>
+                      <option value="Company Updates">Company Updates</option>
+                      <option value="Safety Tips">Safety Tips</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
 
-              <div>
+                  <div>
                     <label className="block text-slate-300 font-medium mb-2">Tags</label>
                     <input
                       name="tags"
@@ -642,10 +644,10 @@ const BlogManager = () => {
                       placeholder="tag1, tag2, tag3"
                       className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     />
-              </div>
+                  </div>
                 </div>
 
-              <div>
+                <div>
                   <label className="block text-slate-300 font-medium mb-2">Image</label>
                   <input
                     type="file"
@@ -654,7 +656,7 @@ const BlogManager = () => {
                     onChange={handleChange}
                     className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-500 file:text-white file:cursor-pointer hover:file:bg-blue-600 transition-all"
                   />
-                {form.img && typeof form.img !== 'string' && (
+                  {form.img && typeof form.img !== 'string' && (
                     <div className="mt-4">
                       <img
                         src={URL.createObjectURL(form.img)}
@@ -662,8 +664,8 @@ const BlogManager = () => {
                         className="w-32 h-32 object-cover rounded-lg shadow-md"
                       />
                     </div>
-                )}
-              </div>
+                  )}
+                </div>
 
                 <div className="flex justify-end space-x-4 pt-6">
                   <motion.button
@@ -683,8 +685,8 @@ const BlogManager = () => {
                   >
                     {editing ? 'Update Post' : 'Create Post'}
                   </motion.button>
-              </div>
-            </form>
+                </div>
+              </form>
             </motion.div>
           </motion.div>
         )}
@@ -725,7 +727,7 @@ const AdminPanel = () => {
 
     try {
       setLogoutError('');
-      
+
       // Call logout API if it exists
       try {
         await fetch('/api/users/logout', {
@@ -743,7 +745,7 @@ const AdminPanel = () => {
       // Clear all session data
       localStorage.removeItem('vw_admin');
       sessionStorage.clear();
-      
+
       // Clear any cookies (if they exist)
       document.cookie.split(";").forEach((c) => {
         const eqPos = c.indexOf("=");
@@ -753,12 +755,12 @@ const AdminPanel = () => {
 
       setLogoutSuccess('Logged out successfully! Redirecting...');
       setUser(null);
-      
+
       // Redirect to login after showing success message
       setTimeout(() => {
         navigate('/admin-login');
       }, 1500);
-      
+
     } catch (error) {
       setLogoutError('Logout failed. Please try again.');
       console.error('Logout error:', error);
@@ -778,34 +780,33 @@ const AdminPanel = () => {
           <div className="p-6 border-b border-slate-700/50">
             <div className="flex items-center space-x-3">
               <img src="/whitebglogo.jpg" alt="Vertical Worx Logo" className="h-10 w-auto rounded-lg shadow-md" />
-    <div>
+              <div>
                 <h1 className="text-xl font-bold text-white">Vertical Worx</h1>
                 <p className="text-slate-400 text-sm">Admin Panel</p>
-      </div>
-                    </div>
-        </div>
+              </div>
+            </div>
+          </div>
 
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-2">
             {NAVIGATION_ITEMS.map((item) => {
               const IconComponent = item.icon;
-  return (
+              return (
                 <motion.button
                   key={item.id}
                   whileHover={{ x: 4 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveSection(item.id)}
-                  className={`w-full flex items-center space-x-4 p-4 rounded-xl transition-all duration-300 ${
-                    activeSection === item.id
+                  className={`w-full flex items-center space-x-4 p-4 rounded-xl transition-all duration-300 ${activeSection === item.id
                       ? 'bg-gradient-to-r from-orange-500/20 to-red-600/20 border border-orange-500/30 text-white'
                       : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <IconComponent className="w-6 h-6" />
                   <div className="text-left">
                     <div className="font-medium">{item.label}</div>
                     <div className="text-xs opacity-70">{item.description}</div>
-        </div>
+                  </div>
                 </motion.button>
               );
             })}
@@ -816,15 +817,15 @@ const AdminPanel = () => {
             <div className="flex items-center space-x-3 p-3 rounded-lg bg-slate-700/30">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                 <UserIcon className="w-4 h-4 text-white" />
-        </div>
+              </div>
               <div className="flex-1">
                 <div className="text-white text-sm font-medium">{user?.username || 'Admin User'}</div>
                 <div className="text-slate-400 text-xs">{user?.role || 'Administrator'}</div>
-        </div>
-        </div>
-            
+              </div>
+            </div>
+
             {/* Logout Button */}
-          <motion.button
+            <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleLogout}
@@ -832,9 +833,9 @@ const AdminPanel = () => {
             >
               <ArrowRightOnRectangleIcon className="w-5 h-5" />
               <span className="font-medium">Logout</span>
-          </motion.button>
+            </motion.button>
+          </div>
         </div>
-      </div>
       </motion.div>
 
       {/* Main Content */}
@@ -849,22 +850,22 @@ const AdminPanel = () => {
               <XMarkIcon className="w-6 h-6" />
             ) : (
               <Bars3Icon className="w-6 h-6" />
-                    )}
-                  </button>
-          
+            )}
+          </button>
+
           <div className="flex items-center space-x-4">
             <div className="text-white">
               <span className="text-slate-400">Current Section: </span>
               <span className="font-medium capitalize">{activeSection}</span>
-      </div>
+            </div>
 
-              </div>
-              </div>
+          </div>
+        </div>
 
         {/* Content Area */}
         <div className="flex-1 p-6 overflow-auto">
           {/* Logout Notifications */}
-      <AnimatePresence>
+          <AnimatePresence>
             {logoutSuccess && (
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -875,24 +876,24 @@ const AdminPanel = () => {
                 <div className="flex items-center space-x-2">
                   <CheckCircleIcon className="w-5 h-5 text-green-400" />
                   <span className="text-green-400 font-medium">{logoutSuccess}</span>
-              </div>
-          </motion.div>
-        )}
-            
+                </div>
+              </motion.div>
+            )}
+
             {logoutError && (
-    <motion.div
+              <motion.div
                 initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl p-6 backdrop-blur-sm"
               >
                 <div className="flex items-center space-x-2">
                   <ExclamationTriangleIcon className="w-5 h-5 text-red-400" />
                   <span className="text-red-400 font-medium">{logoutError}</span>
-              </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <AnimatePresence mode="wait">
             {activeSection === 'dashboard' && <Dashboard setActiveSection={setActiveSection} />}
@@ -903,12 +904,12 @@ const AdminPanel = () => {
             {activeSection === 'gallery' && <GalleryManager key="gallery" />}
             {activeSection === 'salesforce' && <SalesforceAnalytics key="salesforce" />}
           </AnimatePresence>
+        </div>
       </div>
-                    </div>
 
       {/* Mobile Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 bg-black/50 z-20"
           onClick={() => setSidebarOpen(false)}
         />
