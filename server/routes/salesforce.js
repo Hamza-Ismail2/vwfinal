@@ -27,11 +27,14 @@ async function getAccessToken() {
   }
 
   try {
+    // Append SECURITY_TOKEN to password if provided
+    const sfPassword = (process.env.SF_PASSWORD || '') + (process.env.SECURITY_TOKEN || '');
+
     const tokenResponse = await axios.post('https://login.salesforce.com/services/oauth2/token', 
       new URLSearchParams({
         grant_type: 'password',
         username: process.env.SF_USERNAME,
-        password: process.env.SF_PASSWORD,
+        password: sfPassword,
         client_id: process.env.SF_CLIENT_ID,
         client_secret: process.env.SF_CLIENT_SECRET
       }), {
