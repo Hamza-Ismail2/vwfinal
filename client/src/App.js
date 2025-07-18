@@ -6,6 +6,8 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
+import useAnalytics from './hooks/useAnalytics';
+import useClickAnalytics from './hooks/useClickAnalytics';
 
 
 // Lazy load pages for better performance
@@ -135,6 +137,9 @@ const getCurrentSEO = (pathname) => {
 // App component with routing
 const AppContent = () => {
   const location = useLocation();
+  // Track analytics for each route change
+  useAnalytics();
+  useClickAnalytics();
   const currentSEO = getCurrentSEO(location.pathname);
   const isAdminPage = location.pathname === '/admin-panel' || location.pathname === '/admin-login';
 
@@ -284,6 +289,7 @@ const AppContent = () => {
               {/* Quote Request */}
               <motion.a
                 href="/request-quote"
+                data-track-click="quick_quote_button"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 1, type: "spring", stiffness: 260, damping: 20 }}

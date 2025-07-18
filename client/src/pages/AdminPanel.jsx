@@ -7,6 +7,7 @@ import GalleryManager from '../components/admin/GalleryManager';
 import SalesforceAnalytics from '../components/admin/SalesforceAnalytics';
 import ContactManager from '../components/admin/ContactManager';
 import QuoteManager from '../components/admin/QuoteManager';
+import EventFeed from '../components/admin/EventFeed';
 import {
   ChartBarIcon,
   DocumentTextIcon,
@@ -330,6 +331,9 @@ const Dashboard = ({ setActiveSection }) => {
           })}
     </div>
       </div>
+
+      {/* Analytics Event Feed */}
+      <EventFeed />
     </motion.div>
   );
 };
