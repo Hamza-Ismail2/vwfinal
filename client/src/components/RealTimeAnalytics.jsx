@@ -9,8 +9,8 @@ const RealTimeAnalytics = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (showLoading = false) => {
+    if (showLoading) setLoading(true);
     try {
       const res = await fetch('/api/events');
       if (!res.ok) throw new Error('no backend');
@@ -18,13 +18,13 @@ const RealTimeAnalytics = () => {
     } catch (_) {
       setEvents(fetchLocal());
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
   useEffect(() => {
-    load();
-    const t = setInterval(load, 10000);
+    load(true); // first load, show spinner
+    const t = setInterval(() => load(false), 10000); // silent refreshes
     return () => clearInterval(t);
   }, []);
 
@@ -72,7 +72,7 @@ const RealTimeAnalytics = () => {
         </div>
       </div>
 
-      <h3 className="text-lg font-semibold mt-4 mb-2">Top Pages</h3>
+      <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-700">Top Pages</h3>
       <table className="min-w-full text-sm mb-6">
         <thead>
           <tr className="text-left text-gray-500">
@@ -94,7 +94,7 @@ const RealTimeAnalytics = () => {
       </table>
 
       {/* Button Clicks */}
-      <h3 className="text-lg font-semibold mt-4 mb-2">Button Clicks</h3>
+      <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-700">Button Clicks</h3>
       <table className="min-w-full text-sm">
         <thead>
           <tr className="text-left text-gray-500">

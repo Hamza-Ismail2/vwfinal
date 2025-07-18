@@ -3,8 +3,12 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import certificationsBackground from '../images/Bell-407-Hughes-500-Flight-over-Old-Flow.jpg';
 import safetyImage from '../images/IMG_7097-scaled-1-1462x2048.jpg';
+import { useNavigate } from 'react-router-dom';
+
 
 const CertificationsCompliance = () => {
+  const navigate = useNavigate();
+
   const faaCertifications = [
     {
       title: "FAA Part 135",
@@ -13,7 +17,7 @@ const CertificationsCompliance = () => {
       icon: "✈️",
       details: [
         "Commercial passenger transport operations",
-        "Cargo and freight delivery services", 
+        "Cargo and freight delivery services",
         "On-demand charter flights",
         "Rigorous pilot training requirements",
         "Comprehensive maintenance protocols",
@@ -22,7 +26,7 @@ const CertificationsCompliance = () => {
       compliance: "Full compliance with 14 CFR Part 135"
     },
     {
-      title: "FAA Part 133", 
+      title: "FAA Part 133",
       subtitle: "External Load Operations",
       description: "Certified for rotorcraft external-load operations including heavy-lift and construction support.",
       icon: "🚁",
@@ -38,7 +42,7 @@ const CertificationsCompliance = () => {
     },
     {
       title: "FAA Part 137",
-      subtitle: "Agricultural Aircraft Operations", 
+      subtitle: "Agricultural Aircraft Operations",
       description: "Certified for agricultural aircraft operations and specialized aerial application services.",
       icon: "🌾",
       details: [
@@ -63,7 +67,7 @@ const CertificationsCompliance = () => {
     {
       title: "OAS Certified Pilots",
       description: "All pilots maintain current certifications and undergo continuous training programs",
-      icon: "👨‍✈️", 
+      icon: "👨‍✈️",
       features: ["Commercial pilot licenses", "Instrument ratings", "Type certifications", "Recurrent training"]
     },
     {
@@ -85,7 +89,7 @@ const CertificationsCompliance = () => {
       category: "Operational Safety",
       standards: [
         "FAA Safety Management System (SMS) implementation",
-        "Rigorous maintenance protocols and inspection schedules", 
+        "Rigorous maintenance protocols and inspection schedules",
         "Pilot proficiency checks and recurrent training",
         "Weather monitoring and flight risk assessment",
         "Emergency response procedures and protocols",
@@ -139,10 +143,12 @@ const CertificationsCompliance = () => {
               Certifications & <span className="text-orange-500">Compliance</span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-200 max-w-4xl mx-auto leading-relaxed mb-8">
-              Our FAA certifications (FAR 135, 133, & 137) and OAS-certified aircraft and pilots 
+              Our FAA certifications (FAR 135, 133, & 137) and OAS-certified aircraft and pilots
               demonstrate our unwavering commitment to safety and professionalism in every operation.
             </p>
             <motion.button
+              data-track-click="join_team_button"
+              onClick={() => navigate('/contact')}
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
@@ -167,7 +173,7 @@ const CertificationsCompliance = () => {
               FAA <span className="text-orange-600">Certifications</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We operate under rigorous FAA certifications and strict protocols to ensure every mission 
+              We operate under rigorous FAA certifications and strict protocols to ensure every mission
               is conducted with the highest safety standards from takeoff to touchdown.
             </p>
           </motion.div>
@@ -193,7 +199,7 @@ const CertificationsCompliance = () => {
                 <p className="text-gray-600 mb-6 leading-relaxed text-center">
                   {cert.description}
                 </p>
-                
+
                 <div className="mb-6">
                   <h5 className="font-semibold text-gray-800 mb-3">Operational Capabilities:</h5>
                   <ul className="space-y-2">
@@ -205,7 +211,7 @@ const CertificationsCompliance = () => {
                     ))}
                   </ul>
                 </div>
-                
+
                 <div className="bg-orange-100 rounded-lg p-4">
                   <p className="text-orange-800 font-semibold text-sm text-center">
                     {cert.compliance}
@@ -231,7 +237,7 @@ const CertificationsCompliance = () => {
               Additional <span className="text-orange-600">Certifications</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Comprehensive certifications and standards that ensure operational excellence 
+              Comprehensive certifications and standards that ensure operational excellence
               and client protection across all aspects of our helicopter services.
             </p>
           </motion.div>
@@ -282,7 +288,7 @@ const CertificationsCompliance = () => {
               Compliance <span className="text-orange-600">Framework</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our comprehensive compliance framework ensures adherence to all applicable 
+              Our comprehensive compliance framework ensures adherence to all applicable
               regulations and industry best practices for safe helicopter operations.
             </p>
           </motion.div>
@@ -330,11 +336,11 @@ const CertificationsCompliance = () => {
                 Uncompromising Safety Record
               </h2>
               <p className="text-xl text-white/90 mb-8 leading-relaxed">
-                Our commitment to safety excellence is reflected in our perfect safety record 
-                and continuous improvement in all operational aspects. Every flight, every maintenance 
+                Our commitment to safety excellence is reflected in our perfect safety record
+                and continuous improvement in all operational aspects. Every flight, every maintenance
                 procedure, and every client interaction reflects our core belief: when it's done right, it just WORX.
               </p>
-              
+
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="text-center">
                   <div className="text-4xl font-bold mb-2">100%</div>
@@ -364,10 +370,10 @@ const CertificationsCompliance = () => {
             >
               <h3 className="text-2xl font-bold mb-6">Request Safety Documentation</h3>
               <p className="text-white/90 mb-6 leading-relaxed">
-                Need detailed information about our certifications, safety procedures, or compliance documentation? 
+                Need detailed information about our certifications, safety procedures, or compliance documentation?
                 Contact our team for comprehensive safety information and operational procedures.
               </p>
-              
+
               <div className="space-y-4 mb-6">
                 <div className="flex items-center space-x-3">
                   <span className="text-xl">📞</span>
@@ -378,8 +384,10 @@ const CertificationsCompliance = () => {
                   <span className="text-lg">info@verticalworx.aero</span>
                 </div>
               </div>
-              
+
               <motion.button
+                data-track-click="contact_safety_button"
+                onClick={() => navigate('/contact')}
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 className="bg-white text-orange-600 px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 w-full"
@@ -404,10 +412,10 @@ const CertificationsCompliance = () => {
               Questions About Our Certifications?
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-12 leading-relaxed">
-              Our safety and compliance team is available to discuss our certifications, 
+              Our safety and compliance team is available to discuss our certifications,
               operational procedures, and safety protocols for your specific mission requirements.
             </p>
-            
+
             <div className="flex justify-center">
               <motion.div
                 whileHover={{ scale: 1.05, y: -2 }}

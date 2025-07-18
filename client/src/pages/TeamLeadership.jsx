@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import teamBackground from '../images/IMG_7075-scaled.jpg';
 import pilotTeam from '../images/IMG_7065-scaled.jpg';
 import operationsTeam from '../images/L1030042-2-1-scaled-1-1366x2048.jpg';
+import { useNavigate } from 'react-router-dom';
 
 const TeamLeadership = () => {
   const leadershipValues = [
@@ -12,7 +13,7 @@ const TeamLeadership = () => {
       icon: "⭐",
       principles: [
         "Mission-first mentality",
-        "Attention to detail", 
+        "Attention to detail",
         "Continuous improvement",
         "Team accountability"
       ]
@@ -40,7 +41,7 @@ const TeamLeadership = () => {
       ]
     },
     {
-      title: "Safety Excellence", 
+      title: "Safety Excellence",
       description: "We operate under rigorous FAA certifications and strict protocols to ensure every mission meets the highest safety standards.",
       icon: "🛡️",
       principles: [
@@ -60,7 +61,7 @@ const TeamLeadership = () => {
       capabilities: [
         "Multi-engine helicopter operations",
         "Instrument flight proficiency",
-        "External load operations expertise", 
+        "External load operations expertise",
         "Emergency response training",
         "Mountain and maritime operations",
         "Night vision operations"
@@ -167,6 +168,8 @@ const TeamLeadership = () => {
     }
   ];
 
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -190,12 +193,14 @@ const TeamLeadership = () => {
               Team & <span className="text-orange-500">Leadership</span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-200 max-w-4xl mx-auto leading-relaxed mb-8">
-              Locally owned and veteran-operated, our team combines military-grade discipline with local expertise 
+              Locally owned and veteran-operated, our team combines military-grade discipline with local expertise
               to deliver dependable, versatile, and safe helicopter services across Hawaii.
             </p>
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
+              data-track-click="join_team_button"
+              onClick={() => navigate('/contact')}
               className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
             >
               Join Our Team
@@ -218,7 +223,7 @@ const TeamLeadership = () => {
               Leadership <span className="text-orange-600">Philosophy</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our veteran-operated leadership brings military precision, discipline, and commitment 
+              Our veteran-operated leadership brings military precision, discipline, and commitment
               to civilian helicopter operations throughout the Hawaiian Islands.
             </p>
           </motion.div>
@@ -269,7 +274,7 @@ const TeamLeadership = () => {
               Team <span className="text-orange-600">Expertise</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our experienced pilots and crew bring years of specialized training and mission-ready focus 
+              Our experienced pilots and crew bring years of specialized training and mission-ready focus
               to every operation. We're problem-solvers in the air, trusted by industries across the islands.
             </p>
           </motion.div>
@@ -414,7 +419,7 @@ const TeamLeadership = () => {
               Our Core <span className="text-orange-600">Values</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              The principles that guide every decision, drive our commitment to excellence, 
+              The principles that guide every decision, drive our commitment to excellence,
               and define our approach to serving clients and community.
             </p>
           </motion.div>
@@ -457,7 +462,7 @@ const TeamLeadership = () => {
               Recognition & Achievements
             </h2>
             <p className="text-xl text-white/90 max-w-3xl mx-auto">
-              Our team's dedication to excellence has earned recognition throughout Hawaii's aviation industry 
+              Our team's dedication to excellence has earned recognition throughout Hawaii's aviation industry
               and the trust of clients across multiple sectors.
             </p>
           </motion.div>
@@ -498,20 +503,24 @@ const TeamLeadership = () => {
               Join Our Elite Team
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-12 leading-relaxed">
-              We're always looking for experienced aviation professionals who share our commitment 
+              We're always looking for experienced aviation professionals who share our commitment
               to safety, excellence, and service. Be part of Hawaii's premier helicopter service team.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
               <motion.button
+                data-track-click="join_team_button"
+                onClick={() => navigate('/careers')}
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 View Career Opportunities
               </motion.button>
-              
+
               <motion.button
+                data-track-click="contact_hr_button"
+                onClick={() => navigate('/contact')}
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-gray-900 transition-all duration-300"
