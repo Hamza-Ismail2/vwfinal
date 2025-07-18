@@ -26,6 +26,17 @@ const FAQs = lazy(() => import('./pages/FAQs'));
 const Careers = lazy(() => import('./pages/Careers'));
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
 const AdminPanel = lazy(() => import('./pages/AdminPanel'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+
+// Create placeholder components for remaining pages
+// const ProjectsCaseStudies = lazy(() => import('./pages/ProjectsCaseStudies'));
+// const CertificationsCompliance = lazy(() => import('./pages/CertificationsCompliance'));
+// const TeamLeadership = lazy(() => import('./pages/TeamLeadership'));
+// const BlogNews = lazy(() => import('./pages/BlogNews'));
+// const FAQs = lazy(() => import('./pages/FAQs'));
+// const Careers = lazy(() => import('./pages/Careers'));
+// const AdminLogin = lazy(() => import('./pages/AdminLogin'));
+// const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 
 // Loading component
 const LoadingPage = () => (
@@ -260,7 +271,7 @@ const AppContent = () => {
                 <Route path="/maintenance" element={<AircraftMaintenance />} />
                 <Route path="/quote" element={<RequestQuote />} />
                 {/* 404 - Redirect to home for now */}
-                <Route path="*" element={<Home />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
           </main>

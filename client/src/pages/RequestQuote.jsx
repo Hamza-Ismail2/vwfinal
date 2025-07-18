@@ -156,6 +156,8 @@ const RequestQuote = () => {
     else if (field === 'specialRequests') sanitized = value; // Don't sanitize while typing
     else if (field === 'additionalInfo') sanitized = value; // Don't sanitize while typing
     else if (field === 'company') sanitized = value; // Don't sanitize while typing (allow spaces in company names)
+    else if (field === 'origin') sanitized = value; // Don't sanitize while typing (allow spaces in location names)
+    else if (field === 'destination') sanitized = value; // Don't sanitize while typing (allow spaces in location names)
     else sanitized = sanitizeInput(value, 'text');
     setFormData(prev => ({ ...prev, [field]: sanitized }));
   };
@@ -425,7 +427,10 @@ const RequestQuote = () => {
                   <option value="3">3 Passengers</option>
                   <option value="4">4 Passengers</option>
                   <option value="5">5 Passengers</option>
-                  <option value="6+">6+ Passengers</option>
+                  <option value="6">6 Passengers</option>
+                  <option value="7">7 Passengers</option>
+                  <option value="8">8 Passengers</option>
+                  <option value="9">9 Passengers</option>
                 </select>
               </div>
 
