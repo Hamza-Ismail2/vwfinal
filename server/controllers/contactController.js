@@ -7,7 +7,7 @@ exports.createContact = async (req, res) => {
         console.log('Received contact form submission:', req.body);
         
         // Validate required fields
-        const requiredFields = ['name', 'email', 'message', 'service'];
+        const requiredFields = ['name', 'email', 'phone', 'service'];
         const missingFields = requiredFields.filter(field => !req.body[field]);
         
         if (missingFields.length > 0) {
