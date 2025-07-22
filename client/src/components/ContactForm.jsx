@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import contactBackground from '../images/Horseback_blueSky.jpg';
 import officeImage from '../images/IMG_7097-scaled-1-1462x2048.jpg';
@@ -15,6 +15,13 @@ const Contact = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+
+  // Ref to access the raw Salesforce form DOM node
+  const formRef = useRef(null);
+
+  // Salesforce return URL for redirect after successful submission
+  // const retURL = `${window.location.origin}/thank-you`;
+  const retURL = 'https://bytes-test-5.com/thank-you';
 
   // Utility for input sanitization
   const sanitizeInput = (value, type = 'text') => {
@@ -55,50 +62,69 @@ const Contact = () => {
     setFormData(prev => ({ ...prev, [name]: sanitized }));
   };
 
-  const handleSubmit = async (e) => {
+  // Dual-submit handler: POST to our backend, then continue to Salesforce
+  const handleDualSubmit = (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    const sanitizedData = {
-      name: sanitizeInput(formData.name, 'text'),
-      email: sanitizeInput(formData.email, 'email'),
-      phone: sanitizeInput(formData.phone, 'phone').slice(0, 3) + '-' + sanitizeInput(formData.phone, 'phone').slice(3, 10),
-      service: sanitizeInput(formData.service, 'text'),
-      message: sanitizeInput(formData.message, 'message'),
-      date: sanitizeInput(formData.date, 'text'),
-      passengers: sanitizeInput(formData.passengers, 'number'),
-    };
-    
-    try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(sanitizedData),
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setSubmitStatus('success');
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          service: '',
-          message: '',
-          date: '',
-          passengers: '1'
-        });
-      } else {
-        setSubmitStatus('error');
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      setSubmitStatus('error');
-    } finally {
-      setIsSubmitting(false);
+
+    if (!formRef.current) return;
+
+    const formEl = formRef.current;
+
+    // Extract field values from the form
+    const nameVal = sanitizeInput(formEl['00NPY00000CMyxt'].value, 'text');
+    const emailVal = sanitizeInput(formEl['email'].value, 'email');
+    const rawPhone = sanitizeInput(formEl['phone'].value, 'phone');
+    const phoneFormatted = rawPhone.slice(0, 3) + '-' + rawPhone.slice(3, 10);
+    const serviceVal = sanitizeInput(formEl['00NPY00000CKHAf'].value, 'text');
+    const messageVal = sanitizeInput(formEl['00NPY00000CK7eM'].value, 'message');
+    const dateVal = sanitizeInput(formEl['00NPY00000CKKLR'].value, 'text');
+    const passengersVal = sanitizeInput(formEl['00NPY00000CK7b8'].value, 'number');
+    let companyVal = sanitizeInput(formEl['company'].value, 'text');
+    if (!companyVal) {
+      companyVal = 'NA';
+      formEl['company'].value = companyVal;
     }
+
+    // Split full name into first and last names for Salesforce
+    let firstName = '';
+    let lastName = '';
+    const nameParts = nameVal.trim().split(' ');
+    if (nameParts.length === 1) {
+      firstName = '';
+      lastName = nameParts[0] || 'N/A';
+    } else {
+      firstName = nameParts.shift();
+      lastName = nameParts.join(' ') || 'N/A';
+    }
+
+    formEl['first_name'].value = firstName;
+    formEl['last_name'].value = lastName;
+
+    const payload = {
+      name: nameVal,
+      email: emailVal,
+      phone: phoneFormatted,
+      service: serviceVal,
+      message: messageVal,
+      date: dateVal,
+      passengers: passengersVal,
+    };
+
+    // Fire to backend; regardless of result, continue to Salesforce
+    fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .catch((err) => {
+        // Log but don't block the Salesforce submission
+        console.error('Error posting to backend:', err);
+      })
+      .finally(() => {
+        // Remove this handler to avoid recursion, then submit natively
+        formRef.current.removeEventListener('submit', handleDualSubmit);
+        formRef.current.submit();
+      });
   };
 
   const contactMethods = [
@@ -221,33 +247,45 @@ const Contact = () => {
               <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-6">
                 Request a Quote
               </h3>
-              
-              <form onSubmit={handleSubmit} className="space-y-6">
+              {/* --- Salesforce Web-to-Lead form (integrated) --- */}
+              <form
+                ref={formRef}
+                action="https://webto.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8&orgId=00DHr0000077ygs"
+                method="POST"
+                className="space-y-6 mb-12"
+                onSubmit={handleDualSubmit}
+              >
+                <input type="hidden" name="oid" value="00DHr0000077ygs" />
+                <input type="hidden" name="retURL" value={retURL} />
+                {/* Hidden fields required by Salesforce */}
+                <input type="hidden" name="first_name" />
+                <input type="hidden" name="last_name" />
+ 
+                {/* Full Name & Email */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-gray-700 font-semibold mb-2">
+                    <label htmlFor="00NPY00000CMyxt" className="block text-gray-700 font-semibold mb-2">
                       Full Name *
                     </label>
                     <input
+                      id="00NPY00000CMyxt"
+                      name="00NPY00000CMyxt"
                       type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
+                      maxLength="40"
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                       placeholder="Your full name"
                     />
                   </div>
-
                   <div>
-                    <label className="block text-gray-700 font-semibold mb-2">
+                    <label htmlFor="email" className="block text-gray-700 font-semibold mb-2">
                       Email Address *
                     </label>
                     <input
-                      type="email"
+                      id="email"
                       name="email"
-                      value={formData.email}
-                      onChange={handleChange}
+                      type="email"
+                      maxLength="80"
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                       placeholder="your.email@example.com"
@@ -255,140 +293,146 @@ const Contact = () => {
                   </div>
                 </div>
 
+                {/* Optional Company Field */}
+                <div>
+                  <label htmlFor="company" className="block text-gray-700 font-semibold mb-2">
+                    Company (optional)
+                  </label>
+                  <input
+                    id="company"
+                    name="company"
+                    type="text"
+                    maxLength="100"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                    placeholder="Company name (if applicable)"
+                  />
+                </div>
+
+                {/* Phone & Service Type */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-gray-700 font-semibold mb-2">
+                    <label htmlFor="phone" className="block text-gray-700 font-semibold mb-2">
                       Phone Number *
                     </label>
                     <input
-                      type="tel"
+                      id="phone"
                       name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
+                      type="tel"
+                      maxLength="40"
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                       placeholder="XXX-XXXXXXX"
-                      maxLength={11}
                     />
                   </div>
-
                   <div>
-                    <label className="block text-gray-700 font-semibold mb-2">
+                    <label htmlFor="00NPY00000CKHAf" className="block text-gray-700 font-semibold mb-2">
                       Service Type *
                     </label>
                     <select
-                      name="service"
-                      value={formData.service}
-                      onChange={handleChange}
+                      id="00NPY00000CKHAf"
+                      name="00NPY00000CKHAf"
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 bg-white"
                     >
                       <option value="">Select a service</option>
-                      {services.map((service, index) => (
-                        <option key={index} value={service}>
-                          {service}
-                        </option>
-                      ))}
+                      <option value="Executive Transport">Executive Transport</option>
+                      <option value="Scenic Tours">Scenic Tours</option>
+                      <option value="Medical Emergency">Medical Emergency</option>
+                      <option value="Cargo &amp; Utility">Cargo &amp; Utility</option>
+                      <option value="Wedding &amp; Events">Wedding &amp; Events</option>
+                      <option value="Film &amp; Photography">Film &amp; Photography</option>
                     </select>
                   </div>
                 </div>
 
+                {/* Preferred Date & Passengers */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-gray-700 font-semibold mb-2">
+                    <label htmlFor="00NPY00000CKKLR" className="block text-gray-700 font-semibold mb-2">
                       Preferred Date
                     </label>
                     <input
+                      id="00NPY00000CKKLR"
+                      name="00NPY00000CKKLR"
                       type="date"
-                      name="date"
-                      value={formData.date}
-                      onChange={handleChange}
-                      min={new Date().toISOString().split('T')[0]}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 bg-white"
                     />
                   </div>
-
                   <div>
-                    <label className="block text-gray-700 font-semibold mb-2">
+                    <label htmlFor="00NPY00000CK7b8" className="block text-gray-700 font-semibold mb-2">
                       Number of Passengers
                     </label>
                     <select
-                      name="passengers"
-                      value={formData.passengers}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                      id="00NPY00000CK7b8"
+                      name="00NPY00000CK7b8"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 bg-white"
                     >
-                      {[1,2,3,4,5,6,7,8].map(num => (
-                        <option key={num} value={num}>
-                          {num} {num === 1 ? 'Passenger' : 'Passengers'}
-                        </option>
-                      ))}
+                      <option value="">Select number of passengers</option>
+                      {[...Array(9)].map((_, i) => {
+                        const num = i + 1;
+                        return (
+                          <option key={num} value={`${num} Passenger${num > 1 ? 's' : ''}`}>
+                            {num} {num === 1 ? 'Passenger' : 'Passengers'}
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                 </div>
 
+                {/* Additional Details */}
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-2">
+                  <label htmlFor="00NPY00000CK7eM" className="block text-gray-700 font-semibold mb-2">
                     Additional Details
                   </label>
                   <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    rows="4"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white resize-none"
-                    placeholder="Tell us about your specific requirements, pickup/drop-off locations, or any special requests..."
-                  ></textarea>
+                    id="00NPY00000CK7eM"
+                    name="00NPY00000CK7eM"
+                    rows={4}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 bg-white resize-none"
+                    placeholder="Tell us more about your requirements..."
+                  />
                 </div>
 
-                <motion.button
+                <button
                   type="submit"
-                  disabled={isSubmitting}
                   data-track-click="contact_send_quote_button"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold py-4 px-6 rounded-lg hover:shadow-lg transform transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold py-4 px-6 rounded-lg hover:shadow-lg transform transition-all duration-300"
                 >
-                  {isSubmitting ? (
-                    <div className="flex items-center justify-center">
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                      Sending Request...
-                    </div>
-                  ) : (
-                    'Send Quote Request'
-                  )}
-                </motion.button>
-
-                {submitStatus === 'success' && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="p-4 bg-green-100 border border-green-300 rounded-lg text-green-700"
-                  >
-                    <div className="flex items-center">
-                      <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      Thank you! Your request has been sent successfully. We'll contact you within 2 hours.
-                    </div>
-                  </motion.div>
-                )}
-
-                {submitStatus === 'error' && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="p-4 bg-red-100 border border-red-300 rounded-lg text-red-700"
-                  >
-                    <div className="flex items-center">
-                      <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                      There was an error sending your request. Please try again or call us directly.
-                    </div>
-                  </motion.div>
-                )}
+                  Submit
+                </button>
               </form>
+              {/* --- End Salesforce form --- */}
+
+              {submitStatus === 'success' && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="p-4 bg-green-100 border border-green-300 rounded-lg text-green-700"
+                >
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Thank you! Your request has been sent successfully. We'll contact you within 2 hours.
+                  </div>
+                </motion.div>
+              )}
+
+              {submitStatus === 'error' && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="p-4 bg-red-100 border border-red-300 rounded-lg text-red-700"
+                >
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    There was an error sending your request. Please try again or call us directly.
+                  </div>
+                </motion.div>
+              )}
             </div>
           </motion.div>
 

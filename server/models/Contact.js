@@ -14,11 +14,11 @@ const contactSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
-        trim: true
+        trim: true,
+        required: [true, 'Phone is required']
     },
     message: {
-        type: String,
-        required: [true, 'Message is required']
+        type: String
     },
     service: {
         type: String,
