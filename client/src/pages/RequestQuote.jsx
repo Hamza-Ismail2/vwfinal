@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import {
@@ -42,6 +42,9 @@ const RequestQuote = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const salesforceFormRef = useRef(null);
+  const [sfSubmitting, setSfSubmitting] = useState(false);
+  const retURL = 'https://bytes-test-5.com/thank-you';
   const todayStr = new Date().toISOString().split('T')[0];
 
   const serviceTypes = [
@@ -263,14 +266,11 @@ const RequestQuote = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleDualSubmit = async (e) => {
     e.preventDefault();
-    
-    // Final validation before submission
     if (!validateStep1() || !validateStep2() || !validateStep3()) {
       return;
     }
-    
     setIsSubmitting(true);
     // Prepare payload for /api/quotes
     const payload = {
@@ -293,40 +293,30 @@ const RequestQuote = () => {
       additionalInfo: formData.additionalInfo
     };
     try {
-      const response = await fetch('/api/quotes', {
+      await fetch('/api/quotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      const data = await response.json();
-      if (data.success) {
-        alert('Quote request submitted successfully! We will contact you within 24 hours.');
-        setFormData({
-          serviceType: '',
-          aircraft: '',
-          passengers: '',
-          flightDate: '',
-          flightTime: '',
-          duration: '',
-          origin: '',
-          destination: '',
-          specialRequests: '',
-          firstName: '',
-          lastName: '',
-          email: '',
-          phone: '',
-          company: '',
-          budget: '',
-          flexibility: '',
-          additionalInfo: ''
-        });
-        setCurrentStep(1);
-      } else {
-        alert('There was an error submitting your request. Please try again.');
-      }
     } catch (error) {
-      alert('There was an error submitting your request. Please try again.');
+      // Log but don't block Salesforce submission
+      console.error('Error posting to backend:', error);
     } finally {
+      // Fill Salesforce form fields and submit
+      if (salesforceFormRef.current) {
+        salesforceFormRef.current['oid'].value = '00DHr0000077ygs';
+        salesforceFormRef.current['retURL'].value = retURL;
+        salesforceFormRef.current['first_name'].value = formData.firstName;
+        salesforceFormRef.current['last_name'].value = formData.lastName;
+        salesforceFormRef.current['company'].value = formData.company || 'NA';
+        salesforceFormRef.current['email'].value = formData.email;
+        // Optional: add title if you have it in your formData
+        if (salesforceFormRef.current['title']) {
+          salesforceFormRef.current['title'].value = formData.title || '';
+        }
+        setSfSubmitting(true);
+        salesforceFormRef.current.submit();
+      }
       setIsSubmitting(false);
     }
   };
@@ -774,7 +764,6 @@ const RequestQuote = () => {
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-2xl shadow-xl p-8">
               {renderStepContent()}
-
               {/* Navigation Buttons */}
               <div className="flex justify-between items-center mt-8 pt-8 border-t border-gray-200">
                 <button
@@ -789,11 +778,9 @@ const RequestQuote = () => {
                 >
                   Previous
                 </button>
-
                 <div className="text-sm text-gray-500">
                   Step {currentStep} of 4
                 </div>
-
                 {currentStep < 4 ? (
                   <button
                     type="button"
@@ -805,17 +792,29 @@ const RequestQuote = () => {
                 ) : (
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleSubmit(e);
-                    }}
+                    onClick={handleDualSubmit}
                     className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 text-sm sm:text-base sm:px-5 sm:py-2.5 md:px-6 md:py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || sfSubmitting}
                   >
-                    {isSubmitting ? 'Submitting...' : 'Submit Quote Request'}
+                    {isSubmitting || sfSubmitting ? 'Submitting...' : 'Submit Quote Request'}
                   </button>
                 )}
               </div>
+              {/* Hidden Salesforce Web-to-Lead form */}
+              <form
+                ref={salesforceFormRef}
+                action="https://webto.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8"
+                method="POST"
+                style={{ display: 'none' }}
+              >
+                <input type="hidden" name="oid" />
+                <input type="hidden" name="retURL" />
+                <input type="hidden" name="first_name" />
+                <input type="hidden" name="last_name" />
+                <input type="hidden" name="company" />
+                <input type="hidden" name="email" />
+                <input type="hidden" name="title" />
+              </form>
             </div>
           </div>
         </div>
