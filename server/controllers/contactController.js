@@ -1,5 +1,6 @@
 const Contact = require('../models/Contact');
 const { sendContactEmails } = require('../services/emailService');
+const sendLeadToSalesforce = require('../services/salesforceWebToLead');
 
 // Create a new contact submission
 exports.createContact = async (req, res) => {
@@ -44,6 +45,42 @@ exports.createContact = async (req, res) => {
                 message: 'Contact form submitted successfully, but email sending failed. Please try again later.',
                 emailError: process.env.NODE_ENV === 'development' ? emailError.message : undefined
             });
+        }
+
+        /* ------------------------------------------------------
+           Salesforce Web-to-Lead forward                       
+           Determine leadSource from payload; default to 'contact'.
+        ------------------------------------------------------ */
+        try {
+            const leadSource = (req.body.leadSource || 'contact').toLowerCase();
+
+            // Split full name into first / last (fallbacks)
+            const [firstName, ...rest] = (req.body.name || '').trim().split(' ');
+            const lastName = rest.length ? rest.join(' ') : 'Unknown';
+
+            const sfPayload = {
+                lead_source: leadSource,
+                first_name: firstName,
+                last_name: lastName,
+                email: req.body.email,
+                phone: req.body.phone,
+                company: req.body.company || 'Individual',
+                description: req.body.message,
+            };
+
+            if (leadSource === 'quote') {
+                sfPayload['00NPY00000CKHAf'] = req.body.service; // Quote service type
+                if (req.body.date) sfPayload['00NPY00000CKKLR'] = req.body.date;
+                if (req.body.passengers) sfPayload['00NPY00000CK7b8'] = `${req.body.passengers} ${req.body.passengers === '1' ? 'Passenger' : 'Passengers'}`;
+                if (req.body.message) sfPayload['00NPY00000CK7eM'] = req.body.message;
+            } else {
+                sfPayload['00NPY00000CKNb4'] = req.body.service; // Contact service type
+                sfPayload['00NPY00000CKPGH'] = req.body.urgency || 'Normal';
+            }
+
+            await sendLeadToSalesforce(sfPayload);
+        } catch (sfErr) {
+            console.error('Failed to send lead to Salesforce (contact):', sfErr.message);
         }
 
         console.log('Sending success response...');

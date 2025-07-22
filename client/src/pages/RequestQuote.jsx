@@ -290,7 +290,8 @@ const RequestQuote = () => {
       company: formData.company,
       budget: formData.budget,
       flexibility: formData.flexibility,
-      additionalInfo: formData.additionalInfo
+      additionalInfo: formData.additionalInfo,
+      leadSource: 'new_quotes_page',
     };
     try {
       const response = await fetch('/api/quotes', {
@@ -321,6 +322,7 @@ const RequestQuote = () => {
           additionalInfo: ''
         });
         setCurrentStep(1);
+        window.location.href = '/thank-you';
       } else {
         alert('There was an error submitting your request. Please try again.');
       }

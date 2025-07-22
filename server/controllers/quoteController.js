@@ -1,4 +1,5 @@
 const Quote = require('../models/Quote');
+const sendLeadToSalesforce = require('../services/salesforceWebToLead');
 
 // Create a new quote request
 exports.createQuote = async (req, res) => {
@@ -12,6 +13,26 @@ exports.createQuote = async (req, res) => {
       });
     }
     const quote = await Quote.create(req.body);
+
+    // Build Salesforce payload
+    try {
+      const sfPayload = {
+        lead_source: 'new_quotes_page',
+        first_name: req.body.firstName,
+        last_name: req.body.lastName,
+        email: req.body.email,
+        phone: req.body.phone,
+        company: req.body.company || 'Individual',
+        '00NPY00000CKmG5': req.body.serviceTypeTitle || req.body.serviceType, // New quotes service type
+        '00NPY00000CK7b8': req.body.passengers ? `${req.body.passengers} ${req.body.passengers === '1' ? 'Passenger' : 'Passengers'}` : undefined,
+        '00NPY00000CKKLR': req.body.flightDate,
+        '00NPY00000CK7eM': req.body.additionalInfo || req.body.specialRequests,
+      };
+      await sendLeadToSalesforce(sfPayload);
+    } catch (err) {
+      console.error('Failed to send quote lead to Salesforce:', err.message);
+    }
+
     res.status(201).json({ success: true, data: quote });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });

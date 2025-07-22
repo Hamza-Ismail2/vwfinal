@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vertical Worx – Lead Form</title>
+  <!-- Google reCAPTCHA -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <style>
+    /* Basic, unopinionated form styling – feel free to override via parent page */
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background: transparent;
+      color: #111827; /* slate-900 */
+      font-size: 16px;
+    }
+    label {
+      display: block;
+      margin-top: 0.75rem;
+      font-weight: 600;
+    }
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #d1d5db; /* gray-300 */
+      border-radius: 0.375rem; /* rounded-md */
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    input[type="submit"] {
+      width: auto;
+      background: linear-gradient(to right, #f97316, #dc2626);
+      color: #ffffff;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 1rem;
+      transition: opacity 0.2s ease;
+    }
+    input[type="submit"]:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+
+<form action="https://webto.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8&orgId=00DHr0000077ygs" method="POST">
+  <!-- CAPTCHA settings (required by Salesforce) -->
+  <input type="hidden" name="captcha_settings" value='{"keyname":"vertical_worx","fallback":"true","orgId":"00DHr0000077ygs","ts":""}' />
+  <input type="hidden" name="oid" value="00DHr0000077ygs" />
+  <input type="hidden" name="retURL" value="https://bytes-test-5.com/thank-you" />
+
+  <!-- lead_source will be set dynamically via JS -->
+  <input type="hidden" id="lead_source_field" name="lead_source" value="contact" />
+
+  <label for="first_name">First Name</label>
+  <input id="first_name" name="first_name" maxlength="40" type="text" />
+
+  <label for="last_name">Last Name</label>
+  <input id="last_name" name="last_name" maxlength="80" type="text" />
+
+  <label for="email">Email</label>
+  <input id="email" name="email" maxlength="80" type="email" />
+
+  <label for="company">Company</label>
+  <input id="company" name="company" maxlength="40" type="text" />
+
+  <label for="phone">Phone</label>
+  <input id="phone" name="phone" maxlength="40" type="tel" />
+
+  <label for="service_quote">Service Type (Quote)</label>
+  <select id="service_quote" name="00NPY00000CKHAf" title="Service Type (Quote)">
+    <option value="">--None--</option>
+    <option value="Select a Service">Select a Service</option>
+    <option value="Executive Transport">Executive Transport</option>
+    <option value="Scenic Tours">Scenic Tours</option>
+    <option value="Medical Emergency">Medical Emergency</option>
+    <option value="Cargo &amp; Utility">Cargo &amp; Utility</option>
+    <option value="Wedding &amp; Events">Wedding &amp; Events</option>
+    <option value="Film &amp; Photography">Film &amp; Photography</option>
+    <option value="Custom Charter">Custom Charter</option>
+  </select>
+
+  <!-- New Quotes Page Service Selector -->
+  <label for="service_quote_page">Service Type (New Quotes)</label>
+  <select id="service_quote_page" name="00NPY00000CKmG5" title="Service Type (New Quotes)">
+    <option value="">--None--</option>
+    <option value="Executive Transport">Executive Transport</option>
+    <option value="Scenic Tours">Scenic Tours</option>
+    <option value="Medical Emergency">Medical Emergency</option>
+    <option value="Cargo &amp; Utility">Cargo &amp; Utility</option>
+    <option value="Wedding &amp; Events">Wedding &amp; Events</option>
+    <option value="Film &amp; Photography">Film &amp; Photography</option>
+  </select>
+
+  <label for="service_contact">Service Type (Contact)</label>
+  <select id="service_contact" name="00NPY00000CKNb4" title="Service Type (Contact)">
+    <option value="">--None--</option>
+    <option value="Select a Service">Select a Service</option>
+    <option value="VIP Transport">VIP Transport</option>
+    <option value="Scenic Tours">Scenic Tours</option>
+    <option value="Cargo &amp; Utility">Cargo &amp; Utility</option>
+    <option value="Film &amp; Photography">Film &amp; Photography</option>
+    <option value="Aircraft Maintenance">Aircraft Maintenance</option>
+    <option value="Pilot Training">Pilot Training</option>
+    <option value="Other">Other</option>
+  </select>
+
+  <label for="pref_date">Preferred Date</label>
+  <input id="pref_date" name="00NPY00000CKKLR" type="text" />
+
+  <label for="num_passengers">Number of Passengers</label>
+  <select id="num_passengers" name="00NPY00000CK7b8" title="Number of Passengers">
+    <option value="">--None--</option>
+    <option value="1 Passenger">1 Passenger</option>
+    <option value="2 Passengers">2 Passengers</option>
+    <option value="3 Passengers">3 Passengers</option>
+    <option value="4 Passengers">4 Passengers</option>
+    <option value="5 Passengers">5 Passengers</option>
+    <option value="6 Passengers">6 Passengers</option>
+    <option value="7 Passengers">7 Passengers</option>
+    <option value="8 Passengers">8 Passengers</option>
+    <option value="9 Passengers">9 Passengers</option>
+  </select>
+
+  <label for="add_details">Additional Details</label>
+  <textarea id="add_details" name="00NPY00000CK7eM" rows="4"></textarea>
+
+  <label for="description">Description</label>
+  <textarea id="description" name="description"></textarea>
+
+  <label for="priority">Priority Level</label>
+  <select id="priority" name="00NPY00000CKPGH" title="Priority Level">
+    <option value="">--None--</option>
+    <option value="Normal">Normal</option>
+    <option value="Urgent">Urgent</option>
+  </select>
+
+  <div class="g-recaptcha" data-sitekey="6LfJ5YorAAAAAE7HKypnPezo56nPxiOafdC8iP74"></div>
+
+  <input type="submit" value="Submit" />
+</form>
+
+<script>
+  /* Dynamically set lead_source based on ?source= contact | contactus | quote */
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const source = (params.get('source') || 'contact').toLowerCase();
+    const allowed = ['contact', 'contactus', 'quote', 'new_quotes_form', 'new_quotes_page'];
+    const src = allowed.includes(source) ? source : 'contact';
+    document.getElementById('lead_source_field').value = src;
+
+    /* Show/Hide field blocks */
+    const quoteIds = ['service_quote', 'pref_date', 'num_passengers', 'add_details'];
+    const newQuoteIds = ['company', 'service_quote_page', 'pref_date', 'num_passengers'];
+    const contactIds = ['company', 'service_contact', 'description', 'priority'];
+
+    let showIds, hideIds;
+    if (src === 'quote') {
+      showIds = quoteIds;
+      hideIds = contactIds.concat(newQuoteIds);
+    } else if (src === 'new_quotes_form' || src === 'new_quotes_page') {
+      showIds = newQuoteIds;
+      hideIds = contactIds.concat(quoteIds);
+    } else {
+      showIds = contactIds;
+      hideIds = quoteIds.concat(newQuoteIds);
+    }
+
+    function setDisplay(ids, display) {
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.style.display = display;
+          const lbl = el.previousElementSibling;
+          if (lbl && lbl.tagName === 'LABEL') lbl.style.display = display;
+        }
+      });
+    }
+
+    setDisplay(showIds, '');      // show relevant
+    setDisplay(hideIds, 'none');   // hide irrelevant
+  })();
+
+  /* Keep reCAPTCHA timestamp valid for SF fallback */
+  function refreshCaptchaTimestamp() {
+    const resp = document.getElementById('g-recaptcha-response');
+    if (!resp || resp.value.trim() === '') {
+      const field = document.querySelector('input[name="captcha_settings"]');
+      if (field) {
+        const cfg = JSON.parse(field.value);
+        cfg.ts = String(Date.now());
+        field.value = JSON.stringify(cfg);
+      }
+    }
+  }
+  setInterval(refreshCaptchaTimestamp, 500);
+</script>
+</body>
+</html>

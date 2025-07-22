@@ -26,6 +26,7 @@ const TeamLeadership = lazy(() => import('./pages/TeamLeadership'));
 const BlogNews = lazy(() => import('./pages/BlogNews'));
 const FAQs = lazy(() => import('./pages/FAQs'));
 const Careers = lazy(() => import('./pages/Careers'));
+const ThankYou = lazy(() => import('./pages/ThankYou'));
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
 const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -125,6 +126,12 @@ const seoData = {
     title: 'Gallery - Professional Helicopter Operations | Vertical Worx Hawaii',
     description: 'Explore our gallery of professional helicopter operations, scenic flights, and aerial services across the Hawaiian Islands. See our work in action.',
     keywords: 'helicopter gallery Hawaii, aerial photography, helicopter operations photos, aviation portfolio',
+    ogType: 'website'
+  },
+  '/thank-you': {
+    title: 'Thank You - Vertical Worx',
+    description: 'Thank you for reaching out to Vertical Worx. We will contact you shortly regarding your inquiry.',
+    keywords: 'thank you, helicopter services contact confirmation',
     ogType: 'website'
   }
 };
@@ -264,6 +271,7 @@ const AppContent = () => {
                 <Route path="/blog-news" element={<BlogNews />} />
                 <Route path="/faqs" element={<FAQs />} />
                 <Route path="/careers" element={<Careers />} />
+                <Route path="/thank-you" element={<ThankYou />} />
                 <Route path="/admin-login" element={<AdminLogin />} />
                 <Route path="/admin-panel" element={
                   <ProtectedRoute>

@@ -66,6 +66,7 @@ const Contact = () => {
       message: sanitizeInput(formData.message, 'message'),
       date: sanitizeInput(formData.date, 'text'),
       passengers: sanitizeInput(formData.passengers, 'number'),
+      leadSource: 'quote',
     };
     
     try {
@@ -90,6 +91,8 @@ const Contact = () => {
           date: '',
           passengers: '1'
         });
+        // Redirect to thank you
+        window.location.href = '/thank-you';
       } else {
         setSubmitStatus('error');
       }
@@ -318,7 +321,7 @@ const Contact = () => {
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                     >
-                      {[1,2,3,4,5,6,7,8].map(num => (
+                      {[1,2,3,4,5,6,7,8,9].map(num => (
                         <option key={num} value={num}>
                           {num} {num === 1 ? 'Passenger' : 'Passengers'}
                         </option>

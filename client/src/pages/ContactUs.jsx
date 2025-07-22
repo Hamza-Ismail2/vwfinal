@@ -64,6 +64,7 @@ const ContactUs = () => {
         : 'Other',
       message: sanitizeInput(formData.message, 'text'),
       urgency: sanitizeInput(formData.urgency, 'text'),
+      leadSource: 'contact',
     };
     try {
       const response = await fetch('/api/contact', {
@@ -83,6 +84,7 @@ const ContactUs = () => {
           message: '',
           urgency: 'normal'
         });
+        window.location.href = '/thank-you';
       } else {
         setSubmitStatus('error');
       }
@@ -300,13 +302,14 @@ const ContactUs = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-gray-700 font-semibold mb-2">
-                      Phone Number
+                      Phone Number *
                     </label>
                     <input
                       type="tel"
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
+                      required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                       placeholder="XXX-XXXXXXX"
                       maxLength={11}
