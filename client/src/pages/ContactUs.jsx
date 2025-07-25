@@ -291,7 +291,7 @@ const ContactUs = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="bg-white rounded-2xl shadow-lg p-8"
+              className="bg-white rounded-2xl shadow-lg p-4 sm:p-8 w-full max-w-full"
             >
               <h3 className="text-3xl font-bold text-gray-800 mb-8">
                 Send Us a Message
@@ -335,10 +335,11 @@ const ContactUs = () => {
                       type="email"
                       maxLength="80"
                       required
+                      pattern="[^\s]+"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                       placeholder="your.email@example.com"
                       value={formData.email}
-                      onChange={handleChange}
+                      onChange={e => setFormData(prev => ({ ...prev, email: e.target.value.replace(/\s/g, '') }))}
                     />
                   </div>
                 </div>
@@ -355,7 +356,7 @@ const ContactUs = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                     placeholder="Company name (if applicable)"
                     value={formData.company}
-                    onChange={handleChange}
+                    onChange={e => setFormData(prev => ({ ...prev, company: e.target.value }))}
                   />
                 </div>
                 {/* Phone & Service Type */}
@@ -407,7 +408,7 @@ const ContactUs = () => {
                       type="date"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 bg-white"
                       value={formData.date}
-                      onChange={handleChange}
+                      onChange={e => setFormData(prev => ({ ...prev, date: e.target.value }))}
                     />
                   </div>
                   <div>
@@ -419,15 +420,13 @@ const ContactUs = () => {
                       name="00NPY00000CK7b8"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 bg-white"
                       value={formData.passengers}
-                      onChange={handleChange}
+                      onChange={e => setFormData(prev => ({ ...prev, passengers: e.target.value }))}
                     >
-                      <option value="">Select number of passengers</option>
+                      <option value="">Select no. of passengers</option>
                       {[...Array(9)].map((_, i) => {
                         const num = i + 1;
                         return (
-                          <option key={num} value={`${num} Passenger${num > 1 ? 's' : ''}`}>
-                            {num} {num === 1 ? 'Passenger' : 'Passengers'}
-                          </option>
+                          <option key={num} value={`${num} Passenger${num > 1 ? 's' : ''}`}>{num} {num === 1 ? 'Passenger' : 'Passengers'}</option>
                         );
                       })}
                     </select>
@@ -445,7 +444,7 @@ const ContactUs = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 bg-white resize-none"
                     placeholder="Tell us more about your requirements..."
                     value={formData.message}
-                    onChange={handleChange}
+                    onChange={e => setFormData(prev => ({ ...prev, message: e.target.value }))}
                   />
                 </div>
                 <button

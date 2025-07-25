@@ -532,7 +532,7 @@ const RequestQuote = () => {
                 <input
                   type="text"
                   value={formData.firstName}
-                  onChange={(e) => handleInputChange('firstName', e.target.value)}
+                  onChange={e => handleInputChange('firstName', e.target.value)}
                   placeholder="Enter your first name"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                   required
@@ -544,7 +544,7 @@ const RequestQuote = () => {
                 <input
                   type="text"
                   value={formData.lastName}
-                  onChange={(e) => handleInputChange('lastName', e.target.value)}
+                  onChange={e => handleInputChange('lastName', e.target.value)}
                   placeholder="Enter your last name"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                   required
@@ -556,10 +556,11 @@ const RequestQuote = () => {
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  onChange={e => handleInputChange('email', e.target.value.replace(/\s/g, ''))}
                   placeholder="Enter your email address"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                   required
+                  pattern="[^\s]+"
                 />
               </div>
 
@@ -581,7 +582,7 @@ const RequestQuote = () => {
                 <input
                   type="text"
                   value={formData.company}
-                  onChange={(e) => handleInputChange('company', e.target.value)}
+                  onChange={e => handleInputChange('company', e.target.value)}
                   placeholder="Enter company name if applicable"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                 />
@@ -796,7 +797,7 @@ const RequestQuote = () => {
                     className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 text-sm sm:text-base sm:px-5 sm:py-2.5 md:px-6 md:py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
                     disabled={isSubmitting || sfSubmitting}
                   >
-                    {isSubmitting || sfSubmitting ? 'Submitting...' : 'Submit Quote Request'}
+                    {isSubmitting || sfSubmitting ? 'Submitting...' : 'Submit'}
                   </button>
                 )}
               </div>
