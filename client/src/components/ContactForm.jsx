@@ -273,8 +273,11 @@ const Contact = () => {
                       type="text"
                       maxLength="40"
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus-border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                       placeholder="Your full name"
+                      onInput={e => {
+                        e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                      }}
                     />
                   </div>
                   <div>
@@ -287,8 +290,11 @@ const Contact = () => {
                       type="email"
                       maxLength="80"
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus-border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                       placeholder="your.email@example.com"
+                      onInput={e => {
+                        e.target.value = e.target.value.replace(/\s/g, '');
+                      }}
                     />
                   </div>
                 </div>
@@ -318,10 +324,14 @@ const Contact = () => {
                       id="phone"
                       name="phone"
                       type="tel"
-                      maxLength="40"
+                      maxLength="10"
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
-                      placeholder="XXX-XXXXXXX"
+                      inputMode="numeric"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus-border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                      placeholder="XXXXXXXXXX"
+                      onInput={e => {
+                        e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+                      }}
                     />
                   </div>
                   <div>
@@ -365,15 +375,13 @@ const Contact = () => {
                     <select
                       id="00NPY00000CK7b8"
                       name="00NPY00000CK7b8"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 bg-white"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus-border-transparent transition-all duration-300 text-gray-900 bg-white"
                     >
-                      <option value="">Select number of passengers</option>
+                      <option value="">Select no. of passengers</option>
                       {[...Array(9)].map((_, i) => {
                         const num = i + 1;
                         return (
-                          <option key={num} value={`${num} Passenger${num > 1 ? 's' : ''}`}>
-                            {num} {num === 1 ? 'Passenger' : 'Passengers'}
-                          </option>
+                          <option key={num} value={`${num} Passenger${num > 1 ? 's' : ''}`}>{num} {num === 1 ? 'Passenger' : 'Passengers'}</option>
                         );
                       })}
                     </select>

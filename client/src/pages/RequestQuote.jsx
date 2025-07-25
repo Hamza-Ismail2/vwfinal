@@ -532,7 +532,7 @@ const RequestQuote = () => {
                 <input
                   type="text"
                   value={formData.firstName}
-                  onChange={e => handleInputChange('firstName', e.target.value)}
+                  onChange={e => handleInputChange('firstName', e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
                   placeholder="Enter your first name"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                   required
@@ -544,7 +544,7 @@ const RequestQuote = () => {
                 <input
                   type="text"
                   value={formData.lastName}
-                  onChange={e => handleInputChange('lastName', e.target.value)}
+                  onChange={e => handleInputChange('lastName', e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
                   placeholder="Enter your last name"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                   required
@@ -724,7 +724,7 @@ const RequestQuote = () => {
       {/* Progress Indicator */}
       <section className="bg-white py-8 border-b">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center space-x-8">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:space-x-8">
             {[1, 2, 3, 4].map((step) => (
               <div key={step} className="flex items-center">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
@@ -749,7 +749,7 @@ const RequestQuote = () => {
                   {step === 4 && 'Review'}
                 </span>
                 {step < 4 && (
-                  <div className={`w-12 h-1 mx-4 ${
+                  <div className={`w-8 sm:w-12 h-1 mx-2 sm:mx-4 ${
                     currentStep > step ? 'bg-orange-500' : 'bg-gray-200'
                   }`} />
                 )}

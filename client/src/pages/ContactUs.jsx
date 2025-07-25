@@ -323,6 +323,8 @@ const ContactUs = () => {
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
                       placeholder="Your full name"
+                      value={formData.name}
+                      onChange={e => setFormData(prev => ({ ...prev, name: e.target.value.replace(/[^a-zA-Z\s]/g, '') }))}
                     />
                   </div>
                   <div>
@@ -561,7 +563,7 @@ const ContactUs = () => {
               </div>
 
               {/* Social Media */}
-              <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-8 text-white">
+              <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-4 sm:p-8 text-white w-full max-w-full overflow-x-auto">
                 <h3 className="text-2xl font-bold mb-4">
                   Connect With Us
                 </h3>
