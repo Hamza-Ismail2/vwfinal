@@ -23,7 +23,7 @@ const FAQs = () => {
         },
         {
           question: "How do I schedule a helicopter service?",
-          answer: "You can reach out to us via phone at (808) 930-9826 or email at info@wvx.aero. We'll discuss your project needs and help schedule the right aircraft and crew for your mission. Our team will work with you to ensure all requirements are met."
+          answer: "You can reach out to us via phone at (808) 930-9826 or email at info@verticalworx.aero. We'll discuss your project needs and help schedule the right aircraft and crew for your mission. Our team will work with you to ensure all requirements are met."
         },
         {
           question: "Can you handle last-minute or urgent requests?",

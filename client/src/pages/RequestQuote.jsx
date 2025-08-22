@@ -44,7 +44,7 @@ const RequestQuote = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const salesforceFormRef = useRef(null);
   const [sfSubmitting, setSfSubmitting] = useState(false);
-  const retURL = 'https://bytes-test-5.com/thank-you';
+  const retURL = `${window.location.origin}/thank-you`;
   const todayStr = new Date().toISOString().split('T')[0];
 
   const serviceTypes = [
