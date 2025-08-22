@@ -18,7 +18,7 @@ const ContactUs = () => {
   const formRef = useRef(null);
 
   // Salesforce return URL for redirect after successful submission
-  const retURL = 'https://bytes-test-5.com/thank-you';
+  const retURL = `${window.location.origin}/thank-you`;
 
   // Utility for input sanitization
   const sanitizeInput = (value, type = 'text') => {
@@ -130,7 +130,7 @@ const ContactUs = () => {
     {
       icon: "📧",
       title: "General Inquiries",
-      primary: "info@wvx.aero",
+              primary: "info@verticalworx.aero",
       secondary: "Response within 2 hours during business hours",
       color: "from-blue-500 to-blue-600"
     },

@@ -20,8 +20,7 @@ const Contact = () => {
   const formRef = useRef(null);
 
   // Salesforce return URL for redirect after successful submission
-  // const retURL = `${window.location.origin}/thank-you`;
-  const retURL = 'https://bytes-test-5.com/thank-you';
+  const retURL = `${window.location.origin}/thank-you`;
 
   // Utility for input sanitization
   const sanitizeInput = (value, type = 'text') => {

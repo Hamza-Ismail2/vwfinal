@@ -187,7 +187,7 @@ const AppContent = () => {
             "description": "Professional helicopter services across the Hawaiian Islands",
             "url": "https://wvx.aero",
             "telephone": "(808) 930-9826",
-            "email": "info@wvx.aero",
+            "email": "info@verticalworx.aero",
             "address": {
               "@type": "PostalAddress",
               "streetAddress": "73 Uu Street",
