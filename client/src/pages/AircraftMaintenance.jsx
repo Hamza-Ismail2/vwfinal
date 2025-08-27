@@ -62,8 +62,18 @@ const AircraftMaintenance = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white min-h-screen flex items-center">
-        <div className="container mx-auto px-4 py-20">
+            <section className="relative bg-gradient-to-r from-gray-800 to-gray-900 text-white min-h-screen flex items-center">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('/images/HI_KOH-COAST_407_001-SHIBSTY-1-scaled.jpg')`
+          }}
+        ></div>
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/60"></div>
+        
+        <div className="relative z-10 container mx-auto px-4 py-20">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -73,7 +83,7 @@ const AircraftMaintenance = () => {
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
               Aircraft <span className="text-orange-500">Maintenance</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-8">
+            <p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-4xl mx-auto leading-relaxed">
               Professional helicopter maintenance services ensuring peak performance and safety
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
