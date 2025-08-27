@@ -229,21 +229,25 @@ const Navbar = () => {
                             className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
                           >
                             {item.dropdown.map((dropdownItem) => (
-                              <button
+                              <a
                                 key={dropdownItem.id}
-                                onClick={() => handlePageChange(dropdownItem.path)}
-                                className="w-full text-left px-4 py-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 transition-colors duration-200"
+                                href={dropdownItem.path}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block w-full text-left px-4 py-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 transition-colors duration-200"
                               >
                                 {dropdownItem.label}
-                              </button>
+                              </a>
                             ))}
                           </motion.div>
                         )}
                       </AnimatePresence>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => handlePageChange(item.path)}
+                    <a
+                      href={item.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className={`px-3 py-2 font-medium transition-colors duration-200 ${
                         location.pathname === item.path
                           ? 'text-orange-600 border-b-2 border-orange-600'
@@ -251,7 +255,7 @@ const Navbar = () => {
                       }`}
                     >
                       {item.label}
-                    </button>
+                    </a>
                   )}
                 </div>
               ))}
@@ -368,21 +372,25 @@ const Navbar = () => {
                                 className="ml-4 mt-2 space-y-2"
                               >
                                 {item.dropdown.map((dropdownItem) => (
-                                  <button
+                                  <a
                                     key={dropdownItem.id}
-                                    onClick={() => handlePageChange(dropdownItem.path)}
+                                    href={dropdownItem.path}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="w-full text-left px-4 py-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors duration-200"
                                   >
                                     {dropdownItem.label}
-                                  </button>
+                                  </a>
                                 ))}
                               </motion.div>
                             )}
                           </AnimatePresence>
                         </div>
                       ) : (
-                        <button
-                          onClick={() => handlePageChange(item.path)}
+                        <a
+                          href={item.path}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors duration-200 ${
                             location.pathname === item.path
                               ? 'text-orange-600 bg-orange-50'
@@ -390,7 +398,7 @@ const Navbar = () => {
                           }`}
                         >
                           {item.label}
-                        </button>
+                        </a>
                       )}
                     </motion.div>
                   ))}
