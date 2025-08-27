@@ -1,0 +1,46 @@
+# Robots.txt for Vertical Worx - Helicopter Services Hawaii
+# https://verticalworx.com
+
+# Allow all search engines to crawl the site
+User-agent: *
+
+# Allow crawling of all public pages
+Allow: /
+
+# Disallow admin and private areas
+Disallow: /admin
+Disallow: /admin-panel
+Disallow: /admin-login
+Disallow: /api/
+Disallow: /uploads/admin/
+Disallow: /_next/
+Disallow: /node_modules/
+
+# Disallow temporary and system files
+Disallow: /.env
+Disallow: /.git
+Disallow: /package.json
+Disallow: /package-lock.json
+
+# Allow specific file types
+Allow: /*.html
+Allow: /*.css
+Allow: /*.js
+Allow: /*.jpg
+Allow: /*.jpeg
+Allow: /*.png
+Allow: /*.gif
+Allow: /*.webp
+Allow: /*.svg
+Allow: /*.ico
+Allow: /*.pdf
+
+# Crawl delay (optional - tells search engines to wait 1 second between requests)
+Crawl-delay: 1
+
+# Point to sitemap location
+Sitemap: https://verticalworx.com/sitemap.xml
+
+# Additional sitemaps for future use (if needed)
+# Sitemap: https://verticalworx.com/sitemap-images.xml
+# Sitemap: https://verticalworx.com/sitemap-blog.xml
