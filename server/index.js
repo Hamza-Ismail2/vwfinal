@@ -45,7 +45,9 @@ app.use(helmet({
       imgSrc: ["'self'", "data:", "https:", "http:", "https://tile.openstreetmap.org"],
       scriptSrc: ["'self'", "'unsafe-eval'"], // needed for Three.js
       // Allow embedded OpenStreetMap iframes
-      frameSrc: ["'self'", "https://www.openstreetmap.org"]
+      frameSrc: ["'self'", "https://www.openstreetmap.org"],
+      // Allow form submissions to Salesforce
+      formAction: ["'self'", "https://webto.salesforce.com"]
     }
   },
   crossOriginResourcePolicy: { policy: "cross-origin" }
