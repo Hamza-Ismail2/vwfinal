@@ -30,40 +30,6 @@ const About = () => {
     }
   ];
 
-  const teamMembers = [
-    {
-      name: "Captain Michael Rodriguez",
-      role: "Chief Pilot & Operations Director",
-      experience: "20+ years",
-      certifications: ["ATP", "CFI", "CFII"],
-      image: "https://images.unsplash.com/photo-1552058544-f2b08422138a?auto=format&fit=crop&w=400&q=80",
-      description: "Former military pilot with extensive experience in emergency services and VIP transport."
-    },
-    {
-      name: "Sarah Johnson",
-      role: "Safety & Training Manager",
-      experience: "15+ years",
-      certifications: ["SMS", "Safety Inspector"],
-      image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=400&q=80",
-      description: "Aviation safety expert ensuring our fleet meets the highest industry standards."
-    },
-    {
-      name: "Captain David Chen",
-      role: "Senior Pilot",
-      experience: "18+ years",
-      certifications: ["ATP", "Night Vision", "IFR"],
-      image: "https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&w=400&q=80",
-      description: "Specialized in medical emergency transport and challenging weather operations."
-    },
-    {
-      name: "Lisa Martinez",
-      role: "Customer Experience Director",
-      experience: "12+ years",
-      certifications: ["Customer Service", "Operations"],
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
-      description: "Dedicated to ensuring every flight experience exceeds customer expectations."
-    }
-  ];
 
   const values = [
     {
@@ -264,68 +230,6 @@ const About = () => {
           </div>
         </motion.div>
 
-        {/* Team Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="mb-20"
-        >
-          <div className="text-center mb-12">
-            <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Meet Our Team
-            </h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Experienced professionals dedicated to your safety and satisfaction
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {teamMembers.map((member, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-white rounded-2xl shadow-lg p-6 lg:p-8 hover:shadow-xl transition-shadow duration-300"
-              >
-                <div className="text-center mb-4">
-                  <div className="w-24 h-24 mx-auto mb-4">
-                    <img src={member.image} alt={member.name} className="w-full h-full object-cover rounded-full shadow-lg" />
-                  </div>
-                  <h4 className="text-xl font-bold text-gray-900 mb-2">
-                    {member.name}
-                  </h4>
-                  <p className="text-blue-600 font-semibold mb-2">
-                    {member.role}
-                  </p>
-                  <p className="text-gray-500 text-sm mb-3">
-                    {member.experience}
-                  </p>
-                </div>
-
-                <div className="mb-4">
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {member.certifications.map((cert, certIndex) => (
-                      <span
-                        key={certIndex}
-                        className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
-                      >
-                        {cert}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <p className="text-gray-600 text-sm text-center leading-relaxed">
-                  {member.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
 
         {/* Gallery Section */}
         <motion.div
