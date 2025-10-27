@@ -310,10 +310,34 @@ const RequestQuote = () => {
         salesforceFormRef.current['last_name'].value = formData.lastName;
         salesforceFormRef.current['company'].value = formData.company || 'NA';
         salesforceFormRef.current['email'].value = formData.email;
-        // Optional: add title if you have it in your formData
-        if (salesforceFormRef.current['title']) {
-          salesforceFormRef.current['title'].value = formData.title || '';
-        }
+        salesforceFormRef.current['phone'].value = formData.phone;
+        
+        // Map service type to readable format
+        const serviceTypeMapping = {
+          'executive-transport': 'Executive Transport',
+          'scenic-tours': 'Scenic Tours',
+          'medical-emergency': 'Medical Emergency',
+          'cargo-utility': 'Cargo & Utility',
+          'wedding-events': 'Wedding & Events',
+          'film-photography': 'Film & Photography'
+        };
+        
+        // Populate Salesforce custom fields
+        salesforceFormRef.current['00NPY00000CMyxt'].value = `${formData.firstName} ${formData.lastName}`; // Full Name
+        salesforceFormRef.current['00NPY00000CKNb4'].value = serviceTypeMapping[formData.serviceType] || formData.serviceType; // Service Type
+        salesforceFormRef.current['00NPY00000CK7b8'].value = formData.passengers ? `${formData.passengers} Passenger${formData.passengers > 1 ? 's' : ''}` : ''; // Number of Passengers
+        salesforceFormRef.current['00NPY00000CK7eM'].value = [
+          `Aircraft: ${formData.aircraft || 'Not specified'}`,
+          `Duration: ${formData.duration || 'Not specified'}`,
+          `Origin: ${formData.origin || 'Not specified'}`,
+          formData.destination ? `Destination: ${formData.destination}` : '',
+          formData.specialRequests ? `Special Requests: ${formData.specialRequests}` : '',
+          formData.budget ? `Budget: ${formData.budget}` : '',
+          formData.flexibility ? `Flexibility: ${formData.flexibility}` : '',
+          formData.additionalInfo ? `Additional Info: ${formData.additionalInfo}` : ''
+        ].filter(Boolean).join('\n'); // Additional Details
+        salesforceFormRef.current['00NPY00000CKKLR'].value = formData.flightDate; // Preferred Date
+        
         setSfSubmitting(true);
         salesforceFormRef.current.submit();
       }
@@ -814,7 +838,14 @@ const RequestQuote = () => {
                 <input type="hidden" name="last_name" />
                 <input type="hidden" name="company" />
                 <input type="hidden" name="email" />
-                <input type="hidden" name="title" />
+                <input type="hidden" name="phone" />
+                
+                {/* Salesforce Custom Fields */}
+                <input type="hidden" name="00NPY00000CMyxt" /> {/* Full Name */}
+                <input type="hidden" name="00NPY00000CKNb4" /> {/* Service Type */}
+                <input type="hidden" name="00NPY00000CK7b8" /> {/* Number of Passengers */}
+                <input type="hidden" name="00NPY00000CK7eM" /> {/* Additional Details */}
+                <input type="hidden" name="00NPY00000CKKLR" /> {/* Preferred Date */}
               </form>
             </div>
           </div>

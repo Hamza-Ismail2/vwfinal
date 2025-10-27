@@ -69,7 +69,7 @@ const ContactUs = () => {
     const emailVal = sanitizeInput(formEl['email'].value, 'email');
     const rawPhone = sanitizeInput(formEl['phone'].value, 'phone');
     const phoneFormatted = rawPhone.slice(0, 3) + '-' + rawPhone.slice(3, 10);
-    const serviceVal = sanitizeInput(formEl['00NPY00000CKHAf'].value, 'text');
+    const serviceVal = sanitizeInput(formEl['00NPY00000CKNb4'].value, 'text');
     const messageVal = sanitizeInput(formEl['00NPY00000CK7eM'].value, 'message');
     const dateVal = sanitizeInput(formEl['00NPY00000CKKLR'].value, 'text');
     const passengersVal = sanitizeInput(formEl['00NPY00000CK7b8'].value, 'number');
@@ -91,6 +91,15 @@ const ContactUs = () => {
     }
     formEl['first_name'].value = firstName;
     formEl['last_name'].value = lastName;
+    formEl['phone'].value = phoneFormatted;
+
+    // Populate Salesforce custom fields
+    formEl['00NPY00000CMyxt'].value = nameVal; // Full Name
+    formEl['00NPY00000CKNb4'].value = serviceVal; // Service Type
+    formEl['00NPY00000CK7b8'].value = passengersVal; // Number of Passengers
+    formEl['00NPY00000CK7eM'].value = messageVal; // Additional Details
+    formEl['00NPY00000CKKLR'].value = dateVal; // Preferred Date
+
     const payload = {
       name: nameVal,
       email: emailVal,
@@ -380,12 +389,12 @@ const ContactUs = () => {
                     />
                   </div>
                   <div>
-                    <label htmlFor="00NPY00000CKHAf" className="block text-gray-700 font-semibold mb-2">
+                    <label htmlFor="00NPY00000CKNb4" className="block text-gray-700 font-semibold mb-2">
                       Service Type *
                     </label>
                     <select
-                      id="00NPY00000CKHAf"
-                      name="00NPY00000CKHAf"
+                      id="00NPY00000CKNb4"
+                      name="00NPY00000CKNb4"
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 bg-white"
                       value={formData.service}
