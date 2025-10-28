@@ -142,23 +142,12 @@ const Contact = () => {
       console.error('❌ Error posting to backend:', err);
     }
 
-    // Step 2: Submit to Salesforce via fetch (won't redirect automatically)
+    // Step 2: Submit to Salesforce (will auto-redirect via retURL)
     console.log('📤 Starting Salesforce submission...');
-    const salesforceData = new FormData(formRef.current);
-    
-    try {
-      const salesforceResponse = await fetch(formRef.current.action, {
-        method: 'POST',
-        body: salesforceData
-      });
-      console.log('✅ Salesforce submission completed, status:', salesforceResponse.status);
-    } catch (err) {
-      console.error('❌ Error posting to Salesforce:', err);
-    }
-
-    // Step 3: Manually redirect to thank you page
-    console.log('🔄 Redirecting to thank you page...');
-    window.location.href = retURL;
+    // Remove event listener to avoid recursion
+    formRef.current.removeEventListener('submit', handleDualSubmit);
+    formRef.current.submit();
+    console.log('✅ Form submitted to Salesforce');
   };
 
   const contactMethods = [
