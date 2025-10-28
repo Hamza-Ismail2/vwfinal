@@ -306,18 +306,20 @@ const RequestQuote = () => {
     
     try {
       // Step 1: Submit to backend and WAIT for it to complete
-      await fetch('/api/quotes', {
+      console.log('📤 Starting backend API call...');
+      const backendResponse = await fetch('/api/quotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+      console.log('✅ Backend API completed, status:', backendResponse.status);
     } catch (error) {
-      // Log but don't block Salesforce submission
-      console.error('Error posting to backend:', error);
+      console.error('❌ Error posting to backend:', error);
     }
 
-    // Step 2: Submit to Salesforce (this will redirect to retURL)
+    // Step 2: Submit to Salesforce via fetch (won't redirect automatically)
     if (salesforceFormRef.current) {
+      console.log('📤 Starting Salesforce submission...');
       salesforceFormRef.current['oid'].value = '00DHr0000077ygs';
       salesforceFormRef.current['retURL'].value = retURL;
       salesforceFormRef.current['first_name'].value = formData.firstName;
@@ -352,8 +354,22 @@ const RequestQuote = () => {
       salesforceFormRef.current['00NPY00000CKKLR'].value = convertDateForSalesforce(formData.flightDate); // Preferred Date (converted to MM/DD/YYYY)
       
       setSfSubmitting(true);
-      salesforceFormRef.current.submit();
+      
+      try {
+        const salesforceData = new FormData(salesforceFormRef.current);
+        const salesforceResponse = await fetch(salesforceFormRef.current.action, {
+          method: 'POST',
+          body: salesforceData
+        });
+        console.log('✅ Salesforce submission completed, status:', salesforceResponse.status);
+      } catch (err) {
+        console.error('❌ Error posting to Salesforce:', err);
+      }
     }
+
+    // Step 3: Manually redirect to thank you page
+    console.log('🔄 Redirecting to thank you page...');
+    window.location.href = retURL;
   };
 
   const renderStepContent = () => {
