@@ -40,6 +40,16 @@ const Contact = () => {
     return v;
   };
 
+  // Convert date from YYYY-MM-DD to MM/DD/YYYY for Salesforce
+  const convertDateForSalesforce = (dateString) => {
+    if (!dateString) return '';
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+      return `${parts[1]}/${parts[2]}/${parts[0]}`;
+    }
+    return dateString;
+  };
+
   // Format phone as XXX-XXXXXXX
   const formatPhone = (value) => {
     const numbers = value.replace(/[^0-9]/g, '');
@@ -70,19 +80,17 @@ const Contact = () => {
     const formEl = formRef.current;
 
     // Extract field values from the form
-    const nameVal = sanitizeInput(formEl['00NPY00000CMyxt'].value, 'text');
+    const nameVal = sanitizeInput(formEl['fullName'].value, 'text');
     const emailVal = sanitizeInput(formEl['email'].value, 'email');
     const rawPhone = sanitizeInput(formEl['phone'].value, 'phone');
     const phoneFormatted = rawPhone.slice(0, 3) + '-' + rawPhone.slice(3, 10);
     const serviceVal = sanitizeInput(formEl['00NPY00000CKNb4'].value, 'text');
     const messageVal = sanitizeInput(formEl['00NPY00000CK7eM'].value, 'message');
-    const dateVal = sanitizeInput(formEl['00NPY00000CKKLR'].value, 'text');
+    const rawDateVal = sanitizeInput(formEl['00NPY00000CKKLR'].value, 'text');
+    const dateVal = convertDateForSalesforce(rawDateVal); // Convert to MM/DD/YYYY for Salesforce
     const passengersVal = sanitizeInput(formEl['00NPY00000CK7b8'].value, 'number');
-    let companyVal = sanitizeInput(formEl['company'].value, 'text');
-    if (!companyVal) {
-      companyVal = 'NA';
-      formEl['company'].value = companyVal;
-    }
+    const companyVal = sanitizeInput(formEl['company'].value, 'text');
+    // Leave company empty if blank (don't set 'NA')
 
     // Split full name into first and last names for Salesforce
     let firstName = '';
@@ -99,13 +107,13 @@ const Contact = () => {
     formEl['first_name'].value = firstName;
     formEl['last_name'].value = lastName;
     formEl['phone'].value = phoneFormatted;
+    formEl['company'].value = companyVal; // Will be empty string if blank
 
     // Populate Salesforce custom fields
-    formEl['00NPY00000CMyxt'].value = nameVal; // Full Name
     formEl['00NPY00000CKNb4'].value = serviceVal; // Service Type
     formEl['00NPY00000CK7b8'].value = passengersVal; // Number of Passengers
     formEl['00NPY00000CK7eM'].value = messageVal; // Additional Details
-    formEl['00NPY00000CKKLR'].value = dateVal; // Preferred Date
+    formEl['00NPY00000CKKLR'].value = dateVal; // Preferred Date (converted to MM/DD/YYYY)
 
     const payload = {
       name: nameVal,
@@ -113,7 +121,7 @@ const Contact = () => {
       phone: phoneFormatted,
       service: serviceVal,
       message: messageVal,
-      date: dateVal,
+      date: rawDateVal, // Send raw date format to backend
       passengers: passengersVal,
     };
 
@@ -264,13 +272,13 @@ const Contact = () => {
               >
                 <input type="hidden" name="oid" value="00DHr0000077ygs" />
                 <input type="hidden" name="retURL" value={retURL} />
+                <input type="hidden" name="lead_source" value="Web" />
                 {/* Hidden fields required by Salesforce */}
                 <input type="hidden" name="first_name" />
                 <input type="hidden" name="last_name" />
                 <input type="hidden" name="phone" />
                 
                 {/* Salesforce Custom Fields */}
-                <input type="hidden" name="00NPY00000CMyxt" /> {/* Full Name */}
                 <input type="hidden" name="00NPY00000CKNb4" /> {/* Service Type */}
                 <input type="hidden" name="00NPY00000CK7b8" /> {/* Number of Passengers */}
                 <input type="hidden" name="00NPY00000CK7eM" /> {/* Additional Details */}
@@ -279,12 +287,12 @@ const Contact = () => {
                 {/* Full Name & Email */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="00NPY00000CMyxt" className="block text-gray-700 font-semibold mb-2">
+                    <label htmlFor="fullName" className="block text-gray-700 font-semibold mb-2">
                       Full Name *
                     </label>
                     <input
-                      id="00NPY00000CMyxt"
-                      name="00NPY00000CMyxt"
+                      id="fullName"
+                      name="fullName"
                       type="text"
                       maxLength="40"
                       required

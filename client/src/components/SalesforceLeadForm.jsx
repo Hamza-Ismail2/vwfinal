@@ -19,21 +19,41 @@ const SalesforceLeadForm = () => {
           >
             <input type="hidden" name="oid" value="00DHr0000077ygs" />
             <input type="hidden" name="retURL" value={retURL} />
+            <input type="hidden" name="lead_source" value="Web" />
 
-            {/* Full Name */}
-            <div>
-              <label htmlFor="00NPY00000CMyxt" className="block text-gray-700 font-semibold mb-2">
-                Full Name *
-              </label>
-              <input
-                id="00NPY00000CMyxt"
-                name="00NPY00000CMyxt"
-                type="text"
-                maxLength="40"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
-                placeholder="Your full name"
-              />
+            {/* Name (two columns on md+) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* First Name */}
+              <div>
+                <label htmlFor="first_name" className="block text-gray-700 font-semibold mb-2">
+                  First Name *
+                </label>
+                <input
+                  id="first_name"
+                  name="first_name"
+                  type="text"
+                  maxLength="40"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                  placeholder="Your first name"
+                />
+              </div>
+
+              {/* Last Name */}
+              <div>
+                <label htmlFor="last_name" className="block text-gray-700 font-semibold mb-2">
+                  Last Name *
+                </label>
+                <input
+                  id="last_name"
+                  name="last_name"
+                  type="text"
+                  maxLength="40"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 bg-white"
+                  placeholder="Your last name"
+                />
+              </div>
             </div>
 
             {/* Email & Phone (two columns on md+) */}

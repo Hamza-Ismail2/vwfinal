@@ -140,6 +140,16 @@ const RequestQuote = () => {
     return v;
   };
 
+  // Convert date from YYYY-MM-DD to MM/DD/YYYY for Salesforce
+  const convertDateForSalesforce = (dateString) => {
+    if (!dateString) return '';
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+      return `${parts[1]}/${parts[2]}/${parts[0]}`;
+    }
+    return dateString;
+  };
+
   // Format phone as XXX-XXXXXXX
   const formatPhone = (value) => {
     const numbers = value.replace(/[^0-9]/g, '');
@@ -308,7 +318,7 @@ const RequestQuote = () => {
         salesforceFormRef.current['retURL'].value = retURL;
         salesforceFormRef.current['first_name'].value = formData.firstName;
         salesforceFormRef.current['last_name'].value = formData.lastName;
-        salesforceFormRef.current['company'].value = formData.company || 'NA';
+        salesforceFormRef.current['company'].value = formData.company || ''; // Leave empty if blank
         salesforceFormRef.current['email'].value = formData.email;
         salesforceFormRef.current['phone'].value = formData.phone;
         
@@ -323,7 +333,6 @@ const RequestQuote = () => {
         };
         
         // Populate Salesforce custom fields
-        salesforceFormRef.current['00NPY00000CMyxt'].value = `${formData.firstName} ${formData.lastName}`; // Full Name
         salesforceFormRef.current['00NPY00000CKNb4'].value = serviceTypeMapping[formData.serviceType] || formData.serviceType; // Service Type
         salesforceFormRef.current['00NPY00000CK7b8'].value = formData.passengers ? `${formData.passengers} Passenger${formData.passengers > 1 ? 's' : ''}` : ''; // Number of Passengers
         salesforceFormRef.current['00NPY00000CK7eM'].value = [
@@ -336,7 +345,7 @@ const RequestQuote = () => {
           formData.flexibility ? `Flexibility: ${formData.flexibility}` : '',
           formData.additionalInfo ? `Additional Info: ${formData.additionalInfo}` : ''
         ].filter(Boolean).join('\n'); // Additional Details
-        salesforceFormRef.current['00NPY00000CKKLR'].value = formData.flightDate; // Preferred Date
+        salesforceFormRef.current['00NPY00000CKKLR'].value = convertDateForSalesforce(formData.flightDate); // Preferred Date (converted to MM/DD/YYYY)
         
         setSfSubmitting(true);
         salesforceFormRef.current.submit();
@@ -834,6 +843,7 @@ const RequestQuote = () => {
               >
                 <input type="hidden" name="oid" />
                 <input type="hidden" name="retURL" />
+                <input type="hidden" name="lead_source" value="Web" />
                 <input type="hidden" name="first_name" />
                 <input type="hidden" name="last_name" />
                 <input type="hidden" name="company" />
@@ -841,7 +851,6 @@ const RequestQuote = () => {
                 <input type="hidden" name="phone" />
                 
                 {/* Salesforce Custom Fields */}
-                <input type="hidden" name="00NPY00000CMyxt" /> {/* Full Name */}
                 <input type="hidden" name="00NPY00000CKNb4" /> {/* Service Type */}
                 <input type="hidden" name="00NPY00000CK7b8" /> {/* Number of Passengers */}
                 <input type="hidden" name="00NPY00000CK7eM" /> {/* Additional Details */}
