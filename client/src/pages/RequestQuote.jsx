@@ -317,11 +317,12 @@ const RequestQuote = () => {
       console.error('❌ Error posting to backend:', error);
     }
 
-    // Step 2: Submit to Salesforce via fetch (won't redirect automatically)
+    // Step 2: Submit to Salesforce (will auto-redirect via retURL)
     if (salesforceFormRef.current) {
       console.log('📤 Starting Salesforce submission...');
       salesforceFormRef.current['oid'].value = '00DHr0000077ygs';
       salesforceFormRef.current['retURL'].value = retURL;
+      salesforceFormRef.current['lead_source'].value = 'Web';
       salesforceFormRef.current['first_name'].value = formData.firstName;
       salesforceFormRef.current['last_name'].value = formData.lastName;
       salesforceFormRef.current['company'].value = formData.company || ''; // Leave empty if blank
@@ -354,22 +355,9 @@ const RequestQuote = () => {
       salesforceFormRef.current['00NPY00000CKKLR'].value = convertDateForSalesforce(formData.flightDate); // Preferred Date (converted to MM/DD/YYYY)
       
       setSfSubmitting(true);
-      
-      try {
-        const salesforceData = new FormData(salesforceFormRef.current);
-        const salesforceResponse = await fetch(salesforceFormRef.current.action, {
-          method: 'POST',
-          body: salesforceData
-        });
-        console.log('✅ Salesforce submission completed, status:', salesforceResponse.status);
-      } catch (err) {
-        console.error('❌ Error posting to Salesforce:', err);
-      }
+      salesforceFormRef.current.submit();
+      console.log('✅ Form submitted to Salesforce');
     }
-
-    // Step 3: Manually redirect to thank you page
-    console.log('🔄 Redirecting to thank you page...');
-    window.location.href = retURL;
   };
 
   const renderStepContent = () => {
