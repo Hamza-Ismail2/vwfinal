@@ -124,19 +124,34 @@ const ContactUs = () => {
     
     try {
       // Step 1: Submit to backend and WAIT for it to complete
-      await fetch('/api/contact', {
+      console.log('📤 Starting backend API call...');
+      const backendResponse = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
+      console.log('✅ Backend API completed, status:', backendResponse.status);
     } catch (err) {
-      console.error('Error posting to backend:', err);
+      console.error('❌ Error posting to backend:', err);
     }
 
-    // Step 2: Submit to Salesforce (this will redirect to retURL)
-    // Remove event listener to avoid recursion
-    formRef.current.removeEventListener('submit', handleDualSubmit);
-    formRef.current.submit();
+    // Step 2: Submit to Salesforce via fetch (won't redirect automatically)
+    console.log('📤 Starting Salesforce submission...');
+    const salesforceData = new FormData(formRef.current);
+    
+    try {
+      const salesforceResponse = await fetch(formRef.current.action, {
+        method: 'POST',
+        body: salesforceData
+      });
+      console.log('✅ Salesforce submission completed, status:', salesforceResponse.status);
+    } catch (err) {
+      console.error('❌ Error posting to Salesforce:', err);
+    }
+
+    // Step 3: Manually redirect to thank you page
+    console.log('🔄 Redirecting to thank you page...');
+    window.location.href = retURL;
   };
 
   const services = [
