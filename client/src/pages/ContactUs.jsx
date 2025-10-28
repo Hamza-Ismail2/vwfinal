@@ -69,8 +69,8 @@ const ContactUs = () => {
     setFormData(prev => ({ ...prev, [name]: sanitized }));
   };
 
-  // Dual-submit handler: POST to our backend, then continue to Salesforce
-  const handleDualSubmit = (e) => {
+  // Dual-submit handler: POST to our backend, wait for it, then submit to Salesforce, then redirect
+  const handleDualSubmit = async (e) => {
     e.preventDefault();
     if (!formRef.current) return;
     const formEl = formRef.current;
@@ -119,19 +119,24 @@ const ContactUs = () => {
       passengers: passengersVal,
       company: companyVal,
     };
+    
     setIsSubmitting(true);
-    fetch('/api/contact', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-      .catch((err) => {
-        console.error('Error posting to backend:', err);
-      })
-      .finally(() => {
-        formRef.current.removeEventListener('submit', handleDualSubmit);
-        formRef.current.submit();
+    
+    try {
+      // Step 1: Submit to backend and WAIT for it to complete
+      await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
+    } catch (err) {
+      console.error('Error posting to backend:', err);
+    }
+
+    // Step 2: Submit to Salesforce (this will redirect to retURL)
+    // Remove event listener to avoid recursion
+    formRef.current.removeEventListener('submit', handleDualSubmit);
+    formRef.current.submit();
   };
 
   const services = [

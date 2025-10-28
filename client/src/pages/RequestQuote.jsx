@@ -282,6 +282,7 @@ const RequestQuote = () => {
       return;
     }
     setIsSubmitting(true);
+    
     // Prepare payload for /api/quotes
     const payload = {
       serviceType: formData.serviceType,
@@ -302,7 +303,9 @@ const RequestQuote = () => {
       flexibility: formData.flexibility,
       additionalInfo: formData.additionalInfo
     };
+    
     try {
+      // Step 1: Submit to backend and WAIT for it to complete
       await fetch('/api/quotes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -311,46 +314,45 @@ const RequestQuote = () => {
     } catch (error) {
       // Log but don't block Salesforce submission
       console.error('Error posting to backend:', error);
-    } finally {
-      // Fill Salesforce form fields and submit
-      if (salesforceFormRef.current) {
-        salesforceFormRef.current['oid'].value = '00DHr0000077ygs';
-        salesforceFormRef.current['retURL'].value = retURL;
-        salesforceFormRef.current['first_name'].value = formData.firstName;
-        salesforceFormRef.current['last_name'].value = formData.lastName;
-        salesforceFormRef.current['company'].value = formData.company || ''; // Leave empty if blank
-        salesforceFormRef.current['email'].value = formData.email;
-        salesforceFormRef.current['phone'].value = formData.phone;
-        
-        // Map service type to readable format
-        const serviceTypeMapping = {
-          'executive-transport': 'Executive Transport',
-          'scenic-tours': 'Scenic Tours',
-          'medical-emergency': 'Medical Emergency',
-          'cargo-utility': 'Cargo & Utility',
-          'wedding-events': 'Wedding & Events',
-          'film-photography': 'Film & Photography'
-        };
-        
-        // Populate Salesforce custom fields
-        salesforceFormRef.current['00NPY00000CKNb4'].value = serviceTypeMapping[formData.serviceType] || formData.serviceType; // Service Type
-        salesforceFormRef.current['00NPY00000CK7b8'].value = formData.passengers ? `${formData.passengers} Passenger${formData.passengers > 1 ? 's' : ''}` : ''; // Number of Passengers
-        salesforceFormRef.current['00NPY00000CK7eM'].value = [
-          `Aircraft: ${formData.aircraft || 'Not specified'}`,
-          `Duration: ${formData.duration || 'Not specified'}`,
-          `Origin: ${formData.origin || 'Not specified'}`,
-          formData.destination ? `Destination: ${formData.destination}` : '',
-          formData.specialRequests ? `Special Requests: ${formData.specialRequests}` : '',
-          formData.budget ? `Budget: ${formData.budget}` : '',
-          formData.flexibility ? `Flexibility: ${formData.flexibility}` : '',
-          formData.additionalInfo ? `Additional Info: ${formData.additionalInfo}` : ''
-        ].filter(Boolean).join('\n'); // Additional Details
-        salesforceFormRef.current['00NPY00000CKKLR'].value = convertDateForSalesforce(formData.flightDate); // Preferred Date (converted to MM/DD/YYYY)
-        
-        setSfSubmitting(true);
-        salesforceFormRef.current.submit();
-      }
-      setIsSubmitting(false);
+    }
+
+    // Step 2: Submit to Salesforce (this will redirect to retURL)
+    if (salesforceFormRef.current) {
+      salesforceFormRef.current['oid'].value = '00DHr0000077ygs';
+      salesforceFormRef.current['retURL'].value = retURL;
+      salesforceFormRef.current['first_name'].value = formData.firstName;
+      salesforceFormRef.current['last_name'].value = formData.lastName;
+      salesforceFormRef.current['company'].value = formData.company || ''; // Leave empty if blank
+      salesforceFormRef.current['email'].value = formData.email;
+      salesforceFormRef.current['phone'].value = formData.phone;
+      
+      // Map service type to readable format
+      const serviceTypeMapping = {
+        'executive-transport': 'Executive Transport',
+        'scenic-tours': 'Scenic Tours',
+        'medical-emergency': 'Medical Emergency',
+        'cargo-utility': 'Cargo & Utility',
+        'wedding-events': 'Wedding & Events',
+        'film-photography': 'Film & Photography'
+      };
+      
+      // Populate Salesforce custom fields
+      salesforceFormRef.current['00NPY00000CKNb4'].value = serviceTypeMapping[formData.serviceType] || formData.serviceType; // Service Type
+      salesforceFormRef.current['00NPY00000CK7b8'].value = formData.passengers ? `${formData.passengers} Passenger${formData.passengers > 1 ? 's' : ''}` : ''; // Number of Passengers
+      salesforceFormRef.current['00NPY00000CK7eM'].value = [
+        `Aircraft: ${formData.aircraft || 'Not specified'}`,
+        `Duration: ${formData.duration || 'Not specified'}`,
+        `Origin: ${formData.origin || 'Not specified'}`,
+        formData.destination ? `Destination: ${formData.destination}` : '',
+        formData.specialRequests ? `Special Requests: ${formData.specialRequests}` : '',
+        formData.budget ? `Budget: ${formData.budget}` : '',
+        formData.flexibility ? `Flexibility: ${formData.flexibility}` : '',
+        formData.additionalInfo ? `Additional Info: ${formData.additionalInfo}` : ''
+      ].filter(Boolean).join('\n'); // Additional Details
+      salesforceFormRef.current['00NPY00000CKKLR'].value = convertDateForSalesforce(formData.flightDate); // Preferred Date (converted to MM/DD/YYYY)
+      
+      setSfSubmitting(true);
+      salesforceFormRef.current.submit();
     }
   };
 
