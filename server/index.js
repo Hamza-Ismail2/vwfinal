@@ -43,7 +43,13 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:", "http:", "https://tile.openstreetmap.org"],
-      scriptSrc: ["'self'", "'unsafe-eval'"], // needed for Three.js
+      // scriptSrc: ["'self'", "'unsafe-eval'"], // needed for Three.js
+      scriptSrc: [
+        "'self'",
+        "'unsafe-eval'",
+        "https://www.googletagmanager.com",
+        "https://www.google-analytics.com"
+      ],
       // Allow embedded OpenStreetMap iframes
       frameSrc: ["'self'", "https://www.openstreetmap.org"],
       // Allow form submissions to Salesforce
